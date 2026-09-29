@@ -1,0 +1,354 @@
+/* src/pages/Dashboard.css */
+.dashboard-container {
+  min-height: 100vh;
+  background-color: #050505; /* Fondo aún más oscuro estilo app moderna */
+  color: #f5f5f5;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background-color: #0a0a0a;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.dashboard-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -0.05em;
+}
+
+.dashboard-user {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0 0;
+}
+
+.btn-logout {
+  background-color: transparent;
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem; /* Botón más redondeado */
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+.btn-logout:hover { background-color: rgba(239, 68, 68, 0.1); }
+
+.dashboard-content {
+  padding: 2.5rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background-color: #111111;
+  border: 1px dashed #333333;
+  border-radius: 1.5rem;
+  text-align: center;
+  margin-top: 2rem;
+}
+.empty-state p { color: #9ca3af; margin-bottom: 1.5rem; }
+.btn-add-moto {
+  background-color: #84cc16;
+  color: #000;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.btn-add-moto:hover { background-color: #a3e635; }
+
+/* --- CABECERA DE LA LISTA --- */
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+.section-title {
+  font-size: 1.2rem;
+  color: #d4d4d8;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+.btn-icon-add {
+  background: rgba(132, 204, 22, 0.1);
+  border: 1px solid rgba(132, 204, 22, 0.3);
+  color: #84cc16;
+  font-weight: bold;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-icon-add:hover { background: rgba(132, 204, 22, 0.2); }
+
+.motos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem; /* Más espacio entre motos para que respiren */
+}
+
+/* =========================================
+   DISEÑO PRO MOTO CARD (Estilo FinTech / Apple)
+   ========================================= */
+.pro-moto-card {
+  background: linear-gradient(145deg, #161616 0%, #0a0a0a 100%);
+  border-radius: 2rem; /* Bordes ultra redondeados */
+  border: 1px solid #262626;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+}
+
+/* Efecto hover general de la tarjeta */
+.pro-moto-card:hover .pro-glow {
+  opacity: 0.25;
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+.pro-card-actions {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 10;
+}
+.pro-btn-delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  padding: 0.4rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pro-btn-delete:hover {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
+
+/* Contenedor de la Imagen Protagonista */
+.pro-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 280px; /* Alto generoso para que luzca */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 2rem;
+}
+
+/* El destello neón detrás de la moto */
+.pro-glow {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  background: #84cc16; /* Verde Biela */
+  filter: blur(90px);
+  opacity: 0.12;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.5s ease;
+  z-index: 1;
+}
+
+/* Imagen con Animación de Levitación */
+.pro-moto-img {
+  max-width: 100%;
+  max-height: 115%; /* Sobresale un poco intencionalmente */
+  object-fit: contain;
+  /* Sombra Ultra Realista */
+  filter: drop-shadow(0px 30px 15px rgba(0, 0, 0, 0.9)); 
+  animation: levitate 4s ease-in-out infinite;
+  z-index: 2;
+}
+
+.pro-no-img {
+  color: #555;
+  font-weight: bold;
+  z-index: 2;
+}
+
+/* Animación Clave */
+@keyframes levitate {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Panel Superpuesto de Datos (Glassmorphism) */
+.pro-data-overlay {
+  background: rgba(20, 20, 20, 0.65); /* Gris muy oscuro transparente */
+  backdrop-filter: blur(16px); /* Efecto vidrio esmerilado */
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 3;
+  margin: -3rem 1.5rem 1.5rem 1.5rem; /* Superpone el panel sobre la moto */
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 15px 25px rgba(0,0,0,0.6);
+  border: 1px solid rgba(132, 204, 22, 0.2); /* Borde sutil verde neón */
+}
+
+.pro-data-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding-bottom: 1rem;
+}
+
+.pro-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+}
+
+.pro-year {
+  color: #84cc16; /* Acento neón */
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+}
+
+.pro-data-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pro-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pro-stat-label {
+  font-size: 0.75rem;
+  color: #71717a;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.pro-stat-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.pro-stat-value small {
+  font-size: 0.9rem;
+  color: #52525b;
+  font-weight: 700;
+  margin-left: 0.2rem;
+}
+
+.text-medium {
+  font-size: 1.25rem !important; /* Para que el texto de aceite no sea gigantesco */
+}
+
+/* --- MODALES --- */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  display: flex; justify-content: center; align-items: center; z-index: 50; padding: 1rem; box-sizing: border-box;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+.modal-content {
+  background-color: #121212; border: 1px solid #262626; border-top: 4px solid #84cc16;
+  border-radius: 1.5rem; padding: 2.5rem 2rem; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 40px rgba(132, 204, 22, 0.05);
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.modal-header { margin-bottom: 2rem; text-align: center; }
+.modal-title { margin: 0 0 0.5rem 0; font-size: 1.75rem; font-weight: 900; color: #ffffff; letter-spacing: -0.03em; }
+.modal-subtitle { margin: 0; color: #a3a3a3; font-size: 0.95rem; }
+.modal-form { display: flex; flex-direction: column; gap: 1.25rem; }
+.input-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.input-group label { font-size: 0.85rem; font-weight: 600; color: #d4d4d8; padding-left: 0.25rem; }
+.input-field {
+  width: 100%; background-color: #0a0a0a; border: 1px solid #3f3f46; color: white; padding: 1rem 1.25rem;
+  border-radius: 1rem; outline: none; font-size: 1rem; transition: all 0.2s ease; box-sizing: border-box;
+}
+.input-field::placeholder { color: #52525b; }
+.input-field:focus { border-color: #84cc16; box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.15); background-color: #171717; }
+.input-file {
+  width: 100%; background-color: #0a0a0a; border: 1px dashed #3f3f46; color: #a3a3a3; padding: 0.75rem 1rem;
+  border-radius: 1rem; outline: none; font-size: 0.85rem; cursor: pointer; transition: border-color 0.2s; box-sizing: border-box;
+}
+.input-file::-webkit-file-upload-button { background-color: #27272a; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; margin-right: 1rem; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
+.input-file:hover { border-color: #84cc16; }
+.row-inputs { display: flex; gap: 1rem; }
+.row-inputs .input-group { flex: 1; }
+.modal-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+.btn-primary, .btn-secondary, .btn-danger { flex: 1; font-weight: 700; padding: 1rem; border-radius: 1rem; cursor: pointer; font-size: 1rem; transition: all 0.2s; display: flex; justify-content: center; align-items: center; border: none; }
+.btn-primary { background-color: #84cc16; color: #000000; }
+.btn-primary:hover:not(:disabled) { background-color: #a3e635; transform: translateY(-2px); }
+.btn-secondary { background-color: transparent; color: #e4e4e7; border: 1px solid #52525b; }
+.btn-secondary:hover { background-color: #27272a; border-color: #71717a; }
+.btn-danger { background-color: #ef4444; color: #ffffff; }
+.btn-danger:hover:not(:disabled) { background-color: #dc2626; transform: translateY(-2px); }
+.delete-modal { max-width: 350px !important; text-align: center; }
+.text-red { color: #ef4444 !important; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+/* =========================================
+   📱 RESPONSIVE DESIGN (PERFECTO PARA MÓVIL)
+   ========================================= */
+@media (max-width: 600px) {
+  .dashboard-header { padding: 1rem; }
+  .dashboard-content { padding: 1rem; }
+  
+  .pro-moto-card { border-radius: 1.5rem; }
+  
+  /* Ajuste de la foto para celular */
+  .pro-image-wrapper {
+    height: 220px; 
+    padding-top: 1.5rem;
+  }
+  .pro-glow { width: 120px; height: 120px; }
+  
+  /* Ajuste del panel de vidrio superpuesto */
+  .pro-data-overlay {
+    margin: -2rem 1rem 1rem 1rem;
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+  }
+  
+  .pro-title { font-size: 1.3rem; }
+  .pro-stat-value { font-size: 1.4rem; }
+  .text-medium { font-size: 1.1rem !important; }
+
+  /* Apila los inputs en el modal */
+  .row-inputs { flex-direction: column; gap: 1.25rem; }
+}

@@ -1,0 +1,105 @@
+/* src/pages/Login.css */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 0 1.5rem;
+  background-color: #0a0a0a; /* Fondo oscuro */
+  color: #f5f5f5;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.logo-text {
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: #9ca3af;
+  margin-bottom: 2rem;
+}
+
+.error-box {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.input-field {
+  width: 100%;
+  background-color: #171717;
+  border: 1px solid #262626;
+  color: white;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.input-field:focus {
+  border-color: #84cc16; /* Verde lima */
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.btn-primary {
+  width: 100%;
+  background-color: #84cc16;
+  color: black;
+  font-weight: bold;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #a3e635;
+}
+
+.btn-primary:disabled, .btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  width: 100%;
+  background-color: transparent;
+  color: white;
+  font-weight: bold;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #404040;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #262626;
+}
