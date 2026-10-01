@@ -135,6 +135,67 @@ export default function Garage({ usuario }) {
       )}
 
       {/* Resto de modales (Registro y Eliminar) que ya teníamos... (Pégalos aquí, la lógica es idéntica) */}
+      {isModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2 className="modal-title">Añadir al garaje</h2>
+              <p className="modal-subtitle">Ingresa los datos de tu vehículo.</p>
+            </div>
+            <form onSubmit={registrarMoto} className="modal-form">
+              <div className="input-group">
+                <label>Foto de la moto (PNG sin fondo)</label>
+                <input type="file" accept="image/png, image/jpeg" onChange={(e) => setImagenArchivo(e.target.files[0])} className="input-file" />
+              </div>
+              <div className="input-group">
+                <label>Marca</label>
+                <input type="text" placeholder="ej. Bera" value={marca} onChange={(e) => setMarca(e.target.value)} required className="input-field" />
+              </div>
+              <div className="row-inputs">
+                <div className="input-group">
+                  <label>Modelo</label>
+                  <input type="text" placeholder="ej. BWS" value={modelo} onChange={(e) => setModelo(e.target.value)} required className="input-field" />
+                </div>
+                <div className="input-group">
+                  <label>Año</label>
+                  <input type="text" placeholder="ej. 2013" value={year} onChange={(e) => setYear(e.target.value)} required className="input-field" />
+                </div>
+              </div>
+              <div className="row-inputs">
+                <div className="input-group">
+                  <label>Kilometraje</label>
+                  <input type="number" placeholder="ej. 15000" value={kilometraje} onChange={(e) => setKilometraje(e.target.value)} required className="input-field" />
+                </div>
+                <div className="input-group">
+                  <label>Aceite</label>
+                  <input type="text" placeholder="ej. 20W-50" value={tipoAceite} onChange={(e) => setTipoAceite(e.target.value)} className="input-field" />
+                </div>
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+                <button type="submit" className="btn-primary" disabled={guardando}>{guardando ? 'Subiendo...' : 'Guardar Moto'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Eliminación */}
+      {isDeleteModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content delete-modal">
+            <div className="modal-header">
+              <h2 className="modal-title text-red">¿Eliminar vehículo?</h2>
+              <p className="modal-subtitle">Esta acción no se puede deshacer.</p>
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="btn-secondary" onClick={() => { setIsDeleteModalOpen(false); setMotoAEliminar(null); }}>Cancelar</button>
+              <button type="button" className="btn-danger" onClick={confirmarEliminacion} disabled={borrando}>{borrando ? 'Borrando...' : 'Sí, eliminar'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
