@@ -1,0 +1,32 @@
+import { supabase } from '../supabase';
+import { useNavigate } from 'react-router-dom';
+import './Profile.css';
+
+export default function Profile({ usuario }) {
+  const navigate = useNavigate();
+
+  const cerrarSesion = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
+
+  return (
+    <div className="profile-container">
+      <div className="profile-header">
+        <div className="profile-avatar">
+          {usuario?.email?.charAt(0).toUpperCase()}
+        </div>
+        <h2 className="profile-email">{usuario?.email}</h2>
+        <span className="profile-badge">Piloto Oficial</span>
+      </div>
+
+      <div className="profile-actions">
+        <button className="btn-menu-item">Configuración de cuenta</button>
+        <button className="btn-menu-item">Soporte y Ayuda</button>
+        <button onClick={cerrarSesion} className="btn-logout-large">
+          Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  );
+}
