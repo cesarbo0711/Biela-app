@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabase';
+import { useNavigate } from 'react-router-dom';
 import './Garage.css';
 
 export default function Garage({ usuario }) {
   const [motos, setMotos] = useState([]); 
-  
+  const navigate = useNavigate();
+
   // Control de Modales
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -141,6 +143,8 @@ export default function Garage({ usuario }) {
               <div className="pro-card-actions">
                 <button className="pro-btn-delete" onClick={() => { setMotoActiva(moto); setIsDeleteModalOpen(true); }}>Borrar</button>
               </div>
+
+            
               
               <div className="pro-image-wrapper">
                 <div className="pro-glow"></div>
@@ -172,6 +176,8 @@ export default function Garage({ usuario }) {
                     <span className="pro-stat-value text-medium">{moto.tipo_aceite || 'N/A'}</span>
                   </div>
                 </div>
+                  <button className="btn-secondary" style={{ padding: '0.4rem 1rem', fontSize: '0.75rem', borderRadius: '2rem', marginLeft: '0.5rem', marginTop: '0.5rem' }}
+                  onClick={() => navigate(`/moto/${moto.id}`)}> Ver Bitácora</button>
               </div>
             </div>
           ))}
