@@ -77,10 +77,11 @@ export default function ChatBot({ usuario }) {
     setCargando(true);
 
     const respuestaIA = await consultarMecánicoIA(
-      nuevoMensajeUsuario.texto || 'Analiza esta imagen y dime qué falla tiene.', 
-      imagenBase64, 
-      contextoVehiculo
-    );
+  mensajes, // <--- Le pasamos todo el historial aquí
+  nuevoMensajeUsuario.texto || 'Analiza esta imagen y dime qué falla tiene.', 
+  imagenBase64, 
+  contextoVehiculo
+);
 
     setMensajes((prev) => [
       ...prev,
@@ -95,7 +96,7 @@ export default function ChatBot({ usuario }) {
         <div className="bot-avatar">🔧</div>
         <div>
           <h2>Taller Mecánico IA</h2>
-          <span className="bot-status">● En línea (Especialista en ruta)</span>
+          <span className="bot-status">● En línea</span>
         </div>
       </header>
 
