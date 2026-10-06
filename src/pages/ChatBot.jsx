@@ -7,7 +7,7 @@ export default function ChatBot({ usuario }) {
   const [mensajes, setMensajes] = useState([
     { 
       rol: 'model', 
-      texto: '¡Epa! Soy tu mecánico de confianza. ¿Qué falla tiene la nave hoy? Échame el cuento o mándame una foto de lo que le duele.' 
+      texto: '¡Epa! Soy Bujia, el mecánico de confianza, ¿Qué falla tiene la nave hoy? Échame el cuento o mándame una foto de lo que le duele.' 
     }
   ]);
   const [inputTexto, setInputTexto] = useState('');
@@ -95,7 +95,7 @@ export default function ChatBot({ usuario }) {
       <header className="chatbot-header">
         <div className="bot-avatar">🔧</div>
         <div>
-          <h2>Taller Mecánico IA</h2>
+          <h2>Taller Mecánico (BujIA)</h2>
           <span className="bot-status">● En línea</span>
         </div>
       </header>

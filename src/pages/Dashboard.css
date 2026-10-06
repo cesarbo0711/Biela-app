@@ -77,3 +77,22 @@
   animation: fadeIn 0.3s;
 }
 .bot-icon { font-size: 4rem; margin-bottom: 1rem; }
+
+/* src/pages/Dashboard.css */
+.bottom-nav {
+  background-color: var(--bg-surface);
+  border-top: 1px solid var(--border-color);
+}
+
+.nav-item {
+  color: var(--text-muted);
+}
+
+.nav-item.active {
+  color: var(--accent-color);
+}
+
+.ai-glow-icon {
+  background-color: var(--accent-color);
+  box-shadow: 0 0 15px var(--accent-shadow);
+}

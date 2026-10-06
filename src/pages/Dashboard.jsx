@@ -2,22 +2,23 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import Garage from './Garage';
-import ChatBot from './ChatBot'; // <--- Importamos el componente de IA
+import ChatBot from './ChatBot'; 
 import Profile from './Profile';
 import './Dashboard.css';
 
-export default function Dashboard() {
+// 1. Recibimos isLightMode y toggleTheme directo en la función principal
+export default function Dashboard({ isLightMode, toggleTheme }) {
   const navigate = useNavigate();
   const [usuario, setUsuario] = useState(null);
-  const [pestanaActiva, setPestanaActiva] = useState('garage'); // 'garage' | 'ia' | 'perfil'
+  const [pestanaActiva, setPestanaActiva] = useState('garage');
   const [cargando, setCargando] = useState(true);
-
+  
   useEffect(() => {
     async function verificarSesion() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        navigate('/'); // Si no hay sesión, regresa al Login
+        navigate('/'); 
       } else {
         setUsuario(session.user);
       }
@@ -30,16 +31,24 @@ export default function Dashboard() {
     return <div className="loading-screen">Cargando taller...</div>;
   }
 
+  // ELIMINADA la declaración duplicada de "const Dashboard" que rompía la app
+
   return (
     <div className="dashboard-layout">
-      {/* CONTENIDO PRINCIPAL SEGÚN LA PESTAÑA ACTIVA */}
       <main className="dashboard-content">
         {pestanaActiva === 'garage' && <Garage usuario={usuario} />}
         {pestanaActiva === 'ia' && <ChatBot usuario={usuario} />}
-        {pestanaActiva === 'profile' && <Profile usuario={usuario} />}
+        
+        {/* 2. Le pasamos las herramientas al Profile */}
+        {pestanaActiva === 'profile' && (
+          <Profile 
+            usuario={usuario} 
+            isLightMode={isLightMode} 
+            toggleTheme={toggleTheme} 
+          />
+        )}
       </main>
 
-      {/* BARRA DE NAVEGACIÓN INFERIOR (SHELL & TABS) */}
       <nav className="bottom-nav">
         <button 
           className={`nav-item ${pestanaActiva === 'garage' ? 'active' : ''}`} 
@@ -49,7 +58,6 @@ export default function Dashboard() {
           <span>Garaje</span>
         </button>
 
-        {/* BOTÓN CENTRAL DE IA (FASE 4) */}
         <button 
           className={`nav-item nav-ai-btn ${pestanaActiva === 'ia' ? 'active' : ''}`} 
           onClick={() => setPestanaActiva('ia')}

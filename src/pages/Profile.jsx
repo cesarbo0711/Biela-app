@@ -2,7 +2,8 @@ import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
 import './Profile.css';
 
-export default function Profile({ usuario }) {
+// 1. Añadimos isLightMode y toggleTheme a las props para que el botón las entienda
+export default function Profile({ usuario, isLightMode, toggleTheme }) {
   const navigate = useNavigate();
 
   const cerrarSesion = async () => {
@@ -23,6 +24,24 @@ export default function Profile({ usuario }) {
       <div className="profile-actions">
         <button className="btn-menu-item">Configuración de cuenta</button>
         <button className="btn-menu-item">Soporte y Ayuda</button>
+        
+        {/* 2. Botón conectado correctamente a las props */}
+        <button 
+          onClick={toggleTheme} 
+          style={{
+            padding: '10px 20px',
+            borderRadius: '20px',
+            border: '1px solid var(--accent-color)',
+            color: 'var(--text-main)',
+            backgroundColor: 'var(--bg-surface)',
+            cursor: 'pointer',
+            width: '100%',
+            fontWeight: '600'
+          }}
+        >
+          {isLightMode ? '🌙 Cambiar a Modo Oscuro' : '☀️ Cambiar a Modo Claro'}
+        </button>
+
         <button onClick={cerrarSesion} className="btn-logout-large">
           Cerrar Sesión
         </button>

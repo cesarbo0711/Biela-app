@@ -129,3 +129,30 @@
   .text-medium { font-size: 1.1rem !important; }
   .row-inputs { flex-direction: column; gap: 1.25rem; }
 }
+
+/* src/pages/Garage.css */
+.moto-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.moto-card h3 {
+  color: var(--text-main);
+}
+
+.moto-card p, .moto-card span {
+  color: var(--text-muted);
+}
+
+.btn-add {
+  background-color: transparent;
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-shadow);
+}
+.btn-add:hover {
+  background-color: var(--accent-color);
+  color: var(--bg-base);
+}
