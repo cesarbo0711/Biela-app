@@ -63,7 +63,7 @@ export default function Dashboard({ isLightMode, toggleTheme }) {
           onClick={() => setPestanaActiva('ia')}
         >
           <div className="ai-glow-icon">🤖</div>
-          <span>Mecánico IA</span>
+          <span>BujIA</span>
         </button>
 
         <button 

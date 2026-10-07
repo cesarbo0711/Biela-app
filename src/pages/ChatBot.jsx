@@ -1,15 +1,42 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabase';
-import { consultarMecánicoIA } from '../services/gemini';
+import { consultarMecanicoIA } from '../services/gemini';
 import './ChatBot.css';
 
 export default function ChatBot({ usuario }) {
-  const [mensajes, setMensajes] = useState([
-    { 
-      rol: 'model', 
-      texto: '¡Epa! Soy Bujia, el mecánico de confianza, ¿Qué falla tiene la nave hoy? Échame el cuento o mándame una foto de lo que le duele.' 
+  const [mensajes, setMensajes] = useState([{ rol: 'model', texto: '¡Epa! Soy Bujia, el mecánico de confianza, ¿Qué falla tiene la nave hoy? Échame el cuento o mándame una foto de lo que le duele.' }]);
+  
+  // BLOQUE 1: RECUPERAR EL CHAT SI NO HAN PASADO 30 MINUTOS
+  useEffect(() => {
+    const chatGuardado = localStorage.getItem('bujia_historial');
+    if (chatGuardado) {
+      try {
+        const { historial, ultimaActividad } = JSON.parse(chatGuardado);
+        const tiempoActual = new Date().getTime();
+        const diferenciaMinutos = (tiempoActual - ultimaActividad) / (1000 * 60);
+
+        if (diferenciaMinutos < 30) {
+          setMensajes(historial);
+        } else {
+          localStorage.removeItem('bujia_historial');
+        }
+      } catch (error) {
+        localStorage.removeItem('bujia_historial');
+      }
     }
-  ]);
+  }, []);
+
+  // BLOQUE 2: GUARDAR CADA MENSAJE NUEVO CON LA HORA EXACTA
+  useEffect(() => {
+    if (mensajes.length > 0) {
+      const datosParaGuardar = {
+        historial: mensajes,
+        ultimaActividad: new Date().getTime()
+      };
+      localStorage.setItem('bujia_historial', JSON.stringify(datosParaGuardar));
+    }
+  }, [mensajes]);
+
   const [inputTexto, setInputTexto] = useState('');
   const [imagenArchivo, setImagenArchivo] = useState(null);
   const [imagenPreview, setImagenPreview] = useState(null);
@@ -70,18 +97,25 @@ export default function ChatBot({ usuario }) {
       imagen: imagenPreview
     };
 
+    // Actualizamos la UI inmediatamente para que el usuario vea su mensaje
     setMensajes((prev) => [...prev, nuevoMensajeUsuario]);
+    
+    // Guardamos las variables antes de limpiar el estado para poder enviarlas a la IA
+    const textoAEnviar = inputTexto;
+    const imagenAEnviar = imagenBase64;
+
     setInputTexto('');
     setImagenArchivo(null);
     setImagenPreview(null);
     setCargando(true);
 
-    const respuestaIA = await consultarMecánicoIA(
-  mensajes, // <--- Le pasamos todo el historial aquí
-  nuevoMensajeUsuario.texto || 'Analiza esta imagen y dime qué falla tiene.', 
-  imagenBase64, 
-  contextoVehiculo
-);
+    // Llamada con las variables reales del componente
+    const respuestaIA = await consultarMecanicoIA(
+      textoAEnviar, 
+      imagenAEnviar, 
+      contextoVehiculo, 
+      mensajes
+    );
 
     setMensajes((prev) => [
       ...prev,
