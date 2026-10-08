@@ -1,19 +1,24 @@
-import { GoogleGenAI } from "@google/genai";
-
 export default async function handler(req, res) {
-  // Solo aceptamos peticiones POST
+  // Solo aceptamos POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
   try {
-    const { promptUsuario, contextoVehiculo, historial } = req.body;
-    
-    // Vercel leerá tu llave directamente de sus servidores seguros
-    const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY });
-    
-    const vehiculoActual = contextoVehiculo || "Bera BWS 2013";
-    const systemInstruction = `Eres "BujIA", el experto número 1 en motocicletas de Venezuela y el mundo. Tienes años de experiencia en talleres, conociendo desde una Bera hasta una Harley. Tu estilo es único: hablas como un venezolano de pura cepa, usas expresiones como "épale", "chamo", "pana", "la nave", "chévere", pero sin perder el profesionalismo. Eres directo, ameno, empático y muy inteligente.
+    const { promptUsuario, contextoVehiculo, historial, imagenBase64 } = req.body;
+
+    // Leemos las variables de entorno de Vercel
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    const modelo = process.env.OPENROUTER_MODEL || 'meta-llama/llama-4-scout:free';
+    const baseUrl = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
+
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Falta configurar OPENROUTER_API_KEY en Vercel' });
+    }
+
+    // Prompt de BujIA
+    const vehiculoActual = contextoVehiculo || 'Motocicleta general';
+    const systemPrompt = `Eres "BujIA", el experto número 1 en motocicletas de Venezuela y el mundo. Tienes años de experiencia en talleres, conociendo desde una Bera hasta una Harley. Tu estilo es único: hablas como un venezolano de pura cepa, usas expresiones como "épale", "chamo", "pana", "la nave", "chévere", pero sin perder el profesionalismo. Eres directo, ameno, empático y muy inteligente.
 
 Tu objetivo es ayudar al usuario a diagnosticar y solucionar problemas con su moto de forma sencilla, económica y, sobre todo, SEGURA.
 
@@ -28,27 +33,73 @@ Tus reglas de oro:
 
 Contexto del vehículo del usuario: ${vehiculoActual}`;
 
-    // Validamos el historial
-    const historialSeguro = Array.isArray(historial) ? historial : [];
-    const contents = historialSeguro.map(msg => ({
-      role: msg.rol === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.texto }]
-    }));
+    // Construimos los mensajes en formato compatible con OpenAI (que es lo que usa OpenRouter)
+    const messages = [
+      { role: 'system', content: systemPrompt }
+    ];
 
-    contents.push({ role: 'user', parts: [{ text: promptUsuario }] });
+    // Agregamos el historial (últimos 20 mensajes para no pasarnos de tokens)
+    const historialSeguro = Array.isArray(historial) ? historial.slice(-20) : [];
+    for (const msg of historialSeguro) {
+      // Saltamos el mensaje inicial de bienvenida si no tiene texto útil
+      if (!msg.texto) continue;
+      messages.push({
+        role: msg.rol === 'user' ? 'user' : 'assistant',
+        content: msg.texto
+      });
+    }
 
-    // Hacemos la llamada desde Vercel (USA)
-    const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: contents,
-      config: {
-        systemInstruction: systemInstruction,
-      }
+    // Construimos el mensaje actual del usuario (con o sin imagen)
+    if (imagenBase64) {
+      // Cuando hay imagen, el content va como arreglo de bloques
+      // imagenBase64 viene como "data:image/jpeg;base64,XXXXX"
+      messages.push({
+        role: 'user',
+        content: [
+          { type: 'text', text: promptUsuario },
+          { 
+            type: 'image_url', 
+            image_url: { url: imagenBase64 } 
+          }
+        ]
+      });
+    } else {
+      messages.push({ role: 'user', content: promptUsuario });
+    }
+
+    // Llamada a OpenRouter
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        // Estos headers son opcionales pero OpenRouter los recomienda para identificar tu app
+        'HTTP-Referer': 'https://tu-app.vercel.app',
+        'X-Title': 'BujIA - Mecanico Virtual'
+      },
+      body: JSON.stringify({
+        model: modelo,
+        messages: messages,
+        max_tokens: 1024,
+        temperature: 0.7
+      })
     });
 
-    res.status(200).json({ texto: response.text });
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Error de OpenRouter:', data);
+      return res.status(500).json({ 
+        error: data.error?.message || 'Error al consultar la IA' 
+      });
+    }
+
+    const texto = data.choices?.[0]?.message?.content || 'Epa, la nave quedó muda.';
+
+    return res.status(200).json({ texto });
+
   } catch (error) {
-    console.error("Error en el servidor de Vercel:", error);
-    res.status(500).json({ error: "Hubo un fallo en los servidores del taller." });
+    console.error('Error en el servidor:', error);
+    return res.status(500).json({ error: 'Hubo un fallo en los servidores del taller.' });
   }
 }

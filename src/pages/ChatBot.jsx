@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabase';
-import { consultarMecanicoIA } from '../services/gemini';
 import './ChatBot.css';
 
 export default function ChatBot({ usuario }) {
-  const [mensajes, setMensajes] = useState([{ rol: 'model', texto: '¡Epa! Soy Bujia, el mecánico de confianza, ¿Qué falla tiene la nave hoy? Échame el cuento o mándame una foto de lo que le duele.' }]);
-  
+  const [mensajes, setMensajes] = useState([
+    { 
+      rol: 'model', 
+      texto: '¡Epa! Soy BujIA, tu mecánico de confianza. ¿Qué falla tiene la nave hoy? Échame el cuento o mándame una foto de lo que le duele.' 
+    }
+  ]);
+
   // BLOQUE 1: RECUPERAR EL CHAT SI NO HAN PASADO 30 MINUTOS
   useEffect(() => {
     const chatGuardado = localStorage.getItem('bujia_historial');
@@ -42,7 +46,7 @@ export default function ChatBot({ usuario }) {
   const [imagenPreview, setImagenPreview] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [contextoVehiculo, setContextoVehiculo] = useState('Motocicleta general');
-  
+
   const chatEndRef = useRef(null);
 
   useEffect(() => {
@@ -54,7 +58,9 @@ export default function ChatBot({ usuario }) {
         .eq('user_id', usuario.id);
 
       if (data && data.length > 0) {
-        const infoMotos = data.map(m => `${m.marca} ${m.modelo} (${m.year}) con ${m.kilometraje} km`).join(', ');
+        const infoMotos = data
+          .map(m => `${m.marca} ${m.modelo} (${m.year}) con ${m.kilometraje} km`)
+          .join(', ');
         setContextoVehiculo(`El usuario maneja los siguientes vehículos: ${infoMotos}.`);
       }
     }
@@ -78,51 +84,77 @@ export default function ChatBot({ usuario }) {
     setImagenPreview(null);
   };
 
-  const enviarMensaje = async (e) => {
-    e.preventDefault();
-    if ((!inputTexto.trim() && !imagenArchivo) || cargando) return;
+ const enviarMensaje = async (e) => {
+  e.preventDefault();
+  if ((!inputTexto.trim() && !imagenArchivo) || cargando) return;
 
-    let imagenBase64 = null;
-    if (imagenArchivo) {
-      imagenBase64 = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(imagenArchivo);
-      });
+  // Convertir imagen a Base64 si existe
+  let imagenBase64 = null;
+  if (imagenArchivo) {
+    imagenBase64 = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(imagenArchivo);
+    });
+  }
+
+  const nuevoMensajeUsuario = {
+    rol: 'user',
+    texto: inputTexto || 'Analiza esta imagen y dime qué falla tiene.',
+    imagen: imagenPreview
+  };
+
+  // Actualizamos la UI inmediatamente
+  setMensajes((prev) => [...prev, nuevoMensajeUsuario]);
+
+  // Guardamos los datos antes de limpiar el estado
+  const textoAEnviar = inputTexto || 'Analiza esta imagen y dime qué falla tiene.';
+  const historialAEnviar = mensajes;
+  const imagenAEnviar = imagenBase64;
+
+  setInputTexto('');
+  setImagenArchivo(null);
+  setImagenPreview(null);
+  setCargando(true);
+
+  try {
+    // Llamada al backend de Vercel (que a su vez llama a OpenRouter)
+    const response = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        promptUsuario: textoAEnviar,
+        contextoVehiculo: contextoVehiculo,
+        historial: historialAEnviar,
+        imagenBase64: imagenAEnviar
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Error en el servidor');
     }
-
-    const nuevoMensajeUsuario = {
-      rol: 'user',
-      texto: inputTexto,
-      imagen: imagenPreview
-    };
-
-    // Actualizamos la UI inmediatamente para que el usuario vea su mensaje
-    setMensajes((prev) => [...prev, nuevoMensajeUsuario]);
-    
-    // Guardamos las variables antes de limpiar el estado para poder enviarlas a la IA
-    const textoAEnviar = inputTexto;
-    const imagenAEnviar = imagenBase64;
-
-    setInputTexto('');
-    setImagenArchivo(null);
-    setImagenPreview(null);
-    setCargando(true);
-
-    // Llamada con las variables reales del componente
-    const respuestaIA = await consultarMecanicoIA(
-      textoAEnviar, 
-      imagenAEnviar, 
-      contextoVehiculo, 
-      mensajes
-    );
 
     setMensajes((prev) => [
       ...prev,
-      { rol: 'model', texto: respuestaIA }
+      { rol: 'model', texto: data.texto || 'Epa, la nave quedó muda.' }
     ]);
+  } catch (error) {
+    console.error('Error al contactar a BujIA:', error);
+    setMensajes((prev) => [
+      ...prev,
+      { 
+        rol: 'model', 
+        texto: 'Epa, pana, se me cayó el sistema un momento. ¿Puedes repetirme la pregunta?' 
+      }
+    ]);
+  } finally {
     setCargando(false);
-  };
+  }
+};
 
   return (
     <div className="chatbot-container fade-in">
@@ -136,9 +168,14 @@ export default function ChatBot({ usuario }) {
 
       <div className="chatbot-messages">
         {mensajes.map((msg, index) => (
-          <div key={index} className={`chat-bubble-wrapper ${msg.rol === 'user' ? 'user' : 'model'}`}>
+          <div
+            key={index}
+            className={`chat-bubble-wrapper ${msg.rol === 'user' ? 'user' : 'model'}`}
+          >
             <div className="chat-bubble">
-              {msg.imagen && <img src={msg.imagen} alt="Evidencia" className="chat-img-preview" />}
+              {msg.imagen && (
+                <img src={msg.imagen} alt="Evidencia" className="chat-img-preview" />
+              )}
               <p>{msg.texto}</p>
             </div>
           </div>
@@ -157,20 +194,27 @@ export default function ChatBot({ usuario }) {
       {imagenPreview && (
         <div className="preview-container">
           <img src={imagenPreview} alt="Preview" />
-          <button type="button" onClick={quitarImagen} className="btn-remove-img">✕</button>
+          <button type="button" onClick={quitarImagen} className="btn-remove-img">
+            ✕
+          </button>
         </div>
       )}
 
       <form onSubmit={enviarMensaje} className="chatbot-input-form">
         <label className="btn-attach" title="Adjuntar foto de la falla">
           📷
-          <input type="file" accept="image/*" onChange={handleImagenChange} style={{ display: 'none' }} />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImagenChange}
+            style={{ display: 'none' }}
+          />
         </label>
-        
-        <input 
-          type="text" 
-          placeholder="Escribe tu problema o duda mecánica..." 
-          value={inputTexto} 
+
+        <input
+          type="text"
+          placeholder="Escribe tu problema o duda mecánica..."
+          value={inputTexto}
           onChange={(e) => setInputTexto(e.target.value)}
           className="chat-input"
         />
