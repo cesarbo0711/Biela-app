@@ -9,7 +9,7 @@ export default async function handler(req, res) {
 
     // Leemos las variables de entorno de Vercel
     const apiKey = process.env.OPENROUTER_API_KEY;
-    const modelo = process.env.OPENROUTER_MODEL || 'meta-llama/llama-4-scout:free';
+    const modelo = process.env.OPENROUTER_MODEL || 'openrouter/free';
     const baseUrl = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
 
     if (!apiKey) {
