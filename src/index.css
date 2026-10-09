@@ -1,4 +1,5 @@
 /* src/index.css */
+@import "tailwindcss";
 
 :root {
   /* MODO OSCURO (Lima y Negro) */

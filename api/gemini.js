@@ -38,8 +38,8 @@ Contexto del vehículo del usuario: ${vehiculoActual}`;
       { role: 'system', content: systemPrompt }
     ];
 
-    // Agregamos el historial (últimos 20 mensajes para no pasarnos de tokens)
-    const historialSeguro = Array.isArray(historial) ? historial.slice(-20) : [];
+    // Agregamos el historial (últimos 10 mensajes para no pasarnos de tokens)
+    const historialSeguro = Array.isArray(historial) ? historial.slice(-10) : [];
     for (const msg of historialSeguro) {
       // Saltamos el mensaje inicial de bienvenida si no tiene texto útil
       if (!msg.texto) continue;
