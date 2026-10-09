@@ -10,6 +10,8 @@ export default function ChatBot({ usuario }) {
     }
   ]);
 
+  const [nombreUsuario, setNombreUsuario] = useState(''); // <-- NUEVO ESTADO PARA EL NOMBRE
+
   // BLOQUE 1: RECUPERAR EL CHAT SI NO HAN PASADO 30 MINUTOS
   useEffect(() => {
     const chatGuardado = localStorage.getItem('bujia_historial');
@@ -40,6 +42,23 @@ export default function ChatBot({ usuario }) {
       localStorage.setItem('bujia_historial', JSON.stringify(datosParaGuardar));
     }
   }, [mensajes]);
+
+  // BLOQUE 3: BUSCAR EL NOMBRE DEL USUARIO EN SUPABASE
+  useEffect(() => {
+    async function obtenerNombre() {
+      if (!usuario) return;
+      const { data } = await supabase
+        .from('perfiles')
+        .select('nombre')
+        .eq('id', usuario.id)
+        .maybeSingle();
+
+      if (data && data.nombre) {
+        setNombreUsuario(data.nombre);
+      }
+    }
+    obtenerNombre();
+  }, [usuario]);
 
   const [inputTexto, setInputTexto] = useState('');
   const [imagenArchivo, setImagenArchivo] = useState(null);
@@ -84,85 +103,87 @@ export default function ChatBot({ usuario }) {
     setImagenPreview(null);
   };
 
- const enviarMensaje = async (e) => {
-  e.preventDefault();
-  if ((!inputTexto.trim() && !imagenArchivo) || cargando) return;
+  const enviarMensaje = async (e) => {
+    e.preventDefault();
+    if ((!inputTexto.trim() && !imagenArchivo) || cargando) return;
 
-  // Convertir imagen a Base64 si existe
-  let imagenBase64 = null;
-  if (imagenArchivo) {
-    imagenBase64 = await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.readAsDataURL(imagenArchivo);
-    });
-  }
-
-  const nuevoMensajeUsuario = {
-    rol: 'user',
-    texto: inputTexto || 'Analiza esta imagen y dime qué falla tiene.',
-    imagen: imagenPreview
-  };
-
-  // Actualizamos la UI inmediatamente
-  setMensajes((prev) => [...prev, nuevoMensajeUsuario]);
-
-  // Guardamos los datos antes de limpiar el estado
-  const textoAEnviar = inputTexto || 'Analiza esta imagen y dime qué falla tiene.';
-  const historialAEnviar = mensajes;
-  const imagenAEnviar = imagenBase64;
-
-  setInputTexto('');
-  setImagenArchivo(null);
-  setImagenPreview(null);
-  setCargando(true);
-
-  try {
-    // Llamada al backend de Vercel (que a su vez llama a OpenRouter)
-    const response = await fetch('/api/gemini', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        promptUsuario: textoAEnviar,
-        contextoVehiculo: contextoVehiculo,
-        historial: historialAEnviar,
-        imagenBase64: imagenAEnviar
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Error en el servidor');
+    // Convertir imagen a Base64 si existe
+    let imagenBase64 = null;
+    if (imagenArchivo) {
+      imagenBase64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(imagenArchivo);
+      });
     }
 
-    setMensajes((prev) => [
-      ...prev,
-      { rol: 'model', texto: data.texto || 'Epa, la nave quedó muda.' }
-    ]);
-  } catch (error) {
-    console.error('Error al contactar a BujIA:', error);
-    setMensajes((prev) => [
-      ...prev,
-      { 
-        rol: 'model', 
-        texto: 'Epa, pana, se me cayó el sistema un momento. ¿Puedes repetirme la pregunta?' 
+    const nuevoMensajeUsuario = {
+      rol: 'user',
+      texto: inputTexto || 'Analiza esta imagen y dime qué falla tiene.',
+      imagen: imagenPreview
+    };
+
+    // Actualizamos la UI inmediatamente
+    setMensajes((prev) => [...prev, nuevoMensajeUsuario]);
+
+    // Guardamos los datos antes de limpiar el estado
+    const textoAEnviar = inputTexto || 'Analiza esta imagen y dime qué falla tiene.';
+    const historialAEnviar = mensajes;
+    const imagenAEnviar = imagenBase64;
+
+    setInputTexto('');
+    setImagenArchivo(null);
+    setImagenPreview(null);
+    setCargando(true);
+
+    try {
+      // Llamada al backend de Vercel (que a su vez llama a OpenRouter)
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          promptUsuario: textoAEnviar,
+          contextoVehiculo: contextoVehiculo,
+          historial: historialAEnviar,
+          imagenBase64: imagenAEnviar,
+          nombreUsuario: nombreUsuario // <-- ENVIAMOS EL NOMBRE A LA API
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error en el servidor');
       }
-    ]);
-  } finally {
-    setCargando(false);
-  }
-};
+
+      setMensajes((prev) => [
+        ...prev,
+        { rol: 'model', texto: data.texto || 'Epa, la nave quedó muda.' }
+      ]);
+    } catch (error) {
+      console.error('Error al contactar a BujIA:', error);
+      setMensajes((prev) => [
+        ...prev,
+        { 
+          rol: 'model', 
+          texto: 'Epa, pana, se me cayó el sistema un momento. ¿Puedes repetirme la pregunta?' 
+        }
+      ]);
+    } finally {
+      setCargando(false);
+    }
+  };
 
   return (
     <div className="chatbot-container fade-in">
       <header className="chatbot-header">
         <div className="bot-avatar">
           <img
-  src="https://api.dicebear.com/10.x/bottts/svg?backgroundColor=&textureProbability=30&eyesVariant=frame2&headVariant=round02&mouthVariant=smile01&sidesVariant=round&textureVariant=dirty01&seed=mdf9n8af"
-  alt="avatar" />
+            src="https://api.dicebear.com/10.x/bottts/svg?backgroundColor=&textureProbability=30&eyesVariant=frame2&headVariant=round02&mouthVariant=smile01&sidesVariant=round&textureVariant=dirty01&seed=mdf9n8af"
+            alt="avatar" 
+          />
         </div>
         <div>
           <h2>Taller Mecánico (BujIA)</h2>

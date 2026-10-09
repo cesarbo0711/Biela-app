@@ -61,3 +61,164 @@
   cursor: pointer;
   margin-top: 1rem;
 }
+
+/* --- ESTILOS DEL AVATAR DICEBEAR --- */
+.avatar-wrapper-main {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 15px auto;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--bg-surface);
+  border: 3px solid var(--accent-color);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- ESTILOS DEL MODAL --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  background-color: var(--bg-base);
+  width: 90%;
+  max-width: 400px;
+  border-radius: 20px;
+  padding: 25px;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  border: 1px solid var(--border-color);
+  animation: slideUp 0.3s ease-out;
+}
+
+.btn-close-modal {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.modal-content h3 {
+  margin-bottom: 20px;
+  color: var(--text-main);
+  text-align: center;
+}
+
+/* --- FORMULARIO DENTRO DEL MODAL --- */
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-main);
+  font-size: 1rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.btn-save-profile {
+  margin-top: 10px;
+  background-color: var(--accent-color);
+  color: #000;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.btn-save-profile:active {
+  transform: scale(0.95);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- ESTILOS DEL BOTÓN DE CAMBIAR AVATAR --- */
+.avatar-edit-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.avatar-preview-small {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-color);
+  background-color: var(--bg-surface);
+  object-fit: cover;
+}
+
+.btn-refresh-avatar {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-refresh-avatar:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+.btn-refresh-avatar:active {
+  transform: scale(0.95);
+}

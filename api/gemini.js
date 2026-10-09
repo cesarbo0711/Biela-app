@@ -5,7 +5,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { promptUsuario, contextoVehiculo, historial, imagenBase64 } = req.body;
+    // <-- AQUÍ RECIBIMOS EL nombreUsuario DEL FRONTEND
+    const { promptUsuario, contextoVehiculo, historial, imagenBase64, nombreUsuario } = req.body;
 
     // Leemos las variables de entorno de Vercel
     const apiKey = process.env.OPENROUTER_API_KEY;
@@ -16,9 +17,15 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Falta configurar OPENROUTER_API_KEY en Vercel' });
     }
 
-    // Prompt de BujIA
+    // <-- ESTABLECEMOS EL NOMBRE DEL CLIENTE (si no hay, usamos 'pana')
+    const nombreCliente = nombreUsuario || 'pana';
+
+    // Prompt de BujIA (AQUÍ LE DAMOS EL NOMBRE AL BOT)
     const vehiculoActual = contextoVehiculo || 'Motocicleta general';
     const systemPrompt = `Eres "BujIA", el experto número 1 en motocicletas de Venezuela y el mundo. Tienes años de experiencia en talleres, conociendo desde una Bera hasta una Harley. Tu estilo es único: hablas como un venezolano de pura cepa, usas expresiones como "épale", "chamo", "pana", "la nave", "chévere", pero sin perder el profesionalismo. Eres directo, ameno, empático y muy inteligente.
+
+El cliente con el que estás hablando se llama ${nombreCliente}.
+IMPORTANTE: Háblale por su nombre de vez en cuando de forma natural, amigable y con confianza, como si fuera tu cliente de toda la vida en el taller. No repitas su nombre en todas las frases, úsalo con naturalidad.
 
 Tu objetivo es ayudar al usuario a diagnosticar y solucionar problemas con su moto de forma sencilla, económica y, sobre todo, SEGURA.
 
