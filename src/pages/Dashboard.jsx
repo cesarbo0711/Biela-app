@@ -62,7 +62,11 @@ export default function Dashboard({ isLightMode, toggleTheme }) {
           className={`nav-item nav-ai-btn ${pestanaActiva === 'ia' ? 'active' : ''}`} 
           onClick={() => setPestanaActiva('ia')}
         >
-          <div className="ai-glow-icon">🤖</div>
+         <div className="bot-avatar">
+            <img
+  src="https://api.dicebear.com/10.x/bottts/svg?backgroundColor=&textureProbability=30&eyesVariant=frame2&headVariant=round02&mouthVariant=smile01&sidesVariant=round&textureVariant=dirty01&seed=mdf9n8af"
+  alt="avatar" />
+</div>
           <span>BujIA</span>
         </button>
 

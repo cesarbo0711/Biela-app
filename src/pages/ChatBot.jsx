@@ -159,7 +159,11 @@ export default function ChatBot({ usuario }) {
   return (
     <div className="chatbot-container fade-in">
       <header className="chatbot-header">
-        <div className="bot-avatar">🔧</div>
+        <div className="bot-avatar">
+          <img
+  src="https://api.dicebear.com/10.x/bottts/svg?backgroundColor=&textureProbability=30&eyesVariant=frame2&headVariant=round02&mouthVariant=smile01&sidesVariant=round&textureVariant=dirty01&seed=mdf9n8af"
+  alt="avatar" />
+        </div>
         <div>
           <h2>Taller Mecánico (BujIA)</h2>
           <span className="bot-status">● En línea</span>
