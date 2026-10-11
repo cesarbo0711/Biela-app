@@ -26,6 +26,18 @@ export default async function handler(req, res) {
 
     // NUEVO PROMPT DE AGENTE AUTÓNOMO CON FORMATO JSON OBLIGATORIO
     const systemPrompt = `Eres "BujIA", el experto número 1 en motocicletas de Venezuela.
+    Eres "BujIA", el experto número 1 en motocicletas de Venezuela y el mundo. Tienes años de experiencia en talleres, conociendo desde una Bera hasta una Harley. Tu estilo es único: hablas como un venezolano de pura cepa, usas expresiones como "épale", "chamo", "pana", "la nave", "chévere", pero sin perder el profesionalismo. Eres directo, ameno, empático y muy inteligente.
+
+Tu objetivo es ayudar al usuario a diagnosticar y solucionar problemas con su moto de forma sencilla, económica y, sobre todo, SEGURA.
+
+Tus reglas de oro:
+1. Siempre prioriza la seguridad del usuario. Si algo es peligroso, adviértelo de inmediato.
+2. Si no estás seguro de un diagnóstico, pide más detalles o fotos. No inventes.
+3. Da explicaciones paso a paso, fáciles de entender para alguien que no es mecánico.
+4. Usa el contexto del vehículo que te proporcionan para dar respuestas personalizadas.
+5. Si algo requiere un taller profesional o herramientas especiales, dilo claramente sin rodeos.
+6. Mantén un tono positivo, motivador y usa el humor venezolano cuando sea apropiado.
+7. No uses formatos de markdown complejos (como tablas o bloques de código) a menos que sea estrictamente necesario. Responde de forma conversacional.
 El cliente con el que hablas se llama ${nombreCliente}. Vehículo: ${vehiculoActual}.
 
 REGLA ESTRICTA DE RESPUESTA (FUNCTION CALLING):
@@ -89,7 +101,7 @@ Tus reglas de personalidad: Habla como venezolano (épale, chamo, pana, la nave)
         model: modelo,
         messages: messages,
         max_tokens: 1024,
-        temperature: 0.4, // Temperatura baja para respuestas JSON estructuradas y consistentes
+        temperature: 0.4, 
         response_format: { type: "json_object" }
       })
     });
@@ -103,31 +115,38 @@ Tus reglas de personalidad: Habla como venezolano (épale, chamo, pana, la nave)
     let textoCrudo = data.choices?.[0]?.message?.content || '{}';
     let respuestaIA;
     
-    // Limpiamos el texto por si el LLM incluye etiquetas de código rebeldes
     textoCrudo = textoCrudo.replace(/```json/g, '').replace(/```/g, '').trim();
 
     try {
       respuestaIA = JSON.parse(textoCrudo);
+      // Evitamos el "undefined" si la IA olvida responder
+      if (!respuestaIA.respuesta_usuario) {
+        respuestaIA.respuesta_usuario = "¡Listo, pana! Anotado en la bitácora.";
+      }
     } catch (e) {
       console.error("Error parseando JSON del LLM:", textoCrudo);
       respuestaIA = { intencion: 'chat', respuesta_usuario: 'Epa pana, tuve un cortocircuito en los cables, dímelo otra vez.' };
     }
 
-    // INTERCEPTAMOS LA INTENCIÓN Y GUARDAMOS EL MANTENIMIENTO EN SUPABASE
+    // INTERCEPTAMOS LA INTENCIÓN Y GUARDAMOS EL MANTENIMIENTO EN SUPABASE CON LAS COLUMNAS CORRECTAS
     if (respuestaIA.intencion === 'registrar_mantenimiento' && motoId) {
       try {
         const { error: dbError } = await supabase
           .from('bitacora_servicios')
           .insert({
             moto_id: motoId,
-            servicio: respuestaIA.servicio,
-            kilometraje: respuestaIA.km_actual,
-            fecha: new Date().toISOString()
+            servicio_id: 7, // ID 7 de tu catálogo (Mantenimiento General)
+            km_al_momento: respuestaIA.km_actual || 0,
+            fecha_servicio: new Date().toISOString().split('T')[0],
+            notas: respuestaIA.servicio || 'Mantenimiento general'
           });
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          console.error("❌ MOTIVO EXACTO DEL REBOTE EN SUPABASE:", dbError);
+          throw dbError;
+        }
         
-        console.log(`Mantenimiento registrado: ${respuestaIA.servicio} a los ${respuestaIA.km_actual}km`);
+        console.log(`✅ Mantenimiento registrado: ${respuestaIA.servicio} a los ${respuestaIA.km_actual}km`);
       } catch (error) {
         console.error("Error guardando en Supabase:", error);
         respuestaIA.respuesta_usuario += "\n\n*(Nota técnica: Hubo un pelón guardando en la bitácora, intenta registrarlo manual).*";
