@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Inicializamos Supabase en el Backend
+// Inicializamos Supabase buscando primero la LLAVE MAESTRA para saltar el RLS
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY; // <-- ¡El cambio vital está aquí!
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req, res) {
@@ -129,26 +129,28 @@ Tus reglas de personalidad: Habla como venezolano (épale, chamo, pana, la nave)
     }
 
     // INTERCEPTAMOS LA INTENCIÓN Y GUARDAMOS EL MANTENIMIENTO EN SUPABASE CON LAS COLUMNAS CORRECTAS
+   // INTERCEPTAMOS LA INTENCIÓN Y GUARDAMOS EL MANTENIMIENTO EN SUPABASE
     if (respuestaIA.intencion === 'registrar_mantenimiento' && motoId) {
       try {
-        const { error: dbError } = await supabase
+        const { data, error: dbError } = await supabase
           .from('bitacora_servicios')
           .insert({
             moto_id: motoId,
-            servicio_id: 7, // ID 7 de tu catálogo (Mantenimiento General)
-            km_al_momento: respuestaIA.km_actual || 0,
-            fecha_servicio: new Date().toISOString().split('T')[0],
-            notas: respuestaIA.servicio || 'Mantenimiento general'
+            servicio_id: 7, // Asignamos "Mantenimiento General" (ID de tu catálogo)
+            km_al_momento: respuestaIA.km_actual || 0, // Ajustado a km_al_momento
+            fecha_servicio: new Date().toISOString().split('T')[0], // Ajustado a fecha_servicio (Solo fecha YYYY-MM-DD)
+            notas: respuestaIA.servicio // Guardamos el texto del servicio en "notas"
           });
 
         if (dbError) {
-          console.error("❌ MOTIVO EXACTO DEL REBOTE EN SUPABASE:", dbError);
-          throw dbError;
+            console.error("❌ ERROR EN SUPABASE:", dbError);
+            throw dbError; 
         }
         
         console.log(`✅ Mantenimiento registrado: ${respuestaIA.servicio} a los ${respuestaIA.km_actual}km`);
       } catch (error) {
         console.error("Error guardando en Supabase:", error);
+        // Le avisamos al usuario que BujIA respondió pero hubo un fallo técnico
         respuestaIA.respuesta_usuario += "\n\n*(Nota técnica: Hubo un pelón guardando en la bitácora, intenta registrarlo manual).*";
       }
     } else if (respuestaIA.intencion === 'registrar_mantenimiento' && !motoId) {
