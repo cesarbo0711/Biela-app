@@ -70,11 +70,11 @@ export default function ChatBot({ usuario }) {
   const chatEndRef = useRef(null);
 
   // BLOQUE 4: CARGAR EL VEHÍCULO Y SU ID
-// BLOQUE 4: CARGAR EL VEHÍCULO Y SU ID
+
   useEffect(() => {
     async function cargarVehiculo() {
       if (!usuario) return;
-      console.log("Buscando motos para el usuario:", usuario.id); // <-- Rastreador 1
+      console.log("Buscando motos para el usuario:", usuario.id);
 
       const { data, error } = await supabase
         .from('motos')
@@ -86,7 +86,7 @@ export default function ChatBot({ usuario }) {
         return;
       }
 
-      console.log("Motos encontradas para BujÍA:", data); // <-- Rastreador 2
+      console.log("Motos encontradas para BujÍA:", data);
 
       if (data && data.length > 0) {
         setMotoId(data[0].id); // <-- GUARDAMOS EL ID DE LA PRIMERA MOTO
@@ -161,7 +161,7 @@ export default function ChatBot({ usuario }) {
           historial: historialAEnviar,
           imagenBase64: imagenAEnviar,
           nombreUsuario: nombreUsuario,
-          motoId: motoId // <-- ENVIAMOS EL ID DE LA MOTO AL BACKEND PARA QUE PUEDA REGISTRAR EL SERVICIO
+         motoId: motoId
         })
       });
 
