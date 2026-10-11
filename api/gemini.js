@@ -1,14 +1,18 @@
+import { createClient } from '@supabase/supabase-js';
+
+// Inicializamos Supabase en el Backend
+const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 export default async function handler(req, res) {
-  // Solo aceptamos POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
   try {
-    // <-- AQUÍ RECIBIMOS EL nombreUsuario DEL FRONTEND
-    const { promptUsuario, contextoVehiculo, historial, imagenBase64, nombreUsuario } = req.body;
+    const { promptUsuario, contextoVehiculo, historial, imagenBase64, nombreUsuario, motoId } = req.body;
 
-    // Leemos las variables de entorno de Vercel
     const apiKey = process.env.OPENROUTER_API_KEY;
     const modelo = process.env.OPENROUTER_MODEL || 'openrouter/free';
     const baseUrl = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
@@ -17,38 +21,42 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Falta configurar OPENROUTER_API_KEY en Vercel' });
     }
 
-    // <-- ESTABLECEMOS EL NOMBRE DEL CLIENTE (si no hay, usamos 'pana')
     const nombreCliente = nombreUsuario || 'pana';
-
-    // Prompt de BujIA (AQUÍ LE DAMOS EL NOMBRE AL BOT)
     const vehiculoActual = contextoVehiculo || 'Motocicleta general';
-    const systemPrompt = `Eres "BujIA", el experto número 1 en motocicletas de Venezuela y el mundo. Tienes años de experiencia en talleres, conociendo desde una Bera hasta una Harley. Tu estilo es único: hablas como un venezolano de pura cepa, usas expresiones como "épale", "chamo", "pana", "la nave", "chévere", pero sin perder el profesionalismo. Eres directo, ameno, empático y muy inteligente.
 
-El cliente con el que estás hablando se llama ${nombreCliente}.
-IMPORTANTE: Háblale por su nombre de vez en cuando de forma natural, amigable y con confianza, como si fuera tu cliente de toda la vida en el taller. No repitas su nombre en todas las frases, úsalo con naturalidad.
+    // NUEVO PROMPT DE AGENTE AUTÓNOMO CON FORMATO JSON OBLIGATORIO
+    const systemPrompt = `Eres "BujIA", el experto número 1 en motocicletas de Venezuela.
+El cliente con el que hablas se llama ${nombreCliente}. Vehículo: ${vehiculoActual}.
 
-Tu objetivo es ayudar al usuario a diagnosticar y solucionar problemas con su moto de forma sencilla, económica y, sobre todo, SEGURA.
+REGLA ESTRICTA DE RESPUESTA (FUNCTION CALLING):
+Eres un agente de software. DEBES responder ÚNICA Y EXCLUSIVAMENTE con un objeto JSON válido. NO incluyas markdown (como \`\`\`json), NO pongas texto fuera de las llaves {}. 
 
-Tus reglas de oro:
-1. Siempre prioriza la seguridad del usuario. Si algo es peligroso, adviértelo de inmediato.
-2. Si no estás seguro de un diagnóstico, pide más detalles o fotos. No inventes.
-3. Da explicaciones paso a paso, fáciles de entender para alguien que no es mecánico.
-4. Usa el contexto del vehículo que te proporcionan para dar respuestas personalizadas.
-5. Si algo requiere un taller profesional o herramientas especiales, dilo claramente sin rodeos.
-6. Mantén un tono positivo, motivador y usa el humor venezolano cuando sea apropiado.
-7. No uses formatos de markdown complejos (como tablas o bloques de código) a menos que sea estrictamente necesario. Responde de forma conversacional.
+Escucha la petición del usuario y decide tu acción:
 
-Contexto del vehículo del usuario: ${vehiculoActual}`;
+OPCIÓN A - REGISTRAR MANTENIMIENTO:
+Si el usuario te dice que le hizo un servicio, cambio de pieza o mantenimiento a su moto (ej: "anota que le cambié el aceite a los 300km" o "ya monté las pastillas nuevas con 1500km"), tu JSON debe ser:
+{
+  "intencion": "registrar_mantenimiento",
+  "servicio": "Breve descripción del servicio (ej. Cambio de aceite 20W50)",
+  "km_actual": <número entero con el kilometraje, pon 0 si no lo menciona>,
+  "respuesta_usuario": "Tu respuesta coloquial venezolana confirmando el registro."
+}
 
-    // Construimos los mensajes en formato compatible con OpenAI (que es lo que usa OpenRouter)
+OPCIÓN B - CHAT NORMAL:
+Si es cualquier otra consulta mecánica, duda o saludo, tu JSON debe ser:
+{
+  "intencion": "chat",
+  "respuesta_usuario": "Tu respuesta amena, experta y coloquial venezolana."
+}
+
+Tus reglas de personalidad: Habla como venezolano (épale, chamo, pana, la nave). Sé profesional, seguro y advierte peligros mecánicos.`;
+
     const messages = [
       { role: 'system', content: systemPrompt }
     ];
 
-    // Agregamos el historial (últimos 10 mensajes para no pasarnos de tokens)
     const historialSeguro = Array.isArray(historial) ? historial.slice(-10) : [];
     for (const msg of historialSeguro) {
-      // Saltamos el mensaje inicial de bienvenida si no tiene texto útil
       if (!msg.texto) continue;
       messages.push({
         role: msg.rol === 'user' ? 'user' : 'assistant',
@@ -56,54 +64,80 @@ Contexto del vehículo del usuario: ${vehiculoActual}`;
       });
     }
 
-    // Construimos el mensaje actual del usuario (con o sin imagen)
     if (imagenBase64) {
-      // Cuando hay imagen, el content va como arreglo de bloques
-      // imagenBase64 viene como "data:image/jpeg;base64,XXXXX"
       messages.push({
         role: 'user',
         content: [
           { type: 'text', text: promptUsuario },
-          { 
-            type: 'image_url', 
-            image_url: { url: imagenBase64 } 
-          }
+          { type: 'image_url', image_url: { url: imagenBase64 } }
         ]
       });
     } else {
       messages.push({ role: 'user', content: promptUsuario });
     }
 
-    // Llamada a OpenRouter
+    // Llamada a OpenRouter forzando un formato de respuesta tipo JSON
     const response = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        // Estos headers son opcionales pero OpenRouter los recomienda para identificar tu app
-        'HTTP-Referer': 'https://tu-app.vercel.app',
-        'X-Title': 'BujIA - Mecanico Virtual'
+        'HTTP-Referer': 'https://biela-app.vercel.app',
+        'X-Title': 'Biela App'
       },
       body: JSON.stringify({
         model: modelo,
         messages: messages,
         max_tokens: 1024,
-        temperature: 0.7
+        temperature: 0.4, // Temperatura baja para respuestas JSON estructuradas y consistentes
+        response_format: { type: "json_object" }
       })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Error de OpenRouter:', data);
-      return res.status(500).json({ 
-        error: data.error?.message || 'Error al consultar la IA' 
-      });
+      throw new Error(data.error?.message || 'Error al consultar la IA');
     }
 
-    const texto = data.choices?.[0]?.message?.content || 'Epa, la nave quedó muda.';
+    let textoCrudo = data.choices?.[0]?.message?.content || '{}';
+    let respuestaIA;
+    
+    // Limpiamos el texto por si el LLM incluye etiquetas de código rebeldes
+    textoCrudo = textoCrudo.replace(/```json/g, '').replace(/```/g, '').trim();
 
-    return res.status(200).json({ texto });
+    try {
+      respuestaIA = JSON.parse(textoCrudo);
+    } catch (e) {
+      console.error("Error parseando JSON del LLM:", textoCrudo);
+      respuestaIA = { intencion: 'chat', respuesta_usuario: 'Epa pana, tuve un cortocircuito en los cables, dímelo otra vez.' };
+    }
+
+    // INTERCEPTAMOS LA INTENCIÓN Y GUARDAMOS EL MANTENIMIENTO EN SUPABASE
+    if (respuestaIA.intencion === 'registrar_mantenimiento' && motoId) {
+      try {
+        const { error: dbError } = await supabase
+          .from('bitacora_servicios')
+          .insert({
+            moto_id: motoId,
+            servicio: respuestaIA.servicio,
+            kilometraje: respuestaIA.km_actual,
+            fecha: new Date().toISOString()
+          });
+
+        if (dbError) throw dbError;
+        
+        console.log(`Mantenimiento registrado: ${respuestaIA.servicio} a los ${respuestaIA.km_actual}km`);
+      } catch (error) {
+        console.error("Error guardando en Supabase:", error);
+        respuestaIA.respuesta_usuario += "\n\n*(Nota técnica: Hubo un pelón guardando en la bitácora, intenta registrarlo manual).*";
+      }
+    } else if (respuestaIA.intencion === 'registrar_mantenimiento' && !motoId) {
+       respuestaIA.respuesta_usuario += "\n\n*(Epa, no tienes ninguna moto registrada en tu garaje todavía, guárdala primero para poder anotarte esto).*";
+    }
+
+    // Retornamos únicamente el texto de respuesta limpia al Frontend
+    return res.status(200).json({ texto: respuestaIA.respuesta_usuario });
 
   } catch (error) {
     console.error('Error en el servidor:', error);

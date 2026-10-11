@@ -10,7 +10,8 @@ export default function ChatBot({ usuario }) {
     }
   ]);
 
-  const [nombreUsuario, setNombreUsuario] = useState(''); // <-- NUEVO ESTADO PARA EL NOMBRE
+  const [nombreUsuario, setNombreUsuario] = useState('');
+  const [motoId, setMotoId] = useState(null); // <-- NUEVO ESTADO PARA IDENTIFICAR LA MOTO ACTIVA
 
   // BLOQUE 1: RECUPERAR EL CHAT SI NO HAN PASADO 30 MINUTOS
   useEffect(() => {
@@ -68,6 +69,7 @@ export default function ChatBot({ usuario }) {
 
   const chatEndRef = useRef(null);
 
+  // BLOQUE 4: CARGAR EL VEHÍCULO Y SU ID
   useEffect(() => {
     async function cargarVehiculo() {
       if (!usuario) return;
@@ -77,8 +79,9 @@ export default function ChatBot({ usuario }) {
         .eq('user_id', usuario.id);
 
       if (data && data.length > 0) {
+        setMotoId(data[0].id); // <-- GUARDAMOS EL ID DE LA PRIMERA MOTO
         const infoMotos = data
-          .map(m => `${m.marca} ${m.modelo} (${m.year}) con ${m.kilometraje} km`)
+          .map(m => `${m.marca}${m.modelo} (${m.year}) con${m.kilometraje} km`)
           .join(', ');
         setContextoVehiculo(`El usuario maneja los siguientes vehículos: ${infoMotos}.`);
       }
@@ -123,10 +126,8 @@ export default function ChatBot({ usuario }) {
       imagen: imagenPreview
     };
 
-    // Actualizamos la UI inmediatamente
     setMensajes((prev) => [...prev, nuevoMensajeUsuario]);
 
-    // Guardamos los datos antes de limpiar el estado
     const textoAEnviar = inputTexto || 'Analiza esta imagen y dime qué falla tiene.';
     const historialAEnviar = mensajes;
     const imagenAEnviar = imagenBase64;
@@ -137,7 +138,6 @@ export default function ChatBot({ usuario }) {
     setCargando(true);
 
     try {
-      // Llamada al backend de Vercel (que a su vez llama a OpenRouter)
       const response = await fetch('/api/gemini', {
         method: 'POST',
         headers: {
@@ -148,7 +148,8 @@ export default function ChatBot({ usuario }) {
           contextoVehiculo: contextoVehiculo,
           historial: historialAEnviar,
           imagenBase64: imagenAEnviar,
-          nombreUsuario: nombreUsuario // <-- ENVIAMOS EL NOMBRE A LA API
+          nombreUsuario: nombreUsuario,
+          motoId: motoId // <-- ENVIAMOS EL ID DE LA MOTO AL BACKEND PARA QUE PUEDA REGISTRAR EL SERVICIO
         })
       });
 
