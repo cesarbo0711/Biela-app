@@ -70,20 +70,32 @@ export default function ChatBot({ usuario }) {
   const chatEndRef = useRef(null);
 
   // BLOQUE 4: CARGAR EL VEHÍCULO Y SU ID
+// BLOQUE 4: CARGAR EL VEHÍCULO Y SU ID
   useEffect(() => {
     async function cargarVehiculo() {
       if (!usuario) return;
-      const { data } = await supabase
+      console.log("Buscando motos para el usuario:", usuario.id); // <-- Rastreador 1
+
+      const { data, error } = await supabase
         .from('motos')
         .select('*')
         .eq('user_id', usuario.id);
 
+      if (error) {
+        console.error("Error buscando motos en el ChatBot:", error.message);
+        return;
+      }
+
+      console.log("Motos encontradas para BujÍA:", data); // <-- Rastreador 2
+
       if (data && data.length > 0) {
         setMotoId(data[0].id); // <-- GUARDAMOS EL ID DE LA PRIMERA MOTO
         const infoMotos = data
-          .map(m => `${m.marca}${m.modelo} (${m.year}) con${m.kilometraje} km`)
+          .map(m => `${m.marca} ${m.modelo} (${m.year}) con ${m.kilometraje} km`)
           .join(', ');
         setContextoVehiculo(`El usuario maneja los siguientes vehículos: ${infoMotos}.`);
+      } else {
+        console.warn("BujÍA no vio ninguna moto en la tabla.");
       }
     }
     cargarVehiculo();
