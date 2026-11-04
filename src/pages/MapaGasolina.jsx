@@ -121,9 +121,16 @@ export default function MapaGasolina() {
           className="w-full h-full"
         >
           {/* TileLayer Oscuro para mantener el tema de Biela */}
+        {/* TileLayer Oscuro de CartoDB (Versión libre sin API Key) */}
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          />
+          
+          {/* Capa de texto para que se lean las calles por encima del tema oscuro */}
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png"
+            attribution=""
           />
 
           {/* Renderizamos los pines por cada estación */}
