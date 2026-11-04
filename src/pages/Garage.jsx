@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import './Garage.css';
 
 export default function Garage({ usuario }) {
-
-  
   const [motos, setMotos] = useState([]); 
   const navigate = useNavigate();
 
@@ -28,6 +26,7 @@ export default function Garage({ usuario }) {
   const [cargando, setCargando] = useState(false);
 
   const cargarMotos = async () => {
+    if (!usuario?.id) return;
     const { data, error } = await supabase
       .from('motos')
       .select('*')
@@ -127,36 +126,81 @@ export default function Garage({ usuario }) {
   };
 
   return (
-
-      
-
-
     <div className="garage-tab fade-in">
       <div className="list-header">
         <h2 className="section-title">Tus Vehículos</h2>
         <button className="btn-icon-add" onClick={() => setIsModalOpen(true)}>+ Añadir</button>
       </div>
 
-      <div className="px-4 mt-6 mb-4">
+      {/* TARJETA DESTACADA: RADAR DE BOMBAS (MAPA) */}
+      <div style={{ padding: '0 1rem', marginTop: '1rem', marginBottom: '1.5rem' }}>
         <button 
           onClick={() => navigate('/mapa-gasolina')}
-          className="w-full bg-gradient-to-r from-[#1a1a1a] to-[#2a2a2a] border border-[#84cc16] rounded-xl p-4 flex items-center justify-between shadow-lg hover:shadow-[#84cc16]/20 transition-all active:scale-95 group"
+          style={{
+            width: '100%',
+            background: 'linear-gradient(135deg, #1f241d 0%, #121411 100%)',
+            border: '1.5px solid #84cc16',
+            borderRadius: '1rem',
+            padding: '1.2rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            boxShadow: '0 0 20px rgba(132, 204, 22, 0.2)',
+            cursor: 'pointer',
+            textAlign: 'left',
+            transition: 'transform 0.2s, box-shadow 0.2s'
+          }}
+          onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
+          onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          <div className="flex items-center gap-4">
-            <div className="bg-[#84cc16]/20 p-3 rounded-full text-[#84cc16] group-hover:bg-[#84cc16] group-hover:text-black transition-colors">
-              {/* Ícono de Mapa/Ubicación */}
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
-                <line x1="9" y1="3" x2="9" y2="21"></line>
-                <line x1="15" y1="3" x2="15" y2="21"></line>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{
+              backgroundColor: 'rgba(132, 204, 22, 0.2)',
+              padding: '0.8rem',
+              borderRadius: '50%',
+              color: '#84cc16',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              {/* Ícono de Mapa / Surtidor */}
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 22h12"></path>
+                <path d="M4 9h10"></path>
+                <path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"></path>
+                <path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"></path>
               </svg>
             </div>
-            <div className="text-left">
-              <h3 className="text-white font-bold text-lg">Radar de Bombas</h3>
-              <p className="text-gray-400 text-xs">Busca y reporta gasolina en vivo</p>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+                <h3 style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '1.1rem', margin: 0 }}>Radar de Bombas</h3>
+                <span style={{
+                  backgroundColor: '#84cc16',
+                  color: '#000000',
+                  fontSize: '0.65rem',
+                  fontWeight: 'bold',
+                  padding: '0.15rem 0.5rem',
+                  borderRadius: '1rem',
+                  textTransform: 'uppercase'
+                }}>EN VIVO</span>
+              </div>
+              <p style={{ color: '#a1a1aa', fontSize: '0.8rem', margin: 0 }}>Ubicación y estatus de combustible</p>
             </div>
           </div>
-          <svg className="text-gray-500 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+          
+          <div style={{
+            backgroundColor: '#84cc16',
+            color: '#000000',
+            borderRadius: '50%',
+            width: '36px',
+            height: '36px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold'
+          }}>
+            ➔
+          </div>
         </button>
       </div>
 
@@ -173,8 +217,6 @@ export default function Garage({ usuario }) {
                 <button className="pro-btn-delete" onClick={() => { setMotoActiva(moto); setIsDeleteModalOpen(true); }}>Borrar</button>
               </div>
 
-            
-              
               <div className="pro-image-wrapper">
                 <div className="pro-glow"></div>
                 {moto.imagen_url ? (
@@ -205,8 +247,13 @@ export default function Garage({ usuario }) {
                     <span className="pro-stat-value text-medium">{moto.tipo_aceite || 'N/A'}</span>
                   </div>
                 </div>
-                  <button className="btn-secondary" style={{ padding: '0.4rem 1rem', fontSize: '0.75rem', borderRadius: '2rem', marginLeft: '0.5rem', marginTop: '0.5rem' }}
-                  onClick={() => navigate(`/moto/${moto.id}`)}> Ver Bitácora</button>
+                <button 
+                  className="btn-secondary" 
+                  style={{ padding: '0.4rem 1rem', fontSize: '0.75rem', borderRadius: '2rem', marginLeft: '0.5rem', marginTop: '0.5rem' }}
+                  onClick={() => navigate(`/moto/${moto.id}`)}
+                >
+                  Ver Bitácora
+                </button>
               </div>
             </div>
           ))}
