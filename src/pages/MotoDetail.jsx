@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import './MotoDetail.css';
-import ModalSurtirGasolina from "../components/ModalSurtirGasolina.jsx";
+import ModalSurtirGasolina from "./ModalSurtirGasolina.jsx";
 
 export default function MotoDetail() {
   const { id } = useParams();
