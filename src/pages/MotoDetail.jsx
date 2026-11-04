@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import './MotoDetail.css';
-import ModalSurtirGasolina from "./ModalSurtirGasolina.jsx";
+import ModalSurtirGasolina from "../components/ModalSurtirGasolina.jsx";
 
 export default function MotoDetail() {
   const { id } = useParams();
@@ -12,14 +12,14 @@ export default function MotoDetail() {
   const [historial, setHistorial] = useState([]);
   const [catalogoServicios, setCatalogoServicios] = useState([]);
   const [usuarioActual, setUsuarioActual] = useState(null);
-  const [historialGasolina, setHistorialGasolina] = useState([]);
+  const [historialGasolina, setHistorialGasolina] = useState([]); 
   
   // Modales y Estados de Eliminación
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [mostrarModalGasolina, setMostrarModalGasolina] = useState(false);
   const [servicioAEliminar, setServicioAEliminar] = useState(null);
-  const [gasolinaAEliminar, setGasolinaAEliminar] = useState(null); // <-- Estado para saber qué gasolina borrar
+  const [gasolinaAEliminar, setGasolinaAEliminar] = useState(null);
   
   // Formulario avanzado
   const [servicioIdSeleccionado, setServicioIdSeleccionado] = useState('');
@@ -38,18 +38,15 @@ export default function MotoDetail() {
   }, [id]);
 
   const cargarDatos = async () => {
-    // 1. Cargar datos de la moto
     const { data: motoData } = await supabase.from('motos').select('*').eq('id', id).single();
     if (motoData) {
       setMoto(motoData);
       setKmAlMomento(motoData.kilometraje); 
     }
 
-    // 2. Cargar catálogo
     const { data: catalogoData } = await supabase.from('catalogo_servicios').select('*');
     if (catalogoData) setCatalogoServicios(catalogoData);
 
-    // 3. Cargar historial de mantenimientos
     const { data: historialData } = await supabase
       .from('bitacora_servicios')
       .select(`id, km_al_momento, fecha_servicio, notas, catalogo_servicios (nombre, intervalo_km)`)
@@ -58,7 +55,6 @@ export default function MotoDetail() {
       
     if (historialData) setHistorial(historialData);
 
-    // 4. Cargar historial de gasolina
     const { data: gasolinaData } = await supabase
       .from('registro_gasolina')
       .select('*')
@@ -134,13 +130,10 @@ export default function MotoDetail() {
   };
 
   const manejarGasolinaAnotada = () => {
-    alert("¡Gasolina anotada mi pana!"); 
     cargarDatos(); 
   };
 
-  // ==========================================
-  // LÓGICA DE CÁLCULO DE RENDIMIENTO Y FINANZAS
-  // ==========================================
+  // CÁLCULO DE RENDIMIENTO Y FINANZAS
   let totalDolaresGastados = 0;
   let rendimientoKmL = "N/A";
   
@@ -159,7 +152,6 @@ export default function MotoDetail() {
       }
     }
   }
-  // ==========================================
 
   if (!moto) return <div className="detail-container"><div style={{padding: '2rem', textAlign: 'center'}}>Cargando taller...</div></div>;
 
@@ -186,7 +178,7 @@ export default function MotoDetail() {
             <div className="text-right border-l border-gray-700 pl-4">
                <h2 className="text-gray-400 text-xs uppercase tracking-wider mb-1">Finanzas Gasolina</h2>
                <p className="text-[#84cc16] font-bold text-lg">${totalDolaresGastados.toFixed(2)}</p>
-               <div className="flex gap-2 mt-1">
+               <div className="flex gap-2 mt-1 justify-end">
                  <span className="text-xs bg-[#2a2a2a] px-2 py-1 rounded-md text-gray-300">
                     {rendimientoKmL} <span className="text-gray-500">Km/L</span>
                  </span>
@@ -278,7 +270,7 @@ export default function MotoDetail() {
                       </div>
                     </div>
 
-                    {/* NUEVO BOTÓN ELIMINAR MANTENIMIENTO (Mismo diseño que gasolina) */}
+                    {/* BOTÓN ELIMINAR MANTENIMIENTO */}
                     <button 
                       className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition-colors"
                       onClick={() => {
@@ -383,13 +375,13 @@ export default function MotoDetail() {
         <div className="modal-overlay" style={{ zIndex: 99999 }}>
           <div className="modal-content delete-modal">
             <div className="modal-header">
-              <h2 className="modal-title text-red">¿Borrar registro?</h2>
-              <p className="modal-subtitle">Esta acción eliminará este elemento permanentemente.</p>
+              <h2 className="modal-title text-red-500 font-bold mb-2">¿Borrar registro?</h2>
+              <p className="modal-subtitle text-gray-400">Esta acción eliminará este elemento permanentemente.</p>
             </div>
-            <div className="modal-actions">
+            <div className="modal-actions mt-6 flex gap-3">
               <button 
                 type="button" 
-                className="btn-secondary" 
+                className="flex-1 bg-[#2a2a2a] text-white p-3 rounded-xl hover:bg-[#333] transition-colors" 
                 onClick={() => { 
                   setIsDeleteModalOpen(false); 
                   setServicioAEliminar(null); 
@@ -400,7 +392,7 @@ export default function MotoDetail() {
               </button>
               <button 
                 type="button" 
-                className="btn-danger" 
+                className="flex-1 bg-red-600/20 border border-red-500 text-red-500 p-3 rounded-xl hover:bg-red-600/30 transition-colors" 
                 onClick={() => {
                   if (servicioAEliminar) borrarMantenimiento();
                   if (gasolinaAEliminar) borrarGasolina();
