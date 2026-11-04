@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import './Garage.css';
 
 export default function Garage({ usuario }) {
+
+  
   const [motos, setMotos] = useState([]); 
   const navigate = useNavigate();
 
@@ -125,10 +127,37 @@ export default function Garage({ usuario }) {
   };
 
   return (
+
+      
+
+
     <div className="garage-tab fade-in">
       <div className="list-header">
         <h2 className="section-title">Tus Vehículos</h2>
         <button className="btn-icon-add" onClick={() => setIsModalOpen(true)}>+ Añadir</button>
+      </div>
+
+      <div className="px-4 mt-6 mb-4">
+        <button 
+          onClick={() => navigate('/mapa-gasolina')}
+          className="w-full bg-gradient-to-r from-[#1a1a1a] to-[#2a2a2a] border border-[#84cc16] rounded-xl p-4 flex items-center justify-between shadow-lg hover:shadow-[#84cc16]/20 transition-all active:scale-95 group"
+        >
+          <div className="flex items-center gap-4">
+            <div className="bg-[#84cc16]/20 p-3 rounded-full text-[#84cc16] group-hover:bg-[#84cc16] group-hover:text-black transition-colors">
+              {/* Ícono de Mapa/Ubicación */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+                <line x1="9" y1="3" x2="9" y2="21"></line>
+                <line x1="15" y1="3" x2="15" y2="21"></line>
+              </svg>
+            </div>
+            <div className="text-left">
+              <h3 className="text-white font-bold text-lg">Radar de Bombas</h3>
+              <p className="text-gray-400 text-xs">Busca y reporta gasolina en vivo</p>
+            </div>
+          </div>
+          <svg className="text-gray-500 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
       </div>
 
       {motos.length === 0 ? (

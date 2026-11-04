@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import MotoDetail from './pages/MotoDetail';
+import MapaGasolina from './pages/MapaGasolina';
+
+// Dentro de tu <Routes>:
+<Route path="/mapa-gasolina" element={<MapaGasolina />} />
 
 function App() {
   // 1. Estado para manejar el modo leyendo si ya estaba guardado en localStorage
