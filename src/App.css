@@ -182,3 +182,17 @@
     border-right-color: var(--border);
   }
 }
+
+/* RESET DE LOS POPUPS DE LEAFLET PARA EL MODO OSCURO DE BIELA */
+.biela-dark-popup .leaflet-popup-content-wrapper {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.biela-dark-popup .leaflet-popup-tip {
+  background: #171717 !important; /* bg-neutral-900 */
+}
+.custom-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
