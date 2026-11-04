@@ -1,13 +1,9 @@
-// src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import MotoDetail from './pages/MotoDetail';
 import MapaGasolina from './pages/MapaGasolina';
-
-// Dentro de tu <Routes>:
-<Route path="/mapa-gasolina" element={<MapaGasolina />} />
 
 function App() {
   // 1. Estado para manejar el modo leyendo si ya estaba guardado en localStorage
@@ -41,15 +37,21 @@ function App() {
     <Router>
       <div className={`min-h-screen font-sans transition-colors duration-300 ease-in-out ${themeClasses}`}>
         <Routes>
+          {/* Rutas Principales */}
           <Route path="/" element={<Login />} />
           
-          {/* Pasamos toggleTheme y el estado al Dashboard para poder poner el botón ahí */}
+          {/* Dashboard y Garaje */}
           <Route 
             path="/dashboard" 
             element={<Dashboard isLightMode={isLightMode} toggleTheme={toggleTheme} />} 
           />
           
+          {/* Detalles de la Moto y Bitácora */}
           <Route path="/moto/:id" element={<MotoDetail />} />
+          
+          {/* NUEVO: Radar de Bombas / Mapa de Gasolina */}
+          <Route path="/mapa-gasolina" element={<MapaGasolina />} />
+          
         </Routes>
       </div>
     </Router>
