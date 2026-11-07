@@ -54,20 +54,20 @@ body {
    ESTILOS DEL NAVBAR FLOTANTE TIPO PÍLDORA (BIELA)
    ========================================================================== */
 .biela-navbar {
-  background: rgba(23, 23, 23, 0.85); 
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: #111111; /* Fondo muy oscuro, casi negro sólido */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
 .nav-btn-active {
-  background: rgba(132, 204, 22, 0.15);
-  color: #84cc16; 
+  background: rgba(132, 204, 22, 0.2); /* Fondo verde tenue para el botón activo */
+  color: #84cc16; /* Verde neón */
 }
 
-.nav-btn-inactive {
-  color: #9ca3af; 
+/* El resplandor brutal para BujÍA en el centro */
+.bujia-glow {
+  background: linear-gradient(135deg, #a3e635, #65a30d);
+  box-shadow: 0 0 20px 5px rgba(132, 204, 22, 0.4);
 }
 
 /* ==========================================================================
@@ -89,3 +89,4 @@ body {
 .biela-dark-popup .leaflet-popup-tip {
   background: #171717 !important; 
 }
+
