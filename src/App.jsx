@@ -4,7 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import MotoDetail from './pages/MotoDetail';
 import MapaGasolina from './pages/MapaGasolina';
-
+import Navbar from './components/Navbar';
 
 function App() {
   // 1. Estado para manejar el modo leyendo si ya estaba guardado en localStorage

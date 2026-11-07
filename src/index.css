@@ -49,3 +49,43 @@ body {
   background: transparent !important;
   border: none !important;
 }
+
+/* ==========================================================================
+   ESTILOS DEL NAVBAR FLOTANTE TIPO PÍLDORA (BIELA)
+   ========================================================================== */
+.biela-navbar {
+  background: rgba(23, 23, 23, 0.85); 
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.nav-btn-active {
+  background: rgba(132, 204, 22, 0.15);
+  color: #84cc16; 
+}
+
+.nav-btn-inactive {
+  color: #9ca3af; 
+}
+
+/* ==========================================================================
+   ESTILOS DE LEAFLET PARA LOS TOOLTIPS Y POPUPS OSCUROS
+   ========================================================================== */
+.leaflet-tooltip.bg-neutral-900\/90 {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.leaflet-tooltip-top:before {
+  border-top-color: rgba(23, 23, 23, 0.9) !important;
+}
+.biela-dark-popup .leaflet-popup-content-wrapper {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.biela-dark-popup .leaflet-popup-tip {
+  background: #171717 !important; 
+}
