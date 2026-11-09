@@ -29,6 +29,8 @@ export default function MapaGasolina() {
   const [nuevaBombaNombre, setNuevaBombaNombre] = useState('');
   const [nuevaBombaEstatus, setNuevaBombaEstatus] = useState('Surtiendo');
   const [nuevaBombaTipo, setNuevaBombaTipo] = useState('Dólares'); 
+  
+  // ESTADO PARA MOSTRAR/OCULTAR EL RESUMEN DE LA IA
   const [mostrarBujia, setMostrarBujia] = useState(false);
 
   useEffect(() => {
@@ -115,7 +117,6 @@ export default function MapaGasolina() {
     return 'text-gray-400 font-bold';
   };
 
-  // NUEVO DISEÑO DE PINES CON INICIALES
   const crearIconoPorEstado = (estado) => {
     let colorPrincipal = '#9ca3af'; 
     let colorFondo = 'rgba(156, 163, 175, 0.2)';
@@ -165,11 +166,12 @@ export default function MapaGasolina() {
     return `Hace ${Math.floor(min / 1440)} días`;
   };
 
+  // RESUMEN INTELIGENTE DE LA IA
   const mensajeBujia = () => {
     const activas = estacionesFull.filter(b => b.estado_actual === 'Surtiendo').length;
-    if (activas === 0) return "¡Epale mi pana! Ahorita la cosa está frita, no veo bombas surtiendo en el radar. Pega un ojo al gasoil o espera un rato.";
-    if (activas === 1) return `Chamo, arranca ya, solo veo una bomba surtiendo gasolina, no vayas a quedarte seco.`;
-    return `¡Epa! Hay ${activas} bombas soltando gasolina ahorita mismo. Tienes opciones para escoger, revisa el mapa.`;
+    if (activas === 0) return "¡Épale mi pana! Ahorita la cosa está frita, no veo bombas surtiendo en el radar. Pega un ojo al gasoil o espera un rato a que reporten.";
+    if (activas === 1) return `¡Chamo, arranca ya! Solo veo UNA bomba surtiendo gasolina, no te vayas a quedar seco.`;
+    return `¡Epa! Hay ${activas} bombas soltando gasolina ahorita mismo. Tienes opciones para escoger, ¡revisa el mapa y arranca!`;
   };
 
   if (cargando && estacionesFull.length === 0) {
@@ -180,7 +182,6 @@ export default function MapaGasolina() {
     <div className="flex flex-col h-screen bg-neutral-950 text-white overflow-hidden relative">
       <header className="bg-neutral-950 p-4 flex flex-col border-b border-neutral-800 z-[1000] relative shadow-md gap-3">
         <div className="flex items-center justify-between">
-          {/* El botón de atrás ahora es redundante si tienes un NavBar abajo, pero lo dejamos por consistencia */}
           <button onClick={() => navigate(-1)} className="text-[#84cc16] hover:text-white transition-colors">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </button>
@@ -224,7 +225,6 @@ export default function MapaGasolina() {
           {!modoAgregar && estaciones.map(bomba => (
             <Marker key={bomba.id} position={[bomba.latitud, bomba.longitud]} icon={crearIconoPorEstado(bomba.estado_actual)}>
               
-              {/* ETIQUETA FLOTANTE (TOOLTIP PERMANENTE) */}
               <Tooltip direction="top" offset={[0, -10]} opacity={1} permanent className="bg-neutral-900/90 text-white font-bold text-[10px] uppercase tracking-wider border border-neutral-700 shadow-md backdrop-blur-sm rounded-md px-2 py-0.5">
                 {bomba.nombre}
               </Tooltip>
@@ -264,6 +264,39 @@ export default function MapaGasolina() {
           ))}
         </MapContainer>
       </div>
+
+      {/* =========================================================
+          BOTÓN FLOTANTE: BUJÍA (RESUMEN DE IA)
+          ========================================================= */}
+    {!modoAgregar && (
+        <button 
+          onClick={() => setMostrarBujia(!mostrarBujia)}
+          className={`absolute bottom-28 left-6 z-[2000] p-4 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center justify-center ${mostrarBujia ? 'bg-neutral-800 border-2 border-neutral-600' : 'bg-gradient-to-r from-lime-400 to-lime-600 shadow-[0_0_20px_rgba(132,204,22,0.5)]'}`}
+        >
+          {mostrarBujia ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5"><path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h0a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"></path><path d="M4 8h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2z"></path><line x1="8" y1="12" x2="8" y2="12"></line><line x1="16" y1="12" x2="16" y2="12"></line><path d="M10 16h4"></path></svg>
+          )}
+        </button>
+      )}
+
+      {/* CUADRO DE DIÁLOGO DE BUJÍA (RESUMEN) */}
+      {mostrarBujia && !modoAgregar && (
+        <div className="absolute bottom-28 left-[4.5rem] ml-2 right-6 z-[2000] bg-neutral-900/95 border border-lime-500/50 backdrop-blur-md rounded-2xl rounded-bl-none p-4 shadow-2xl animate-in fade-in zoom-in duration-200">
+          <div className="flex gap-3">
+             <div className="w-10 h-10 rounded-full bg-lime-500/20 border border-lime-500 flex items-center justify-center flex-shrink-0">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#84cc16" strokeWidth="2"><path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h0a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"></path><path d="M4 8h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2z"></path><path d="M10 16h4"></path></svg>
+             </div>
+             <div>
+               <h3 className="text-lime-400 font-black text-sm uppercase tracking-wide mb-1">BujÍA dice:</h3>
+               <p className="text-sm text-neutral-200 font-medium leading-tight">
+                 {mensajeBujia()}
+               </p>
+             </div>
+          </div>
+        </div>
+      )}
 
       {modoAgregar && !mostrarFormNuevo && (
         <div className="absolute bottom-28 left-0 right-0 z-[2000] px-6">

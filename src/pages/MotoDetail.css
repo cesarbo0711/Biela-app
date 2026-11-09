@@ -1,88 +1,158 @@
-.detail-container { min-height: 100vh; background-color: var(--bg-base); color: var(--text-main); font-family: system-ui, sans-serif; padding-bottom: 2rem; }
-.detail-header { display: flex; align-items: center; gap: 1rem; padding: 1.5rem 2rem; background-color: var(--bg-surface); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 50; }
-.btn-back { display: flex; align-items: center; gap: 0.5rem; background: transparent; border: none; color: var(--text-muted); font-size: 1rem; font-weight: 600; cursor: pointer; padding: 0.5rem; transition: color 0.2s; }
-.btn-back:hover { color: var(--accent-color); }
-.detail-title { margin: 0; font-size: 1.25rem; font-weight: 900; letter-spacing: -0.02em; }
-.detail-content { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
-
-/* Resumen Superior */
-.moto-summary-card { background: var(--bg-card); border-radius: 1.5rem; border: 1px solid var(--border-color); padding: 2rem; display: flex; align-items: center; gap: 2rem; margin-bottom: 2.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-.summary-img { width: 120px; height: 120px; object-fit: contain; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); }
-.summary-data h2 { margin: 0 0 0.5rem 0; color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
-.summary-km { margin: 0; font-size: 2.5rem; font-weight: 900; color: var(--text-main); line-height: 1; }
-.summary-km small { font-size: 1rem; color: var(--accent-color); }
-
-/* Sección Historial */
-.history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.history-header h2 { margin: 0; font-size: 1.25rem; }
-.btn-add-service { background-color: var(--accent-shadow); color: var(--accent-color); border: 1px solid var(--accent-color); padding: 0.5rem 1rem; border-radius: 2rem; font-weight: bold; cursor: pointer; }
-.empty-history { text-align: center; padding: 3rem; background: var(--bg-surface); border: 1px dashed var(--border-color); border-radius: 1rem; color: var(--text-muted); }
-.history-list { display: flex; flex-direction: column; gap: 1rem; }
-
-/* Tarjeta de Servicio */
-.history-card { background: var(--bg-surface); border-left: 4px solid var(--accent-color); border-radius: 1rem; padding: 1.25rem; display: flex; align-items: center; gap: 1rem; }
-.history-icon { background: var(--bg-base); padding: 0.75rem; border-radius: 50%; font-size: 1.2rem; }
-.history-info { flex: 1; }
-.history-info h3 { margin: 0 0 0.25rem 0; font-size: 1.1rem; color: var(--text-main); }
-.history-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
-.history-kms { display: flex; flex-direction: column; gap: 0.5rem; text-align: right; }
-.km-block { display: flex; flex-direction: column; }
-.km-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-.km-value { font-size: 0.95rem; font-weight: 700; color: var(--text-main); }
-.km-block.next .km-value { color: var(--accent-color); }
-
-/* Responsive */
-@media (max-width: 600px) {
-  .moto-summary-card { flex-direction: column; text-align: center; gap: 1rem; padding: 1.5rem; }
-  .history-card { flex-direction: column; align-items: flex-start; }
-  .history-kms { text-align: left; flex-direction: row; gap: 2rem; margin-top: 0.5rem; width: 100%; justify-content: space-between; }
+/* ==========================================================================
+   ANIMACIONES BASE Y ESTRUCTURA
+   ========================================================================== */
+.fade-in { 
+  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+}
+@keyframes fadeIn { 
+  from { opacity: 0; transform: translateY(15px); } 
+  to { opacity: 1; transform: translateY(0); } 
 }
 
-/* Botón de Borrar Servicio en la tarjeta */
+/* ==========================================================================
+   RESUMEN SUPERIOR (Tarjeta Principal)
+   ========================================================================== */
+.moto-summary-card { 
+  /* Usamos colores semi-transparentes que se adaptan al fondo padre */
+  background: var(--bg-card, rgba(128, 128, 128, 0.05));
+  border-radius: 2rem; 
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.15)); 
+  padding: 2rem; 
+  display: flex; 
+  align-items: center; 
+  gap: 1.5rem; 
+  margin-bottom: 2.5rem; 
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15); 
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.summary-img { 
+  width: 130px; 
+  height: 130px; 
+  object-fit: contain; 
+  filter: drop-shadow(0 20px 15px rgba(0,0,0,0.3)); 
+  animation: levitate 5s ease-in-out infinite;
+}
+
+@keyframes levitate { 
+  0%, 100% { transform: translateY(0px); } 
+  50% { transform: translateY(-8px); } 
+}
+
+/* ==========================================================================
+   HISTORIAL Y TARJETAS DE SERVICIO (GLASSMORPHISM)
+   ========================================================================== */
+.history-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 1.5rem; 
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color, rgba(128, 128, 128, 0.15));
+}
+
+.history-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 1rem; 
+}
+
+/* Tarjeta individual de Mantenimiento */
+.history-card { 
+  background: var(--bg-surface, rgba(128, 128, 128, 0.03));
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.1));
+  border-left: 4px solid #84cc16; 
+  border-radius: 1.5rem; 
+  padding: 1.5rem; 
+  display: flex; 
+  align-items: center; 
+  gap: 1.25rem; 
+  transition: transform 0.2s ease, background 0.2s ease;
+  position: relative;
+}
+
+.history-card:hover {
+  background: var(--bg-surface-hover, rgba(128, 128, 128, 0.08));
+  transform: translateX(4px);
+}
+
+.history-icon { 
+  background: rgba(132, 204, 22, 0.15); 
+  color: #84cc16;
+  padding: 1rem; 
+  border-radius: 50%; 
+  font-size: 1.3rem; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(132, 204, 22, 0.3);
+}
+
+.history-info { flex: 1; padding-right: 2rem; }
+.history-info h3 { margin: 0 0 0.4rem 0; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; }
+.history-date { font-size: 0.75rem; opacity: 0.7; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+.history-notes { margin: 0.5rem 0 0 0; font-size: 0.85rem; opacity: 0.8; font-style: italic; }
+
+/* Bloques de KM en las tarjetas */
+.history-kms { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 0.5rem; 
+  text-align: right; 
+  background: var(--bg-base, rgba(128, 128, 128, 0.05));
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.05));
+}
+
+.km-block { display: flex; flex-direction: column; }
+.km-label { font-size: 0.65rem; opacity: 0.6; text-transform: uppercase; font-weight: 800; letter-spacing: 0.08em; }
+.km-value { font-size: 1.1rem; font-weight: 900; }
+.km-block.next .km-value { color: #84cc16; }
+
+/* Botón Borrar en tarjeta */
 .btn-delete-service {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: var(--bg-base, rgba(128, 128, 128, 0.1));
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.1));
+  color: inherit;
+  opacity: 0.6;
   padding: 0.5rem;
-  border-radius: 0.5rem;
+  border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 0.5rem;
   transition: all 0.2s;
 }
-
 .btn-delete-service:hover {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.15);
   color: #ef4444; 
+  border-color: rgba(239, 68, 68, 0.3);
+  opacity: 1;
 }
 
+/* ==========================================================================
+   RESPONSIVE Y MODALES
+   ========================================================================== */
 @media (max-width: 600px) {
-  .history-card {
-    position: relative;
-    padding-right: 3rem; 
+  .moto-summary-card { 
+    flex-direction: column; 
+    text-align: center; 
+    padding: 2rem 1.5rem; 
   }
-  .btn-delete-service {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    margin-left: 0;
+  .history-card { 
+    flex-direction: column; 
+    align-items: flex-start; 
   }
-}
-
-.history-notes {
-  margin: 0.35rem 0 0 0;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-style: italic;
-}
-select.input-field {
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 1rem;
-  padding-right: 2.5rem;
-  cursor: pointer;
+  .history-kms { 
+    width: 100%; 
+    flex-direction: row; 
+    justify-content: space-between; 
+    text-align: left; 
+    margin-top: 0.5rem; 
+  }
 }

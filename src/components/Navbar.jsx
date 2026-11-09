@@ -37,7 +37,13 @@ export default function Navbar() {
             onClick={() => navigate('/chat')} 
             className="flex items-center justify-center w-[52px] h-[52px] bujia-glow text-black rounded-full hover:scale-105 active:scale-95 transition-all duration-300 z-10"
           >
-             <span className="text-2xl drop-shadow-md">🤖</span>
+             
+                 <div className="bot-avatar">
+          <img
+            src="https://api.dicebear.com/10.x/bottts/svg?backgroundColor=&textureProbability=30&eyesVariant=frame2&headVariant=round02&mouthVariant=smile01&sidesVariant=round&textureVariant=dirty01&seed=mdf9n8af"
+            alt="avatar" 
+          />
+        </div>
           </button>
         </div>
 
