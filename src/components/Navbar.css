@@ -1,0 +1,135 @@
+/* ── glass navigation (Biela Tokens Mapped) ────────────────── */
+.gdock {
+  /* BIELA TOKENS MAP */
+  --pane: rgba(17, 17, 17, 0.7); /* Fondo oscuro semitransparente */
+  --g-blur: 16px;
+  --g-sat: 180%;
+  --g-bright: 100%;
+  --ink: #a3a3a3; /* Gris claro para íconos inactivos */
+  --ink-rgb: 163, 163, 163;
+  --on-ink: #000000;
+  --fill-on: #84cc16; /* Biela Lime para el Tooltip */
+  --fill-slab: #000000; /* Texto del tooltip */
+  --font-ui: ui-sans-serif, system-ui, sans-serif;
+  
+  /* Biela Rim Edge settings */
+  --g-edge-hi: 0.15;
+  --g-edge-lo: 0.02;
+  --g-edge-far: 0.05;
+  --g-spec: 0.1;
+  --shadow-rgb: 0, 0, 0;
+  --g-lift: 0.5;
+
+  position: relative;
+  background: var(--pane);
+  -webkit-backdrop-filter: blur(var(--g-blur)) saturate(var(--g-sat)) brightness(var(--g-bright));
+  backdrop-filter: blur(var(--g-blur)) saturate(var(--g-sat)) brightness(var(--g-bright));
+  isolation: isolate;
+  color: var(--ink);
+
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 28px;
+  touch-action: pan-y;
+  
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, var(--g-spec)),
+              0 20px 40px rgba(var(--shadow-rgb), var(--g-lift)),
+              0 0 0 1px rgba(255,255,255,0.05); /* Borde sutil general */
+}
+
+/* El aro luminoso 3D (Rim) */
+.gdock::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid transparent;
+  pointer-events: none;
+  z-index: 3;
+  
+  background: linear-gradient(
+      142deg,
+      rgba(255, 255, 255, var(--g-edge-hi)) 0%,
+      rgba(255, 255, 255, var(--g-edge-lo)) 26%,
+      rgba(255, 255, 255, var(--g-edge-lo)) 62%,
+      rgba(255, 255, 255, var(--g-edge-far)) 100%
+    ) border-box;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+/* ── Items del Dock ──────────────────────────────────────── */
+.gdock-item {
+  position: relative;
+  width: 44px; height: 44px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  opacity: 0.5;
+  display: grid; place-items: center;
+  cursor: pointer;
+  transition: opacity 220ms ease, color 220ms ease;
+}
+
+.gdock-glyph {
+  display: grid; place-items: center;
+  transform-origin: center bottom;
+  transition: transform 420ms cubic-bezier(0.24, 1.34, 0.38, 1);
+}
+
+.gdock-item[data-near="1"] { opacity: 0.8; }
+.gdock-item[data-near="0"] { opacity: 1; color: white; }
+.gdock-item[data-active="true"] { opacity: 1; color: var(--fill-on); } /* Icono activo en Lime */
+
+.gdock-item:focus-visible { outline: none; }
+
+/* El punto verde para la ruta activa */
+.gdock-dot {
+  position: absolute;
+  left: 50%; bottom: 3px;
+  width: 4px; height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--fill-on);
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 220ms ease, transform 420ms cubic-bezier(0.24, 1.34, 0.38, 1);
+}
+
+.gdock-dot[data-on="true"] { opacity: 1; transform: scale(1); box-shadow: 0 0 8px var(--fill-on); }
+
+/* ── Tooltip flotante ────────────────────────────────────── */
+.gdock-tip {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 12px);
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--fill-on);
+  color: var(--fill-slab);
+  font-family: var(--font-ui);
+  line-height: 28px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition:
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 4px 12px rgba(132, 204, 22, 0.3);
+}
+
+.gdock-tip > span { flex: none; }
+
+.gdock-tip:not([data-ready]) { transition: opacity 160ms cubic-bezier(0.22, 1, 0.36, 1); }
+
+.gdock-tip[data-on="true"] { opacity: 1; }

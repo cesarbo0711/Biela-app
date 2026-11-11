@@ -1,0 +1,30 @@
+/* ══ Dragging ball (Biela Theme) ════════════════════════════ */
+.drg-well {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+.drg-goo > svg {
+  transform: scale(calc(1 / var(--k, 1)));
+  transform-origin: 0 0;
+}
+
+.drg-goo {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.drg-ball {
+  position: absolute;
+  border-radius: 999px;
+  cursor: grab;
+  touch-action: none;
+  will-change: transform;
+}
+
+.drg-ball:active { 
+  cursor: grabbing; 
+}
