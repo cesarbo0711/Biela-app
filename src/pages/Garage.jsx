@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
+import { UploadDropzone } from '../components/UploadDropzone.jsx';
 
 export default function Garage({ usuario }) {
   const [motos, setMotos] = useState([]); 
@@ -255,9 +256,9 @@ export default function Garage({ usuario }) {
               <p className="text-xs text-neutral-400 mt-1">Registra los datos de tu vehículo.</p>
             </div>
             <form onSubmit={registrarMoto} className="flex flex-col gap-4">
-              <div>
-                <label className="text-[11px] font-extrabold text-neutral-400 uppercase mb-1 block">Foto (PNG sin fondo)</label>
-                <input type="file" accept="image/png, image/jpeg" onChange={(e) => setImagenArchivo(e.target.files[0])} className="w-full text-xs text-neutral-400 bg-neutral-950 border border-neutral-800 rounded-xl p-2.5 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-neutral-800 file:text-white hover:file:bg-neutral-700 cursor-pointer" />
+              <div className="input-group mb-6">
+                <UploadDropzone onFileSelect={(imagen_url) => setImagenArchivo(imagen_url)} />
+                <label className="text-[11px] font-extrabold text-neutral-400 uppercase tracking-widest block mb-2 text-center margin-top 20px ">Foto de tu Moto</label>
               </div>
               <div>
                 <label className="text-[11px] font-extrabold text-neutral-400 uppercase mb-1 block">Marca</label>
