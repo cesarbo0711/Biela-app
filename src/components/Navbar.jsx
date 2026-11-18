@@ -5,7 +5,7 @@ import "./Navbar.css";
 
 /* ── ICONOS Y RUTAS DE BIELA ────────────────────────────── */
 const DOCK = [
-  { key: "/", label: "Garaje", Icon: Wrench },
+  { key: "/dashboard", label: "Garaje", Icon: Wrench },
   { key: "/mapa", label: "Estaciones", Icon: MapPin },
   { key: "/chat", label: "Biela", Icon: MessageSquareText },
   { key: "/perfil", label: "Perfil", Icon: User },
@@ -27,7 +27,7 @@ export default function Navbar({
   // Integración con React Router
   const navigate = useNavigate();
   const location = useLocation();
-  const active = location.pathname; // El activo ahora es la ruta actual
+  const active = location.pathname === '/' ? '/dashboard' : location.pathname; // El activo ahora es la ruta actual
 
   const bar = useRef(null);
   const down = useRef(false);
