@@ -278,3 +278,11 @@
 @keyframes upl-pop { from { scale: 0; } }
 
 @keyframes upl-back { from { scale: 0.7; opacity: 0; } }
+:root.light-mode .upl {
+  --ink: #17181a;
+  --fill-on: #17181a;
+  --fill-slab: rgba(255,255,255,0.9);
+  --card: #ffffff;
+  --pane-edge: rgba(0,0,0,0.12);
+}
+.upl { --upl-r: 16px; --upl-spring: cubic-bezier(0.24, 1.34, 0.38, 1); }

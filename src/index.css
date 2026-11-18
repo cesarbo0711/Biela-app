@@ -1,7 +1,10 @@
 /* src/index.css */
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
+  color-scheme: dark;
   /* MODO OSCURO (Lima y Negro) */
   --bg-base: #050505;          
   --bg-surface: #121212;       
@@ -13,7 +16,8 @@
   --border-color: #333333;
 }
 
-body.light-mode {
+:root.light-mode {
+  color-scheme: light;
   /* MODO CLARO (Blanco hueso y Melocotón) */
   --bg-base: #F8F5F0;          
   --bg-surface: #FFFFFF;       

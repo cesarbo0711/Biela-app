@@ -126,15 +126,15 @@ export default function Garage({ usuario }) {
   };
 
   return (
-    <div className="min-h-screen text-white pb-32 px-4 sm:px-6 max-w-md mx-auto">
+    <div className="min-h-screen text-neutral-900 dark:text-white pb-32 px-4 sm:px-6 max-w-md mx-auto">
       
       {/* =========================================================
           ENCABEZADO: TUS VEHÍCULOS Y BOTÓN AÑADIR
           ========================================================= */}
       <div className="flex items-center justify-between pt-6 mb-12">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">Tus Vehículos</h2>
-          <p className="text-xs text-neutral-400 font-medium">Gestiona tu flota y mantenimientos</p>
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 dark:text-white">Tus Vehículos</h2>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Gestiona tu flota y mantenimientos</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
@@ -146,11 +146,11 @@ export default function Garage({ usuario }) {
       </div>
 
       {motos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-10 bg-neutral-900/60 border border-neutral-800 rounded-3xl text-center mt-12 backdrop-blur-md">
-          <div className="w-16 h-16 bg-neutral-800 rounded-full flex items-center justify-center mb-4 text-neutral-500">
+        <div className="flex flex-col items-center justify-center p-10 bg-white/80 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-3xl text-center mt-12 backdrop-blur-md">
+          <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mb-4 text-neutral-400 dark:text-neutral-500">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
           </div>
-          <p className="text-neutral-300 font-bold mb-2">Aún no tienes vehículos</p>
+          <p className="text-neutral-800 dark:text-neutral-300 font-bold mb-2">Aún no tienes vehículos</p>
           <p className="text-xs text-neutral-500 mb-6">Agrega tu primera nave para empezar la bitácora.</p>
           <button className="bg-lime-500 text-black font-extrabold px-6 py-3 rounded-xl hover:bg-lime-400 transition-all" onClick={() => setIsModalOpen(true)}>+ Registrar Moto</button>
         </div>
@@ -160,12 +160,12 @@ export default function Garage({ usuario }) {
             ========================================================= */
         <div className="flex flex-col gap-24 pt-12">
           {motos.map(moto => (
-            <div key={moto.id} className="relative bg-gradient-to-b from-neutral-900/90 to-neutral-950 border border-neutral-800/80 rounded-[2.5pxt] rounded-[2rem] p-6 shadow-2xl backdrop-blur-sm">
+            <div key={moto.id} className="relative bg-gradient-to-b from-white to-neutral-50 dark:from-neutral-900/90 dark:to-neutral-950 border border-neutral-200 dark:border-neutral-800/80 rounded-[2rem] p-6 shadow-xl dark:shadow-2xl backdrop-blur-sm">
               
               {/* BOTÓN ELIMINAR (Discreto arriba a la derecha) */}
               <button 
                 onClick={() => { setMotoActiva(moto); setIsDeleteModalOpen(true); }}
-                className="absolute top-4 right-4 z-20 bg-neutral-900/80 hover:bg-red-500/20 p-2.5 rounded-full text-neutral-400 hover:text-red-400 transition-all border border-neutral-800 shadow-sm"
+                className="absolute top-4 right-4 z-20 bg-white/90 dark:bg-neutral-900/80 hover:bg-red-500/20 p-2.5 rounded-full text-neutral-500 dark:text-neutral-400 hover:text-red-500 dark:hover:text-red-400 transition-all border border-neutral-200 dark:border-neutral-800 shadow-sm"
                 title="Borrar vehículo"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
@@ -177,10 +177,10 @@ export default function Garage({ usuario }) {
                   <img 
                     src={moto.imagen_url} 
                     alt={`${moto.marca} ${moto.modelo}`} 
-                    className="w-52 h-40 object-contain drop-shadow-[0_20px_20px_rgba(0,0,0,0.8)] transition-transform duration-500 hover:scale-105"
+                    className="w-52 h-40 object-contain drop-shadow-[0_20px_20px_rgba(0,0,0,0.25)] dark:drop-shadow-[0_20px_20px_rgba(0,0,0,0.8)] transition-transform duration-500 hover:scale-105"
                   />
                 ) : (
-                  <div className="w-36 h-36 bg-neutral-900 rounded-full flex items-center justify-center border-4 border-neutral-800 text-neutral-600 font-bold text-xs shadow-xl">
+                  <div className="w-36 h-36 bg-neutral-100 dark:bg-neutral-900 rounded-full flex items-center justify-center border-4 border-neutral-200 dark:border-neutral-800 text-neutral-400 dark:text-neutral-600 font-bold text-xs shadow-xl">
                     Sin foto
                   </div>
                 )}
@@ -191,10 +191,10 @@ export default function Garage({ usuario }) {
 
               {/* MARCA, MODELO Y AÑO */}
               <div className="text-center mb-6">
-                <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider">
-                  {moto.marca} <span className="text-neutral-600 font-bold mx-1">/</span> {moto.modelo}
+                <h3 className="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white uppercase tracking-wider">
+                  {moto.marca} <span className="text-neutral-300 dark:text-neutral-600 font-bold mx-1">/</span> {moto.modelo}
                 </h3>
-                <span className="inline-block mt-2 bg-neutral-950 border border-neutral-800 text-lime-400 px-3.5 py-1 rounded-full text-xs font-extrabold tracking-widest shadow-inner">
+                <span className="inline-block mt-2 bg-neutral-100 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-lime-600 dark:text-lime-400 px-3.5 py-1 rounded-full text-xs font-extrabold tracking-widest shadow-inner">
                   {moto.year || 'N/A'}
                 </span>
               </div>
@@ -203,17 +203,17 @@ export default function Garage({ usuario }) {
               <div className="grid grid-cols-2 gap-3 mb-6">
                 
                 {/* KILOMETRAJE */}
-                <div className="bg-neutral-950/60 border border-neutral-800/80 rounded-2xl p-3.5 flex flex-col justify-between relative group">
-                   <span className="text-[10px] text-neutral-400 font-extrabold uppercase tracking-wider mb-1">Kilometraje</span>
+                <div className="bg-neutral-50 dark:bg-neutral-950/60 border border-neutral-200 dark:border-neutral-800/80 rounded-2xl p-3.5 flex flex-col justify-between relative group">
+                   <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-extrabold uppercase tracking-wider mb-1">Kilometraje</span>
                    <div className="flex items-baseline gap-1">
-                     <span className="text-xl sm:text-2xl font-black text-white tracking-tight">{moto.kilometraje.toLocaleString('en-US')}</span>
-                     <span className="text-[10px] text-neutral-400 font-bold">KM</span>
+                     <span className="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white tracking-tight">{moto.kilometraje.toLocaleString('en-US')}</span>
+                     <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-bold">KM</span>
                    </div>
                    
                    {/* BOTÓN EDITAR KM */}
                    <button 
                      onClick={() => { setMotoActiva(moto); setNuevoKm(moto.kilometraje); setIsKmModalOpen(true); }}
-                     className="absolute top-3 right-3 bg-neutral-900 p-1.5 rounded-full text-neutral-400 hover:text-lime-400 hover:bg-neutral-800 transition-colors shadow-sm"
+                     className="absolute top-3 right-3 bg-white dark:bg-neutral-900 p-1.5 rounded-full text-neutral-500 dark:text-neutral-400 hover:text-lime-600 dark:hover:text-lime-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors shadow-sm border border-neutral-200 dark:border-transparent"
                      title="Actualizar Kilometraje"
                    >
                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -221,9 +221,9 @@ export default function Garage({ usuario }) {
                 </div>
 
                 {/* ACEITE */}
-                <div className="bg-neutral-950/60 border border-neutral-800/80 rounded-2xl p-3.5 flex flex-col justify-between">
-                   <span className="text-[10px] text-neutral-400 font-extrabold uppercase tracking-wider mb-1">Aceite</span>
-                   <span className="text-sm font-black text-white truncate mt-1" title={moto.tipo_aceite}>
+                <div className="bg-neutral-50 dark:bg-neutral-950/60 border border-neutral-200 dark:border-neutral-800/80 rounded-2xl p-3.5 flex flex-col justify-between">
+                   <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-extrabold uppercase tracking-wider mb-1">Aceite</span>
+                   <span className="text-sm font-black text-neutral-900 dark:text-white truncate mt-1" title={moto.tipo_aceite}>
                      {moto.tipo_aceite || 'N/A'}
                    </span>
                 </div>
@@ -233,7 +233,7 @@ export default function Garage({ usuario }) {
               {/* BOTÓN VER BITÁCORA */}
               <button 
                 onClick={() => navigate(`/moto/${moto.id}`)}
-                className="w-full flex items-center justify-center gap-2 bg-neutral-900 hover:bg-lime-500 border border-neutral-700 hover:border-lime-500 text-white hover:text-black font-extrabold py-3.5 rounded-xl transition-all duration-300 active:scale-95 shadow-md text-sm"
+                className="w-full flex items-center justify-center gap-2 bg-neutral-100 dark:bg-neutral-900 hover:bg-lime-500 border border-neutral-300 dark:border-neutral-700 hover:border-lime-500 text-neutral-900 dark:text-white hover:text-black font-extrabold py-3.5 rounded-xl transition-all duration-300 active:scale-95 shadow-md text-sm"
               >
                 Ver Bitácora
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
@@ -249,43 +249,43 @@ export default function Garage({ usuario }) {
       
       {/* MODAL 1: REGISTRAR MOTO */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-neutral-900 border border-neutral-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 bg-black/50 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="text-center mb-6">
-              <h2 className="text-xl font-black text-white">Añadir al Garaje</h2>
-              <p className="text-xs text-neutral-400 mt-1">Registra los datos de tu vehículo.</p>
+              <h2 className="text-xl font-black text-neutral-900 dark:text-white">Añadir al Garaje</h2>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">Registra los datos de tu vehículo.</p>
             </div>
             <form onSubmit={registrarMoto} className="flex flex-col gap-4">
-              <div className="input-group mb-6">
+              <div className="input-group mb-2">
                 <UploadDropzone onFileSelect={(imagen_url) => setImagenArchivo(imagen_url)} />
-                <label className="text-[11px] font-extrabold text-neutral-400 uppercase tracking-widest block mb-2 text-center margin-top 20px ">Foto de tu Moto</label>
+                <label className="text-[11px] font-extrabold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest block mt-2 text-center">Foto de tu Moto</label>
               </div>
               <div>
-                <label className="text-[11px] font-extrabold text-neutral-400 uppercase mb-1 block">Marca</label>
-                <input type="text" placeholder="ej. Bera" value={marca} onChange={(e) => setMarca(e.target.value)} required className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-sm text-white focus:border-lime-500 focus:outline-none" />
+                <label className="text-[11px] font-extrabold text-neutral-500 dark:text-neutral-400 uppercase mb-1 block">Marca</label>
+                <input type="text" placeholder="ej. Bera" value={marca} onChange={(e) => setMarca(e.target.value)} required className="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3 text-sm text-neutral-900 dark:text-white focus:border-lime-500 focus:outline-none" />
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="text-[11px] font-extrabold text-neutral-400 uppercase mb-1 block">Modelo</label>
-                  <input type="text" placeholder="ej. BR" value={modelo} onChange={(e) => setModelo(e.target.value)} required className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-sm text-white focus:border-lime-500 focus:outline-none" />
+                  <label className="text-[11px] font-extrabold text-neutral-500 dark:text-neutral-400 uppercase mb-1 block">Modelo</label>
+                  <input type="text" placeholder="ej. BR" value={modelo} onChange={(e) => setModelo(e.target.value)} required className="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3 text-sm text-neutral-900 dark:text-white focus:border-lime-500 focus:outline-none" />
                 </div>
                 <div className="w-24">
-                  <label className="text-[11px] font-extrabold text-neutral-400 uppercase mb-1 block">Año</label>
-                  <input type="text" placeholder="2026" value={year} onChange={(e) => setYear(e.target.value)} required className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-sm text-white focus:border-lime-500 focus:outline-none" />
+                  <label className="text-[11px] font-extrabold text-neutral-500 dark:text-neutral-400 uppercase mb-1 block">Año</label>
+                  <input type="text" placeholder="2026" value={year} onChange={(e) => setYear(e.target.value)} required className="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3 text-sm text-neutral-900 dark:text-white focus:border-lime-500 focus:outline-none" />
                 </div>
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="text-[11px] font-extrabold text-neutral-400 uppercase mb-1 block">Kilometraje</label>
-                  <input type="number" placeholder="ej. 820" value={kilometraje} onChange={(e) => setKilometraje(e.target.value)} required className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-sm text-white focus:border-lime-500 focus:outline-none" />
+                  <label className="text-[11px] font-extrabold text-neutral-500 dark:text-neutral-400 uppercase mb-1 block">Kilometraje</label>
+                  <input type="number" placeholder="ej. 820" value={kilometraje} onChange={(e) => setKilometraje(e.target.value)} required className="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3 text-sm text-neutral-900 dark:text-white focus:border-lime-500 focus:outline-none" />
                 </div>
                 <div className="flex-1">
-                  <label className="text-[11px] font-extrabold text-neutral-400 uppercase mb-1 block">Aceite</label>
-                  <input type="text" placeholder="ej. 20W-50" value={tipoAceite} onChange={(e) => setTipoAceite(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-3 text-sm text-white focus:border-lime-500 focus:outline-none" />
+                  <label className="text-[11px] font-extrabold text-neutral-500 dark:text-neutral-400 uppercase mb-1 block">Aceite</label>
+                  <input type="text" placeholder="ej. 20W-50" value={tipoAceite} onChange={(e) => setTipoAceite(e.target.value)} className="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3 text-sm text-neutral-900 dark:text-white focus:border-lime-500 focus:outline-none" />
                 </div>
               </div>
               <div className="flex gap-3 mt-4">
-                <button type="button" className="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white font-bold py-3 rounded-xl text-sm transition-all" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+                <button type="button" className="flex-1 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white font-bold py-3 rounded-xl text-sm transition-all" onClick={() => setIsModalOpen(false)}>Cancelar</button>
                 <button type="submit" className="flex-1 bg-lime-500 hover:bg-lime-400 text-black font-extrabold py-3 rounded-xl text-sm transition-all shadow-lg" disabled={cargando}>{cargando ? 'Guardando...' : 'Guardar'}</button>
               </div>
             </form>
@@ -295,13 +295,13 @@ export default function Garage({ usuario }) {
 
       {/* MODAL 2: ACTUALIZAR KM RÁPIDO */}
       {isKmModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-neutral-900 border border-neutral-800 w-full max-w-xs rounded-3xl p-6 shadow-2xl text-center">
-            <h2 className="text-lg font-black text-white mb-4">Ajustar Kilometraje</h2>
+        <div className="fixed inset-0 z-50 bg-black/50 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 w-full max-w-xs rounded-3xl p-6 shadow-2xl text-center">
+            <h2 className="text-lg font-black text-neutral-900 dark:text-white mb-4">Ajustar Kilometraje</h2>
             <form onSubmit={actualizarKm} className="flex flex-col gap-4">
-              <input type="number" autoFocus value={nuevoKm} onChange={(e) => setNuevoKm(e.target.value)} required className="w-full bg-neutral-950 border-2 border-lime-500 rounded-2xl p-4 text-white text-center text-3xl font-black focus:outline-none shadow-[0_0_20px_rgba(132,204,22,0.2)]" />
+              <input type="number" autoFocus value={nuevoKm} onChange={(e) => setNuevoKm(e.target.value)} required className="w-full bg-neutral-50 dark:bg-neutral-950 border-2 border-lime-500 rounded-2xl p-4 text-neutral-900 dark:text-white text-center text-3xl font-black focus:outline-none shadow-[0_0_20px_rgba(132,204,22,0.2)]" />
               <div className="flex gap-2 mt-2">
-                <button type="button" className="flex-1 bg-neutral-800 text-white font-bold py-3 rounded-xl text-sm" onClick={() => setIsKmModalOpen(false)}>Cancelar</button>
+                <button type="button" className="flex-1 bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-white font-bold py-3 rounded-xl text-sm" onClick={() => setIsKmModalOpen(false)}>Cancelar</button>
                 <button type="submit" className="flex-1 bg-lime-500 text-black font-extrabold py-3 rounded-xl text-sm" disabled={cargando}>{cargando ? '...' : 'Actualizar'}</button>
               </div>
             </form>
@@ -311,15 +311,15 @@ export default function Garage({ usuario }) {
 
       {/* MODAL 3: ELIMINAR MOTO */}
       {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-neutral-900 border border-neutral-800 w-full max-w-xs rounded-3xl p-6 shadow-2xl text-center">
+        <div className="fixed inset-0 z-50 bg-black/50 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 w-full max-w-xs rounded-3xl p-6 shadow-2xl text-center">
             <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20 text-red-500">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
             </div>
-            <h2 className="text-lg font-black text-white mb-1">¿Eliminar vehículo?</h2>
-            <p className="text-xs text-neutral-400 mb-6">Se borrará toda la bitácora de forma permanente.</p>
+            <h2 className="text-lg font-black text-neutral-900 dark:text-white mb-1">¿Eliminar vehículo?</h2>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-6">Se borrará toda la bitácora de forma permanente.</p>
             <div className="flex gap-2">
-              <button type="button" className="flex-1 bg-neutral-800 text-white font-bold py-3 rounded-xl text-sm" onClick={() => { setIsDeleteModalOpen(false); setMotoActiva(null); }}>Cancelar</button>
+              <button type="button" className="flex-1 bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-white font-bold py-3 rounded-xl text-sm" onClick={() => { setIsDeleteModalOpen(false); setMotoActiva(null); }}>Cancelar</button>
               <button type="button" className="flex-1 bg-red-600 text-white font-extrabold py-3 rounded-xl text-sm shadow-lg shadow-red-600/30" onClick={confirmarEliminacion} disabled={cargando}>{cargando ? 'Borrando...' : 'Eliminar'}</button>
             </div>
           </div>

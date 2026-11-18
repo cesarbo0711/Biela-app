@@ -58,13 +58,13 @@ export default function ModalSurtirGasolina({ motoId, userId, onClose, onAnotado
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm animate-fade-in">
-      <div className="bg-[#1a1a1a] w-11/12 max-w-md rounded-2xl p-6 border border-[#2a2a2a] shadow-2xl relative animate-slide-up">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/70 backdrop-blur-sm animate-fade-in">
+      <div className="bg-white dark:bg-[#1a1a1a] w-11/12 max-w-md rounded-2xl p-6 border border-neutral-200 dark:border-[#2a2a2a] shadow-2xl relative animate-slide-up">
         
         {/* Botón Cerrar */}
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+          className="absolute top-4 right-4 text-neutral-500 hover:text-neutral-900 dark:text-gray-400 dark:hover:text-white transition-colors"
         >
           ✕
         </button>
@@ -79,11 +79,11 @@ export default function ModalSurtirGasolina({ motoId, userId, onClose, onAnotado
               <path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"></path>
             </svg>
           </div>
-          <h3 className="text-xl font-bold text-white">Surtir Gasolina</h3>
+          <h3 className="text-xl font-bold text-neutral-900 dark:text-white">Surtir Gasolina</h3>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-lg bg-red-900/50 border border-red-500 text-red-200 text-sm">
+          <div className="mb-4 p-3 rounded-lg bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-500 text-red-700 dark:text-red-200 text-sm">
             {error}
           </div>
         )}
@@ -92,48 +92,48 @@ export default function ModalSurtirGasolina({ motoId, userId, onClose, onAnotado
           
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Litros</label>
+              <label className="text-xs font-semibold text-neutral-500 dark:text-gray-400 uppercase tracking-wider">Litros</label>
               <input 
                 type="number" 
                 step="0.01"
                 value={litros}
                 onChange={(e) => setLitros(e.target.value)}
                 placeholder="Ej: 5.5"
-                className="p-3 rounded-xl border border-gray-700 bg-[#2a2a2a] text-white focus:outline-none focus:border-[#84cc16]"
+                className="p-3 rounded-xl border border-neutral-300 dark:border-gray-700 bg-neutral-50 dark:bg-[#2a2a2a] text-neutral-900 dark:text-white focus:outline-none focus:border-[#84cc16]"
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Costo ($)</label>
+              <label className="text-xs font-semibold text-neutral-500 dark:text-gray-400 uppercase tracking-wider">Costo ($)</label>
               <input 
                 type="number" 
                 step="0.01"
                 value={precioDolares}
                 onChange={(e) => setPrecioDolares(e.target.value)}
                 placeholder="Ej: 2.75"
-                className="p-3 rounded-xl border border-gray-700 bg-[#2a2a2a] text-white focus:outline-none focus:border-[#84cc16]"
+                className="p-3 rounded-xl border border-neutral-300 dark:border-gray-700 bg-neutral-50 dark:bg-[#2a2a2a] text-neutral-900 dark:text-white focus:outline-none focus:border-[#84cc16]"
               />
             </div>
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Kilometraje Actual</label>
+            <label className="text-xs font-semibold text-neutral-500 dark:text-gray-400 uppercase tracking-wider">Kilometraje Actual</label>
             <input 
               type="number" 
               value={kilometrajeActual}
               onChange={(e) => setKilometrajeActual(e.target.value)}
               placeholder="¿Qué dice el tablero ahorita?"
-              className="p-3 rounded-xl border border-gray-700 bg-[#2a2a2a] text-white focus:outline-none focus:border-[#84cc16]"
+              className="p-3 rounded-xl border border-neutral-300 dark:border-gray-700 bg-neutral-50 dark:bg-[#2a2a2a] text-neutral-900 dark:text-white focus:outline-none focus:border-[#84cc16]"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Notas (Opcional)</label>
+            <label className="text-xs font-semibold text-neutral-500 dark:text-gray-400 uppercase tracking-wider">Notas (Opcional)</label>
             <textarea 
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
               placeholder="Bomba Los Alpes, sin cola..."
               rows="2"
-              className="p-3 rounded-xl border border-gray-700 bg-[#2a2a2a] text-white focus:outline-none focus:border-[#84cc16] resize-none"
+              className="p-3 rounded-xl border border-neutral-300 dark:border-gray-700 bg-neutral-50 dark:bg-[#2a2a2a] text-neutral-900 dark:text-white focus:outline-none focus:border-[#84cc16] resize-none"
             />
           </div>
 
@@ -142,7 +142,7 @@ export default function ModalSurtirGasolina({ motoId, userId, onClose, onAnotado
             disabled={cargando}
             className={`mt-2 w-full p-4 rounded-xl font-bold text-black transition-all ${
               cargando 
-                ? 'bg-gray-500 cursor-not-allowed' 
+                ? 'bg-gray-400 dark:bg-gray-500 cursor-not-allowed' 
                 : 'bg-[#84cc16] hover:bg-[#65a30d] active:scale-95'
             }`}
           >

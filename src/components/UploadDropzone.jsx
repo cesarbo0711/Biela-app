@@ -143,10 +143,10 @@ export function UploadDropzone({ onFileSelect, speed = 50 }) {
             <>
               <span className="upl-icon"><UpIcon size={18} strokeWidth={2} /></span>
               <span className="upl-say">
-                <b className={refuse ? "text-red-500" : "text-white"}>
+                <b className={refuse ? "text-red-500" : "text-neutral-900 dark:text-white"}>
                   {refuse ?? (over ? "Suelta la foto aquí" : "Toca o arrastra la foto")}
                 </b>
-                <span className="text-neutral-500">JPG o PNG hasta {MAX} MB</span>
+                <span className="text-neutral-500 dark:text-neutral-400">JPG o PNG hasta {MAX} MB</span>
               </span>
             </>
           ) : (

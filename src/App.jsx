@@ -9,11 +9,10 @@ import MapaGasolina from './pages/MapaGasolina';
 import ChatBot from './pages/ChatBot';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
-import { ThemeBall } from './components/ThemeBall';
 
 export default function App() {
   const [session, setSession] = useState(null);
-  const [isLightMode, setIsLightMode] = useState(false);
+  const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('theme') === 'light');
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -27,16 +26,16 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  return (
-    <div className={`${isLightMode ? '' : 'dark'} min-h-screen transition-colors duration-300`}>
-      <div className="min-h-screen bg-[#F8F5F0] dark:bg-[#111111] text-neutral-900 dark:text-white pb-20">
-        
-        {/* LA NUEVA BOLA LÍQUIDA ARRASTRABLE */}
-        <ThemeBall 
-          isLightMode={isLightMode} 
-          toggleTheme={() => setIsLightMode(!isLightMode)} 
-        />
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle('dark', !isLightMode);
+    root.classList.toggle('light-mode', isLightMode);
+    localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+  }, [isLightMode]);
 
+  return (
+    <div className="min-h-screen transition-colors duration-300">
+      <div className="min-h-screen bg-[#F8F5F0] dark:bg-[#111111] text-neutral-900 dark:text-white pb-20">
         <Router>
           {session ? (
             <>
@@ -45,7 +44,7 @@ export default function App() {
                 <Route path="/moto/:id" element={<MotoDetail />} />
                 <Route path="/mapa" element={<MapaGasolina />} />
                 <Route path="/chat" element={<ChatBot />} />
-                <Route path="/perfil" element={<Profile usuario={session.user} />} />
+                <Route path="/perfil" element={<Profile usuario={session.user} isLightMode={isLightMode} toggleTheme={() => setIsLightMode(!isLightMode)} />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               <Navbar />

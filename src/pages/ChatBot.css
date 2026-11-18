@@ -10,7 +10,7 @@
 .chat-bubble-wrapper.model { justify-content: flex-start; }
 
 .chat-bubble { max-width: 75%; padding: 0.85rem 1.2rem; border-radius: 1.25rem; font-size: 0.95rem; line-height: 1.4; word-break: break-word; }
-.user .chat-bubble { background-color: var(--accent-color); color: var(--bg-base); border-bottom-right-radius: 0.25rem; font-weight: 500; }
+.user .chat-bubble { background-color: var(--accent-color); color: #111111; border-bottom-right-radius: 0.25rem; font-weight: 500; }
 .model .chat-bubble { background-color: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 0.25rem; white-space: pre-wrap; }
 .chat-img-preview { max-width: 100%; border-radius: 0.75rem; margin-bottom: 0.5rem; display: block; max-height: 200px; object-fit: cover; }
 

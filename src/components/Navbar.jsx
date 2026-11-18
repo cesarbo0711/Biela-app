@@ -7,7 +7,7 @@ import "./Navbar.css";
 const DOCK = [
   { key: "/", label: "Garaje", Icon: Wrench },
   { key: "/mapa", label: "Estaciones", Icon: MapPin },
-  { key: "/chat", label: "Boberto", Icon: MessageSquareText },
+  { key: "/chat", label: "Biela", Icon: MessageSquareText },
   { key: "/perfil", label: "Perfil", Icon: User },
 ];
 

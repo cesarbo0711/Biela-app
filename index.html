@@ -4,6 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Biela - Mi Garage</title>
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem('theme');
+          var root = document.documentElement;
+          if (theme === 'light') {
+            root.classList.add('light-mode');
+            root.classList.remove('dark');
+          } else {
+            root.classList.add('dark');
+            root.classList.remove('light-mode');
+          }
+        } catch (e) {}
+      })();
+    </script>
     
     <!-- Favicons modernos y clásicos -->
     <link rel="icon" type="image/svg+xml" href="/icons.svg" />

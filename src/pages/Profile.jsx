@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
+import { ThemeBall } from '../components/ThemeBall';
 import './Profile.css';
 
 export default function Profile({ usuario, isLightMode, toggleTheme }) {
@@ -85,6 +86,7 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
 
   return (
     <div className="profile-container fade-in">
+      <ThemeBall isLightMode={isLightMode} toggleTheme={toggleTheme} />
       
       {/* CABECERA PRINCIPAL */}
       <div className="profile-header">

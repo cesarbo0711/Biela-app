@@ -174,18 +174,20 @@ export default function MapaGasolina() {
     return `¡Epa! Hay ${activas} bombas soltando gasolina ahorita mismo. Tienes opciones para escoger, ¡revisa el mapa y arranca!`;
   };
 
+  const isLight = document.documentElement.classList.contains('light-mode');
+
   if (cargando && estacionesFull.length === 0) {
-    return <div className="min-h-screen bg-neutral-950 text-white flex items-center justify-center">Cargando radar...</div>;
+    return <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-main)] flex items-center justify-center">Cargando radar...</div>;
   }
 
   return (
-    <div className="flex flex-col h-screen bg-neutral-950 text-white overflow-hidden relative">
-      <header className="bg-neutral-950 p-4 flex flex-col border-b border-neutral-800 z-[1000] relative shadow-md gap-3">
+    <div className="flex flex-col h-screen bg-[var(--bg-base)] text-[var(--text-main)] overflow-hidden relative">
+      <header className="bg-[var(--bg-surface)]/95 p-4 flex flex-col border-b border-[var(--border-color)] z-[1000] relative shadow-md gap-3 backdrop-blur">
         <div className="flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="text-[#84cc16] hover:text-white transition-colors">
+          <button onClick={() => navigate(-1)} className="text-[#84cc16] hover:opacity-80 transition-colors">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </button>
-          <h1 className="text-xl font-bold text-white tracking-wide">Radar de Bombas</h1>
+          <h1 className="text-xl font-bold tracking-wide">Radar de Bombas</h1>
           <button onClick={() => setModoAgregar(!modoAgregar)} className={`p-2 rounded-full transition-colors ${modoAgregar ? 'bg-red-500 text-white' : 'bg-[#84cc16] text-black'}`}>
             {modoAgregar ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>}
           </button>
@@ -218,7 +220,7 @@ export default function MapaGasolina() {
           </div>
         )}
 
-        <MapContainer center={defaultCenter} zoom={14} className="w-full h-full" style={{ filter: 'invert(90%) hue-rotate(180deg) brightness(95%) contrast(85%)' }}>
+        <MapContainer center={defaultCenter} zoom={14} className="w-full h-full" style={isLight ? undefined : { filter: 'invert(90%) hue-rotate(180deg) brightness(95%) contrast(85%)' }}>
           {modoAgregar && <MapCenterTracker onCenterChange={setCentroActual} />}
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="" />
 
