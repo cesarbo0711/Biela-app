@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import './MotoDetail.css';
 import ModalSurtirGasolina from "./ModalSurtirGasolina.jsx";
+import MotoHealthDiagram from '../components/MotoHealthDiagram.jsx';
 
 export default function MotoDetail() {
   const { id } = useParams();
@@ -119,6 +120,14 @@ export default function MotoDetail() {
     cargarDatos(); 
   };
 
+  const abrirRegistroServicio = (servicioId = null) => {
+    if (moto) setKmAlMomento(moto.kilometraje);
+    setServicioIdSeleccionado(servicioId ? String(servicioId) : '');
+    setFechaServicio(new Date().toISOString().split('T')[0]);
+    setNotas('');
+    setIsModalOpen(true);
+  };
+
   // Finanzas
   let totalDolaresGastados = 0;
   let rendimientoKmL = "N/A";
@@ -176,6 +185,21 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center"
                  </div>
               </div>
             </div>
+          </div>
+
+          {/* RADIOGRAFÍA / SALUD DE LA MOTO */}
+          <div className="mt-10 mb-12">
+            <div className="history-header">
+              <h2 className="text-xl font-black flex items-center gap-2">
+                <span className="text-lime-500">🩺</span> Radiografía
+              </h2>
+            </div>
+            <MotoHealthDiagram
+              kilometrajeActual={moto.kilometraje}
+              historialMantenimientos={historial}
+              catalogoServicios={catalogoServicios}
+              onRegistrarServicio={abrirRegistroServicio}
+            />
           </div>
 
           {/* HISTORIAL DE COMBUSTIBLE */}
