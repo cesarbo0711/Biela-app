@@ -2,49 +2,47 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabase';
 import './ChatBot.css';
 
+const SUGGESTED = [
+  'Mi moto no quiere encender, ¿qué reviso primero?',
+  '¿Cada cuánto debo ajustar la cadena?',
+  'Escucho un ruido raro en el motor, ¿puede ser grave?',
+];
+
+const GREETING = {
+  rol: 'model',
+  texto: '¡Épale! Soy BujIA, tu mecánico de confianza. Cuéntame qué le pasa a la nave o mándame una foto y lo revisamos.',
+};
+
 export default function ChatBot({ usuario }) {
-  const [mensajes, setMensajes] = useState([
-    { 
-      rol: 'model', 
-      texto: '¡Epa! Soy BujIA, tu mecánico de confianza. ¿Qué falla tiene la nave hoy? Échame el cuento o mándame una foto de lo que le duele.' 
-    }
-  ]);
-
   const [nombreUsuario, setNombreUsuario] = useState('');
-  const [motoId, setMotoId] = useState(null); // <-- NUEVO ESTADO PARA IDENTIFICAR LA MOTO ACTIVA
+  const [motoId, setMotoId] = useState(null);
 
-  // BLOQUE 1: RECUPERAR EL CHAT SI NO HAN PASADO 30 MINUTOS
-  useEffect(() => {
+  const [mensajes, setMensajes] = useState(() => {
     const chatGuardado = localStorage.getItem('bujia_historial');
     if (chatGuardado) {
       try {
         const { historial, ultimaActividad } = JSON.parse(chatGuardado);
-        const tiempoActual = new Date().getTime();
-        const diferenciaMinutos = (tiempoActual - ultimaActividad) / (1000 * 60);
-
-        if (diferenciaMinutos < 30) {
-          setMensajes(historial);
-        } else {
-          localStorage.removeItem('bujia_historial');
+        const diferenciaMinutos = (new Date().getTime() - ultimaActividad) / (1000 * 60);
+        if (diferenciaMinutos < 30 && Array.isArray(historial) && historial.length > 0) {
+          return historial;
         }
-      } catch (error) {
+      } catch {
         localStorage.removeItem('bujia_historial');
       }
     }
-  }, []);
+    localStorage.removeItem('bujia_historial');
+    return [{ ...GREETING }];
+  });
 
-  // BLOQUE 2: GUARDAR CADA MENSAJE NUEVO CON LA HORA EXACTA
   useEffect(() => {
     if (mensajes.length > 0) {
-      const datosParaGuardar = {
+      localStorage.setItem('bujia_historial', JSON.stringify({
         historial: mensajes,
-        ultimaActividad: new Date().getTime()
-      };
-      localStorage.setItem('bujia_historial', JSON.stringify(datosParaGuardar));
+        ultimaActividad: new Date().getTime(),
+      }));
     }
   }, [mensajes]);
 
-  // BLOQUE 3: BUSCAR EL NOMBRE DEL USUARIO EN SUPABASE
   useEffect(() => {
     async function obtenerNombre() {
       if (!usuario) return;
@@ -53,10 +51,7 @@ export default function ChatBot({ usuario }) {
         .select('nombre')
         .eq('id', usuario.id)
         .maybeSingle();
-
-      if (data && data.nombre) {
-        setNombreUsuario(data.nombre);
-      }
+      if (data?.nombre) setNombreUsuario(data.nombre);
     }
     obtenerNombre();
   }, [usuario]);
@@ -66,36 +61,29 @@ export default function ChatBot({ usuario }) {
   const [imagenPreview, setImagenPreview] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [contextoVehiculo, setContextoVehiculo] = useState('Motocicleta general');
+  const [errorChat, setErrorChat] = useState('');
 
   const chatEndRef = useRef(null);
-
-  // BLOQUE 4: CARGAR EL VEHÍCULO Y SU ID
 
   useEffect(() => {
     async function cargarVehiculo() {
       if (!usuario) return;
-      console.log("Buscando motos para el usuario:", usuario.id);
-
       const { data, error } = await supabase
         .from('motos')
         .select('*')
         .eq('user_id', usuario.id);
 
       if (error) {
-        console.error("Error buscando motos en el ChatBot:", error.message);
+        console.error('Error buscando motos en ChatBot:', error.message);
         return;
       }
 
-      console.log("Motos encontradas para BujÍA:", data);
-
       if (data && data.length > 0) {
-        setMotoId(data[0].id); // <-- GUARDAMOS EL ID DE LA PRIMERA MOTO
+        setMotoId(data[0].id);
         const infoMotos = data
-          .map(m => `${m.marca} ${m.modelo} (${m.year}) con ${m.kilometraje} km`)
+          .map((m) => `${m.marca} ${m.modelo} (${m.year}) con ${m.kilometraje} km`)
           .join(', ');
         setContextoVehiculo(`El usuario maneja los siguientes vehículos: ${infoMotos}.`);
-      } else {
-        console.warn("BujÍA no vio ninguna moto en la tabla.");
       }
     }
     cargarVehiculo();
@@ -118,76 +106,95 @@ export default function ChatBot({ usuario }) {
     setImagenPreview(null);
   };
 
+  const limpiarConversacion = () => {
+    localStorage.removeItem('bujia_historial');
+    setMensajes([{ ...GREETING }]);
+    setErrorChat('');
+    setInputTexto('');
+    quitarImagen();
+  };
+
+  const enviarTexto = async (texto, imagenB64 = null, preview = null) => {
+    const textoLimpio = (texto || '').trim();
+    if ((!textoLimpio && !imagenB64) || cargando) return;
+
+    const nuevoMensajeUsuario = {
+      rol: 'user',
+      texto: textoLimpio || 'Analiza esta imagen y dime qué falla tiene.',
+      ...(preview ? { imagen: preview } : {}),
+    };
+
+    const historialAEnviar = mensajes;
+    setMensajes((prev) => [...prev, nuevoMensajeUsuario]);
+    setInputTexto('');
+    setImagenArchivo(null);
+    setImagenPreview(null);
+    setCargando(true);
+    setErrorChat('');
+
+    try {
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          promptUsuario: nuevoMensajeUsuario.texto,
+          contextoVehiculo,
+          historial: historialAEnviar,
+          imagenBase64: imagenB64,
+          nombreUsuario,
+          motoId,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error || `Error ${response.status} al contactar a BujIA`);
+      }
+
+      const textoRespuesta = typeof data.texto === 'string' && data.texto.trim()
+        ? data.texto
+        : 'No recibí una respuesta clara. Intenta preguntarme de otra forma.';
+
+      setMensajes((prev) => [...prev, { rol: 'model', texto: textoRespuesta }]);
+    } catch (error) {
+      console.error('Error al contactar a BujIA:', error);
+      const msg = error?.message || 'No pude conectar con el taller.';
+      setErrorChat(msg);
+      setMensajes((prev) => [
+        ...prev,
+        {
+          rol: 'model',
+          texto: 'Tuve un problema conectando con el taller. Revisa tu conexión e inténtalo de nuevo en un momento.',
+        },
+      ]);
+    } finally {
+      setCargando(false);
+    }
+  };
+
   const enviarMensaje = async (e) => {
     e.preventDefault();
     if ((!inputTexto.trim() && !imagenArchivo) || cargando) return;
 
-    // Convertir imagen a Base64 si existe
     let imagenBase64 = null;
+    let preview = null;
     if (imagenArchivo) {
+      preview = imagenPreview;
       imagenBase64 = await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result);
         reader.readAsDataURL(imagenArchivo);
       });
     }
-
-    const nuevoMensajeUsuario = {
-      rol: 'user',
-      texto: inputTexto || 'Analiza esta imagen y dime qué falla tiene.',
-      imagen: imagenPreview
-    };
-
-    setMensajes((prev) => [...prev, nuevoMensajeUsuario]);
-
-    const textoAEnviar = inputTexto || 'Analiza esta imagen y dime qué falla tiene.';
-    const historialAEnviar = mensajes;
-    const imagenAEnviar = imagenBase64;
-
-    setInputTexto('');
-    setImagenArchivo(null);
-    setImagenPreview(null);
-    setCargando(true);
-
-    try {
-      const response = await fetch('/api/gemini', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          promptUsuario: textoAEnviar,
-          contextoVehiculo: contextoVehiculo,
-          historial: historialAEnviar,
-          imagenBase64: imagenAEnviar,
-          nombreUsuario: nombreUsuario,
-         motoId: motoId
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Error en el servidor');
-      }
-
-      setMensajes((prev) => [
-        ...prev,
-        { rol: 'model', texto: data.texto || 'Epa, la nave quedó muda.' }
-      ]);
-    } catch (error) {
-      console.error('Error al contactar a BujIA:', error);
-      setMensajes((prev) => [
-        ...prev,
-        { 
-          rol: 'model', 
-          texto: 'Epa, pana, se me cayó el sistema un momento. ¿Puedes repetirme la pregunta?' 
-        }
-      ]);
-    } finally {
-      setCargando(false);
-    }
+    await enviarTexto(inputTexto, imagenBase64, preview);
   };
+
+  const usarSugerencia = (texto) => {
+    if (cargando) return;
+    setInputTexto(texto);
+  };
+
+  const showSuggestions = mensajes.length <= 1 && !cargando;
 
   return (
     <div className="chatbot-container fade-in">
@@ -195,14 +202,21 @@ export default function ChatBot({ usuario }) {
         <div className="bot-avatar">
           <img
             src="https://api.dicebear.com/10.x/bottts/svg?backgroundColor=&textureProbability=30&eyesVariant=frame2&headVariant=round02&mouthVariant=smile01&sidesVariant=round&textureVariant=dirty01&seed=mdf9n8af"
-            alt="avatar" 
+            alt="BujIA"
           />
         </div>
-        <div>
+        <div className="chatbot-header-info">
           <h2>Taller Mecánico (BujIA)</h2>
           <span className="bot-status">● En línea</span>
         </div>
+        <button type="button" className="btn-clear-chat" onClick={limpiarConversacion} title="Limpiar conversación">
+          Limpiar
+        </button>
       </header>
+
+      <div className="chat-safety-banner">
+        Asistente preventivo IA • Ante fallas críticas de frenos o motor, consulta un taller certificado.
+      </div>
 
       <div className="chatbot-messages">
         {mensajes.map((msg, index) => (
@@ -211,13 +225,21 @@ export default function ChatBot({ usuario }) {
             className={`chat-bubble-wrapper ${msg.rol === 'user' ? 'user' : 'model'}`}
           >
             <div className="chat-bubble">
-              {msg.imagen && (
-                <img src={msg.imagen} alt="Evidencia" className="chat-img-preview" />
-              )}
+              {msg.imagen && <img src={msg.imagen} alt="Evidencia" className="chat-img-preview" />}
               <p>{msg.texto}</p>
             </div>
           </div>
         ))}
+
+        {showSuggestions && (
+          <div className="chat-suggestions">
+            {SUGGESTED.map((s) => (
+              <button key={s} type="button" className="chat-suggestion-chip" onClick={() => usarSugerencia(s)}>
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
 
         {cargando && (
           <div className="chat-bubble-wrapper model">
@@ -229,11 +251,13 @@ export default function ChatBot({ usuario }) {
         <div ref={chatEndRef} />
       </div>
 
+      {errorChat && <div className="chat-error-inline">{errorChat}</div>}
+
       {imagenPreview && (
         <div className="preview-container">
           <img src={imagenPreview} alt="Preview" />
-          <button type="button" onClick={quitarImagen} className="btn-remove-img">
-            ✕
+          <button type="button" onClick={quitarImagen} className="btn-remove-img" aria-label="Quitar imagen">
+            ×
           </button>
         </div>
       )}
@@ -251,13 +275,14 @@ export default function ChatBot({ usuario }) {
 
         <input
           type="text"
-          placeholder="Escribe tu problema o duda mecánica..."
+          placeholder="Escribe tu duda mecánica..."
           value={inputTexto}
           onChange={(e) => setInputTexto(e.target.value)}
           className="chat-input"
+          enterKeyHint="send"
         />
 
-        <button type="submit" className="btn-send" disabled={cargando}>
+        <button type="submit" className="btn-send" disabled={cargando} aria-label="Enviar mensaje">
           ➤
         </button>
       </form>

@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMapEvents } from 'r
 import L from 'leaflet';
 import { supabase } from '../supabase'; 
 import { useNavigate } from 'react-router-dom';
+import { MapSkeleton } from '../components/BielaSkeletons.jsx';
 
 const defaultCenter = [9.9115, -67.3538];
 
@@ -52,15 +53,20 @@ export default function MapaGasolina() {
 
   const cargarEstaciones = async () => {
     setCargando(true);
-    const { data, error } = await supabase.from('estaciones_servicio').select('*');
-    if (error) {
+    try {
+      const { data, error } = await supabase.from('estaciones_servicio').select('*');
+      if (error) {
+        console.error("❌ Error Supabase:", error.message);
+      } else {
+        const estacionesValidas = data.filter(e => e.latitud != null && e.longitud != null);
+        setEstacionesFull(estacionesValidas || []);
+        setEstaciones(estacionesValidas || []);
+      }
+    } catch (error) {
       console.error("❌ Error Supabase:", error.message);
-    } else {
-      const estacionesValidas = data.filter(e => e.latitud != null && e.longitud != null);
-      setEstacionesFull(estacionesValidas || []);
-      setEstaciones(estacionesValidas || []); 
+    } finally {
+      setCargando(false);
     }
-    setCargando(false);
   };
 
   const reportarEstatus = async (estacionId, nuevoEstado) => {
@@ -176,12 +182,8 @@ export default function MapaGasolina() {
 
   const isLight = document.documentElement.classList.contains('light-mode');
 
-  if (cargando && estacionesFull.length === 0) {
-    return <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-main)] flex items-center justify-center">Cargando radar...</div>;
-  }
-
   return (
-    <div className="flex flex-col h-screen bg-[var(--bg-base)] text-[var(--text-main)] overflow-hidden relative">
+    <div className="biela-fade-in flex flex-col h-screen bg-[var(--bg-base)] text-[var(--text-main)] overflow-hidden relative">
       <header className="bg-[var(--bg-surface)]/95 p-4 flex flex-col border-b border-[var(--border-color)] z-[1000] relative shadow-md gap-3 backdrop-blur">
         <div className="flex items-center justify-between">
           <button onClick={() => navigate(-1)} className="text-[#84cc16] hover:opacity-80 transition-colors">
@@ -265,6 +267,7 @@ export default function MapaGasolina() {
             </Marker>
           ))}
         </MapContainer>
+        {cargando && <MapSkeleton />}
       </div>
 
       {/* =========================================================

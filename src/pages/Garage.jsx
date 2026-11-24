@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
 import { UploadDropzone } from '../components/UploadDropzone.jsx';
+import { GarageSkeleton } from '../components/BielaSkeletons.jsx';
 
 export default function Garage({ usuario }) {
   const [motos, setMotos] = useState([]); 
@@ -24,17 +25,29 @@ export default function Garage({ usuario }) {
   const [motoActiva, setMotoActiva] = useState(null);
   const [nuevoKm, setNuevoKm] = useState('');
   const [cargando, setCargando] = useState(false);
+  const [cargandoInicial, setCargandoInicial] = useState(true);
 
   const cargarMotos = async () => {
-    if (!usuario?.id) return;
-    const { data, error } = await supabase
-      .from('motos')
-      .select('*')
-      .eq('user_id', usuario.id)
-      .order('created_at', { ascending: false });
-      
-    if (data) setMotos(data);
-    if (error) console.error("Error al cargar motos:", error);
+    if (!usuario?.id) {
+      setMotos([]);
+      setCargandoInicial(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('motos')
+        .select('*')
+        .eq('user_id', usuario.id)
+        .order('created_at', { ascending: false });
+
+      if (data) setMotos(data);
+      if (error) console.error("Error al cargar motos:", error);
+    } catch (error) {
+      console.error("Error al cargar motos:", error);
+    } finally {
+      setCargandoInicial(false);
+    }
   };
 
   useEffect(() => {
@@ -125,8 +138,10 @@ export default function Garage({ usuario }) {
     setCargando(false);
   };
 
+  if (cargandoInicial) return <GarageSkeleton />;
+
   return (
-    <div className="min-h-screen text-neutral-900 dark:text-white pb-32 px-4 sm:px-6 max-w-md mx-auto">
+    <div className="biela-fade-in min-h-screen text-neutral-900 dark:text-white pb-32 px-4 sm:px-6 max-w-md mx-auto">
       
       {/* =========================================================
           ENCABEZADO: TUS VEHÍCULOS Y BOTÓN AÑADIR

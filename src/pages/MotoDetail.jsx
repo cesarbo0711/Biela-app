@@ -4,6 +4,7 @@ import { supabase } from '../supabase';
 import './MotoDetail.css';
 import ModalSurtirGasolina from "./ModalSurtirGasolina.jsx";
 import MotoHealthDiagram from '../components/MotoHealthDiagram.jsx';
+import { MotoDetailSkeleton } from '../components/BielaSkeletons.jsx';
 
 export default function MotoDetail() {
   const { id } = useParams();
@@ -28,6 +29,7 @@ export default function MotoDetail() {
   const [fechaServicio, setFechaServicio] = useState(new Date().toISOString().split('T')[0]);
   const [notas, setNotas] = useState('');
   const [cargando, setCargando] = useState(false);
+  const [cargandoInicial, setCargandoInicial] = useState(true);
 
   useEffect(() => {
     const obtenerUsuario = async () => {
@@ -39,30 +41,36 @@ export default function MotoDetail() {
   }, [id]);
 
   const cargarDatos = async () => {
-    const { data: motoData } = await supabase.from('motos').select('*').eq('id', id).single();
-    if (motoData) {
-      setMoto(motoData);
-      setKmAlMomento(motoData.kilometraje); 
+    try {
+      const { data: motoData } = await supabase.from('motos').select('*').eq('id', id).single();
+      if (motoData) {
+        setMoto(motoData);
+        setKmAlMomento(motoData.kilometraje);
+      }
+
+      const { data: catalogoData } = await supabase.from('catalogo_servicios').select('*');
+      if (catalogoData) setCatalogoServicios(catalogoData);
+
+      const { data: historialData } = await supabase
+        .from('bitacora_servicios')
+        .select(`id, km_al_momento, fecha_servicio, notas, catalogo_servicios (nombre, intervalo_km)`)
+        .eq('moto_id', id)
+        .order('fecha_servicio', { ascending: false });
+
+      if (historialData) setHistorial(historialData);
+
+      const { data: gasolinaData } = await supabase
+        .from('registro_gasolina')
+        .select('*')
+        .eq('moto_id', id)
+        .order('fecha', { ascending: true });
+
+      if (gasolinaData) setHistorialGasolina(gasolinaData);
+    } catch (error) {
+      console.error("Error al cargar la bitácora:", error);
+    } finally {
+      setCargandoInicial(false);
     }
-
-    const { data: catalogoData } = await supabase.from('catalogo_servicios').select('*');
-    if (catalogoData) setCatalogoServicios(catalogoData);
-
-    const { data: historialData } = await supabase
-      .from('bitacora_servicios')
-      .select(`id, km_al_momento, fecha_servicio, notas, catalogo_servicios (nombre, intervalo_km)`)
-      .eq('moto_id', id)
-      .order('fecha_servicio', { ascending: false });
-      
-    if (historialData) setHistorial(historialData);
-
-    const { data: gasolinaData } = await supabase
-      .from('registro_gasolina')
-      .select('*')
-      .eq('moto_id', id)
-      .order('fecha', { ascending: true });
-
-    if (gasolinaData) setHistorialGasolina(gasolinaData);
   };
 
   const registrarMantenimiento = async (e) => {
@@ -144,11 +152,12 @@ export default function MotoDetail() {
     }
   }
 
-if (!moto) return <div className="min-h-screen flex items-center justify-center">Cargando bitácora...</div>;
+if (cargandoInicial) return <MotoDetailSkeleton />;
+if (!moto) return <div className="min-h-screen flex items-center justify-center text-[var(--text-main)]">No encontramos esta moto.</div>;
 
   return (
     <>
-      <div className="min-h-screen pb-32 fade-in bg-transparent">
+      <div className="biela-fade-in min-h-screen pb-32 fade-in bg-transparent">
         
         {/* HEADER PREMIUM (ADAPTATIVO) */}
         <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-black/5 dark:border-white/5 bg-white/70 dark:bg-[#111111]/80 px-6 py-4 flex items-center justify-between">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
+import { ProfileSkeleton } from '../components/BielaSkeletons.jsx';
 import { useNavigate } from 'react-router-dom';
 import { ThemeBall } from '../components/ThemeBall';
 import './Profile.css';
@@ -9,6 +10,7 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [guardando, setGuardando] = useState(false);
+  const [cargandoInicial, setCargandoInicial] = useState(true);
   
   const [perfil, setPerfil] = useState({
     nombre: 'César Borrego', 
@@ -19,20 +21,30 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
 
   useEffect(() => {
     async function cargarPerfil() {
-      if (!usuario) return;
-      const { data, error } = await supabase
-        .from('perfiles')
-        .select('*')
-        .eq('id', usuario.id)
-        .maybeSingle();
+      if (!usuario) {
+        setCargandoInicial(false);
+        return;
+      }
 
-      if (data) {
-        setPerfil({
-          nombre: data.nombre || 'César Borrego',
-          telefono: data.telefono || '',
-          residencia: data.residencia || 'San Juan de los Morros, Venezuela',
-          avatar_seed: data.avatar_seed || ''
-        });
+      try {
+        const { data } = await supabase
+          .from('perfiles')
+          .select('*')
+          .eq('id', usuario.id)
+          .maybeSingle();
+
+        if (data) {
+          setPerfil({
+            nombre: data.nombre || 'César Borrego',
+            telefono: data.telefono || '',
+            residencia: data.residencia || 'San Juan de los Morros, Venezuela',
+            avatar_seed: data.avatar_seed || ''
+          });
+        }
+      } catch (error) {
+        console.error("Error al cargar el perfil:", error);
+      } finally {
+        setCargandoInicial(false);
       }
     }
     cargarPerfil();
@@ -84,8 +96,10 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
   const semillaAvatar = encodeURIComponent(semillaBase);
   const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${semillaAvatar}&backgroundColor=e5e5e5`;
 
+  if (cargandoInicial) return <ProfileSkeleton />;
+
   return (
-    <div className="profile-container fade-in">
+    <div className="biela-fade-in profile-container fade-in">
       <ThemeBall isLightMode={isLightMode} toggleTheme={toggleTheme} />
       
       {/* CABECERA PRINCIPAL */}

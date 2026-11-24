@@ -51,7 +51,7 @@ export default function App() {
                   <Route path="/dashboard" element={<Dashboard usuario={session.user} />} />
                   <Route path="/moto/:id" element={<MotoDetail />} />
                   <Route path="/mapa" element={<MapaGasolina />} />
-                  <Route path="/chat" element={<ChatBot />} />
+                  <Route path="/chat" element={<ChatBot usuario={session.user} />} />
                   <Route path="/perfil" element={<Profile usuario={session.user} isLightMode={isLightMode} toggleTheme={() => setIsLightMode(!isLightMode)} />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
