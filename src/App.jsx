@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import MotoDetail from './pages/MotoDetail';
 import MapaGasolina from './pages/MapaGasolina';
 import ChatBot from './pages/ChatBot';
+import Tiendas from './pages/Tiendas';
 import Profile from './pages/Profile';
 import LandingLobby from './pages/LandingLobby';
 
@@ -36,12 +37,12 @@ export default function App() {
   }, [isLightMode]);
 
   if (!authReady) {
-    return <div className="min-h-screen bg-[#050505]" />;
+    return <div className="min-h-screen bg-[var(--bg-base)]" />;
   }
 
   return (
     <div className="min-h-screen transition-colors duration-300">
-      <div className="min-h-screen bg-[#F8F5F0] dark:bg-[#111111] text-neutral-900 dark:text-white">
+      <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-main)]">
         <Router>
           {session ? (
             <>
@@ -52,6 +53,7 @@ export default function App() {
                   <Route path="/moto/:id" element={<MotoDetail />} />
                   <Route path="/mapa" element={<MapaGasolina />} />
                   <Route path="/chat" element={<ChatBot usuario={session.user} />} />
+                  <Route path="/tiendas" element={<Tiendas />} />
                   <Route path="/perfil" element={<Profile usuario={session.user} isLightMode={isLightMode} toggleTheme={() => setIsLightMode(!isLightMode)} />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>

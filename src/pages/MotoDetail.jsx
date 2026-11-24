@@ -6,6 +6,72 @@ import ModalSurtirGasolina from "./ModalSurtirGasolina.jsx";
 import MotoHealthDiagram from '../components/MotoHealthDiagram.jsx';
 import { MotoDetailSkeleton } from '../components/BielaSkeletons.jsx';
 
+const TASA_BCV_URL = 'https://ve.dolarapi.com/v1/dolares/oficial';
+const TASA_BCV_FALLBACK = 36;
+const TASA_BCV_CACHE_KEY = 'biela:tasa-bcv';
+
+function leerTasaCacheada() {
+  const valor = Number(localStorage.getItem(TASA_BCV_CACHE_KEY));
+  return Number.isFinite(valor) && valor > 0 ? valor : null;
+}
+
+function formatearUsd(valor) {
+  return `$${Number(valor || 0).toFixed(2)}`;
+}
+
+function formatearBs(usd, tasa) {
+  const valor = Number(usd || 0) * Number(tasa || 0);
+  return new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor);
+}
+
+function calcularFinanzas(registros) {
+  const validos = [...registros]
+    .filter((registro) => /^\d{4}-\d{2}-\d{2}/.test(String(registro.fecha)) && Number.isFinite(Date.parse(registro.fecha)))
+    .sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)));
+
+  let kilometrosRecorridos = 0;
+  let litrosConsumidos = 0;
+  let paresValidos = 0;
+
+  for (let indice = 1; indice < validos.length; indice += 1) {
+    const anterior = validos[indice - 1];
+    const actual = validos[indice];
+    const deltaKm = Number(actual.kilometraje) - Number(anterior.kilometraje);
+    const litrosAnteriores = Number(anterior.litros);
+
+    if (Number.isFinite(deltaKm) && deltaKm > 0 && Number.isFinite(litrosAnteriores) && litrosAnteriores > 0) {
+      kilometrosRecorridos += deltaKm;
+      litrosConsumidos += litrosAnteriores;
+      paresValidos += 1;
+    }
+  }
+
+  const rendimiento = paresValidos > 0 && litrosConsumidos > 0 ? kilometrosRecorridos / litrosConsumidos : null;
+  const gastoHistorico = validos.reduce((total, registro) => total + (Number(registro.precio_dolares) || 0), 0);
+  const ahora = new Date();
+  const gastoMes = validos
+    .filter((registro) => {
+      const [anio, mes] = String(registro.fecha).split('-').map(Number);
+      return mes === ahora.getMonth() + 1 && anio === ahora.getFullYear();
+    })
+    .reduce((total, registro) => total + (Number(registro.precio_dolares) || 0), 0);
+
+  const ultimoTanqueo = validos[validos.length - 1];
+  const litrosUltimoTanqueo = Number(ultimoTanqueo?.litros) || 0;
+  const autonomia = rendimiento !== null && litrosUltimoTanqueo > 0 ? rendimiento * litrosUltimoTanqueo : null;
+  const costoPorKm = kilometrosRecorridos > 0 ? gastoHistorico / kilometrosRecorridos : null;
+
+  return {
+    rendimiento,
+    rendimientoListo: rendimiento !== null,
+    estadoRendimiento: rendimiento !== null && rendimiento >= 30 ? 'Óptimo' : 'Normal',
+    gastoHistorico,
+    gastoMes,
+    autonomia,
+    costoPorKm,
+  };
+}
+
 export default function MotoDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -30,6 +96,35 @@ export default function MotoDetail() {
   const [notas, setNotas] = useState('');
   const [cargando, setCargando] = useState(false);
   const [cargandoInicial, setCargandoInicial] = useState(true);
+  const [tasaBcv, setTasaBcv] = useState(() => leerTasaCacheada() ?? TASA_BCV_FALLBACK);
+  const [tasaBcvEsFallback, setTasaBcvEsFallback] = useState(() => !leerTasaCacheada());
+
+  useEffect(() => {
+    let activo = true;
+
+    fetch(TASA_BCV_URL, { cache: 'no-store' })
+      .then((response) => {
+        if (!response.ok) throw new Error('No se pudo obtener la tasa BCV');
+        return response.json();
+      })
+      .then((data) => {
+        const valor = Number(data?.promedio ?? data?.venta ?? data?.compra);
+        if (!activo || !Number.isFinite(valor) || valor <= 0) throw new Error('Tasa BCV inválida');
+        setTasaBcv(valor);
+        setTasaBcvEsFallback(false);
+        localStorage.setItem(TASA_BCV_CACHE_KEY, String(valor));
+      })
+      .catch(() => {
+        if (!activo) return;
+        const tasaCacheada = leerTasaCacheada();
+        setTasaBcv(tasaCacheada ?? TASA_BCV_FALLBACK);
+        setTasaBcvEsFallback(true);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, []);
 
   useEffect(() => {
     const obtenerUsuario = async () => {
@@ -136,23 +231,9 @@ export default function MotoDetail() {
     setIsModalOpen(true);
   };
 
-  // Finanzas
-  let totalDolaresGastados = 0;
-  let rendimientoKmL = "N/A";
-  if (historialGasolina.length > 0) {
-    totalDolaresGastados = historialGasolina.reduce((acc, reg) => acc + Number(reg.precio_dolares), 0);
-    if (historialGasolina.length > 1) {
-      const primerRegistro = historialGasolina[0];
-      const ultimoRegistro = historialGasolina[historialGasolina.length - 1];
-      const kmRecorridos = ultimoRegistro.kilometraje - primerRegistro.kilometraje;
-      const litrosConsumidos = historialGasolina.slice(0, -1).reduce((acc, reg) => acc + Number(reg.litros), 0);
-      if (litrosConsumidos > 0 && kmRecorridos > 0) {
-        rendimientoKmL = (kmRecorridos / litrosConsumidos).toFixed(1);
-      }
-    }
-  }
+  const finanzas = calcularFinanzas(historialGasolina);
 
-if (cargandoInicial) return <MotoDetailSkeleton />;
+  if (cargandoInicial) return <MotoDetailSkeleton />;
 if (!moto) return <div className="min-h-screen flex items-center justify-center text-[var(--text-main)]">No encontramos esta moto.</div>;
 
   return (
@@ -178,20 +259,60 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
                <div className="w-28 h-28 bg-neutral-200 dark:bg-[#1a1a1a] rounded-full flex items-center justify-center border-4 border-neutral-300 dark:border-[#2a2a2a] text-neutral-500 font-black shadow-lg">NO IMG</div>
             )}
             
-            <div className="flex-1 w-full flex flex-col sm:flex-row justify-between gap-6">
-              <div>
-                <h2 className="text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1">Odómetro</h2>
-                <p className="text-4xl font-black leading-none">{moto.kilometraje.toLocaleString('en-US')} <span className="text-sm text-lime-600 dark:text-lime-500">KM</span></p>
+            <div className="flex-1 w-full flex flex-col gap-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1">Odómetro</h2>
+                  <p className="text-4xl font-black leading-none">{moto.kilometraje.toLocaleString('en-US')} <span className="text-sm text-lime-600 dark:text-lime-500">KM</span></p>
+                </div>
+                <span
+                  title={tasaBcvEsFallback ? 'Tasa de referencia usada porque no se pudo consultar la API' : 'Tasa de cambio de referencia consultada automáticamente'}
+                  className="shrink-0 rounded-full border border-neutral-200 bg-neutral-100/80 px-2.5 py-1 text-[9px] font-bold text-neutral-500 dark:border-white/10 dark:bg-white/5 dark:text-neutral-400"
+                >
+                  Tasa ref: Bs. {formatearBs(1, tasaBcv)}{tasaBcvEsFallback ? ' · local' : ''}
+                </span>
               </div>
-              
-              <div className="sm:text-right border-t sm:border-t-0 sm:border-l border-black/10 dark:border-white/10 pt-4 sm:pt-0 sm:pl-6">
-                 <h2 className="text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1">Gasto en Gasolina</h2>
-                 <p className="text-2xl font-black text-lime-600 dark:text-lime-400">${totalDolaresGastados.toFixed(2)}</p>
-                 <div className="mt-2 sm:justify-end flex">
-                   <span className="text-xs font-bold bg-neutral-100 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#222] px-3 py-1 rounded-full shadow-inner">
-                      {rendimientoKmL} <span className="text-neutral-500">Km/L</span>
-                   </span>
-                 </div>
+
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                <div className="rounded-xl border border-neutral-200/80 bg-white/80 p-3 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-neutral-900/80">
+                  <span className="flex items-center justify-between gap-1 text-[9px] font-extrabold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                    Rendimiento
+                    <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[8px] font-black text-orange-700 dark:bg-lime-500/15 dark:text-lime-300">
+                      {finanzas.rendimientoListo ? finanzas.estadoRendimiento : '—'}
+                    </span>
+                  </span>
+                  <strong
+                    title={finanzas.rendimientoListo ? 'Promedio real calculado entre tanqueos' : 'Registra al menos dos tanqueos con kilometraje ascendente'}
+                    className="mt-1.5 block text-lg font-black leading-tight text-neutral-900 dark:text-white"
+                  >
+                    {finanzas.rendimientoListo ? `${finanzas.rendimiento.toFixed(1)} Km/L` : 'Calculando...'}
+                  </strong>
+                  <span className="mt-1 block text-[9px] leading-tight text-neutral-500 dark:text-neutral-500">
+                    {finanzas.rendimientoListo ? 'Promedio real entre tanqueos' : 'Faltan tanqueos con KM ascendente'}
+                  </span>
+                </div>
+
+                <div className="rounded-xl border border-neutral-200/80 bg-white/80 p-3 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-neutral-900/80">
+                  <span className="block text-[9px] font-extrabold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Gasto Mes Actual</span>
+                  <strong className="mt-1.5 block text-lg font-black leading-tight text-orange-600 dark:text-lime-400">{formatearUsd(finanzas.gastoMes)}</strong>
+                  <span className="mt-1 block text-[9px] leading-tight text-neutral-500 dark:text-neutral-500">Bs. {formatearBs(finanzas.gastoMes, tasaBcv)}</span>
+                </div>
+
+                <div className="rounded-xl border border-neutral-200/80 bg-white/80 p-3 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-neutral-900/80">
+                  <span className="block text-[9px] font-extrabold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Gasto Histórico Gasolina</span>
+                  <strong className="mt-1.5 block text-lg font-black leading-tight text-neutral-900 dark:text-white">{formatearUsd(finanzas.gastoHistorico)}</strong>
+                  <span className="mt-1 block text-[9px] leading-tight text-neutral-500 dark:text-neutral-500">Acumulado</span>
+                </div>
+
+                <div className="rounded-xl border border-neutral-200/80 bg-white/80 p-3 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-neutral-900/80">
+                  <span className="block text-[9px] font-extrabold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Costo por Km</span>
+                  <strong className="mt-1.5 block text-lg font-black leading-tight text-neutral-900 dark:text-white">
+                    {finanzas.costoPorKm !== null ? `$${finanzas.costoPorKm.toFixed(3)} / km` : '— / km'}
+                  </strong>
+                  <span className="mt-1 block text-[9px] leading-tight text-neutral-500 dark:text-neutral-500">
+                    Autonomía: {finanzas.autonomia !== null ? `${Math.round(finanzas.autonomia)} km` : '—'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -331,6 +452,7 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
         <ModalSurtirGasolina 
           userId={usuarioActual.id} 
           motoId={id} 
+          kilometrajeMoto={moto.kilometraje}
           onClose={() => setMostrarModalGasolina(false)}
           onAnotado={manejarGasolinaAnotada}
         />

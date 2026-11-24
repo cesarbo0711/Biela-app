@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { MapPin, MessageSquareText, User, Wrench } from "lucide-react";
+import { MapPin, MessageSquareText, Store, User, Wrench } from "lucide-react";
 import "./Navbar.css";
 
 /* ── ICONOS Y RUTAS DE BIELA ────────────────────────────── */
@@ -8,6 +8,7 @@ const DOCK = [
   { key: "/dashboard", label: "Garaje", Icon: Wrench },
   { key: "/mapa", label: "Estaciones", Icon: MapPin },
   { key: "/chat", label: "Biela", Icon: MessageSquareText },
+  { key: "/tiendas", label: "Tienda", Icon: Store },
   { key: "/perfil", label: "Perfil", Icon: User },
 ];
 

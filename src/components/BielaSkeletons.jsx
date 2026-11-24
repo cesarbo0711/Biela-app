@@ -185,3 +185,47 @@ export function MapSkeleton() {
     </div>
   );
 }
+
+export function TiendasSkeleton() {
+  return (
+    <div className="biela-skeleton-page mx-auto w-full max-w-6xl px-4 pb-28 pt-8" aria-hidden="true">
+      <div className="flex flex-col gap-3">
+        <Bar width="min(18rem, 72%)" height={28} radius={8} />
+        <Bar width="min(26rem, 92%)" height={10} />
+      </div>
+
+      <div className="mt-7 flex gap-3">
+        <Bar height={48} radius={14} />
+        <Bar width={92} height={48} radius={14} />
+      </div>
+
+      <div className="mt-5 flex gap-2 overflow-hidden">
+        {[84, 96, 88, 74, 68].map((width, index) => (
+          <Bar key={index} width={width} height={34} radius={999} />
+        ))}
+      </div>
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {[0, 1, 2, 3, 4, 5].map((item) => (
+          <div
+            key={item}
+            className="flex min-h-[236px] flex-col gap-4 rounded-2xl border p-4"
+            style={{ background: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <Bar width="58%" height={18} radius={6} />
+              <Bar width={64} height={20} radius={999} />
+            </div>
+            <Bar width={92} height={22} radius={999} />
+            <Bar width="88%" height={9} />
+            <Bar width="72%" height={9} />
+            <Bar width="64%" height={9} />
+            <div className="mt-auto">
+              <Bar height={48} radius={12} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

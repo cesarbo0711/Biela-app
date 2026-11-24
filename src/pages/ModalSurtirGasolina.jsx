@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../supabase';
 
-export default function ModalSurtirGasolina({ motoId, userId, onClose, onAnotado }) {
+export default function ModalSurtirGasolina({ motoId, userId, kilometrajeMoto = 0, onClose, onAnotado }) {
   const [litros, setLitros] = useState('');
   const [precioDolares, setPrecioDolares] = useState('');
   const [kilometrajeActual, setKilometrajeActual] = useState('');
@@ -23,18 +23,40 @@ export default function ModalSurtirGasolina({ motoId, userId, onClose, onAnotado
     }
 
     try {
+      const litrosNumerico = parseFloat(litros);
+      const precioNumerico = parseFloat(precioDolares);
+      const kmNumerico = parseFloat(kilometrajeActual);
+
+      const { data: motoActual } = await supabase
+        .from('motos')
+        .select('kilometraje')
+        .eq('id', motoId)
+        .maybeSingle();
+
+      const kmGuardado = Number(motoActual?.kilometraje ?? kilometrajeMoto) || 0;
+
       const { error: dbError } = await supabase
         .from('registro_gasolina')
         .insert({
           user_id: userId,
           moto_id: motoId,
-          litros: parseFloat(litros),
-          precio_dolares: parseFloat(precioDolares),
-          kilometraje: parseFloat(kilometrajeActual),
+          litros: litrosNumerico,
+          precio_dolares: precioNumerico,
+          kilometraje: kmNumerico,
+          fecha: new Date().toISOString().split('T')[0],
           notas: notas || 'Tanque full'
         });
 
       if (dbError) throw dbError;
+
+      if (Number.isFinite(kmNumerico) && kmNumerico > kmGuardado) {
+        const { error: odometroError } = await supabase
+          .from('motos')
+          .update({ kilometraje: kmNumerico })
+          .eq('id', motoId);
+
+        if (odometroError) throw odometroError;
+      }
 
       // Éxito: Limpiamos y cerramos
       setLitros('');
