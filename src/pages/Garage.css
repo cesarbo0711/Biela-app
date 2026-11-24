@@ -1,322 +1,881 @@
-/* ==========================================================================
-   ANIMACIONES BASE
-   ========================================================================== */
-.fade-in { 
-  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
-}
-@keyframes fadeIn { 
-  from { opacity: 0; transform: translateY(15px); } 
-  to { opacity: 1; transform: translateY(0); } 
+.biela-fade-in {
+  animation: garageFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* ==========================================================================
-   ESTADOS VACÍOS
-   ========================================================================== */
-.empty-state { 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  justify-content: center; 
-  padding: 4rem 2rem; 
-  background: rgba(255, 255, 255, 0.02); 
-  border: 1px dashed rgba(255, 255, 255, 0.1); 
-  border-radius: 2rem; 
-  text-align: center; 
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+@keyframes garageFadeIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ==========================================================================
-   TARJETAS 3D PREMIUM (TUS VEHÍCULOS)
-   ========================================================================== */
-.pro-moto-card { 
-  /* Fondo súper oscuro con un brillo superior muy sutil */
-  background: linear-gradient(180deg, rgba(30, 30, 30, 0.9) 0%, rgba(10, 10, 10, 1) 100%);
-  border-radius: 2.2rem; 
-  border: 1px solid rgba(255, 255, 255, 0.04); 
-  box-shadow: 
-    0 30px 60px -15px rgba(0, 0, 0, 0.9), 
-    inset 0 1px 0 rgba(255, 255, 255, 0.06); 
-  position: relative; 
-  display: flex; 
-  flex-direction: column; 
-  overflow: visible; 
-  margin-top: 6rem; /* Espacio para que la moto asome la cabeza */
-  margin-bottom: 2.5rem;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+.garage-root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  min-width: 0;
 }
 
-/* Efecto al tocar la tarjeta entera */
-.pro-moto-card:hover {
-  transform: translateY(-8px) scale(1.01);
-  border-color: rgba(132, 204, 22, 0.2);
-  box-shadow: 
-    0 40px 80px -20px rgba(0, 0, 0, 1), 
-    0 0 40px rgba(132, 204, 22, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1); 
+.garage-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-/* Contenedor de la Imagen 3D */
-.pro-image-wrapper { 
-  position: relative; 
-  width: 100%; 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  margin-top: -7rem; /* Sobresale agresivamente */
-  margin-bottom: 1.5rem;
-  z-index: 10;
-  pointer-events: none; /* Que no bloquee los clics en la tarjeta */
+.garage-section-label {
+  color: #84cc16;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
 }
 
-/* Imagen de la moto flotando y respirando */
-.pro-moto-img { 
-  width: 260px; /* Moto más imponente */
-  height: auto;
-  object-fit: contain; 
-  filter: drop-shadow(0px 40px 25px rgba(0, 0, 0, 0.8)); 
-  animation: levitate 6s ease-in-out infinite; 
-  transition: transform 0.4s ease;
+.garage-section-head h2 {
+  margin: 0.35rem 0 0.2rem;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
 }
 
-.pro-moto-card:hover .pro-moto-img {
-  transform: scale(1.05) translateY(-5px);
-  filter: drop-shadow(0px 50px 30px rgba(0, 0, 0, 0.9)); 
-}
-
-@keyframes levitate { 
-  0%, 100% { transform: translateY(0px); } 
-  50% { transform: translateY(-12px); } 
-}
-
-/* Botón Borrar (Papelera) - Más discreto para no dañar el diseño */
-.pro-btn-delete { 
-  position: absolute;
-  top: 1.2rem;
-  right: 1.2rem;
-  background: rgba(0, 0, 0, 0.4); 
-  color: #555; 
-  border: 1px solid rgba(255, 255, 255, 0.03); 
-  backdrop-filter: blur(10px); 
-  -webkit-backdrop-filter: blur(10px); 
-  padding: 0.7rem; 
-  border-radius: 50%; 
-  cursor: pointer; 
-  transition: all 0.3s ease; 
-  z-index: 20;
-}
-.pro-btn-delete:hover { 
-  background: rgba(239, 68, 68, 0.15); 
-  color: #ef4444; 
-  border-color: rgba(239, 68, 68, 0.4); 
-  transform: scale(1.1) rotate(5deg);
-}
-
-/* ==========================================================================
-   DATOS Y ESTADÍSTICAS (CRISTAL OSCURO / GLASSMORPHISM)
-   ========================================================================== */
-.pro-data-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.pro-title-main {
-  font-size: 1.6rem;
-  font-weight: 900; /* Extra Black */
-  color: #ffffff;
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
+.garage-section-head p {
   margin: 0;
-  line-height: 1.1;
+  color: var(--text-muted);
+  font-size: 0.82rem;
 }
 
-.pro-year-badge {
-  display: inline-block;
-  margin-top: 0.6rem;
+.garage-head-add {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(132, 204, 22, 0.35);
+  background: rgba(132, 204, 22, 0.08);
+  color: #a3e635;
+  font-size: 0.82rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.garage-head-add:hover {
+  background: rgba(132, 204, 22, 0.16);
+  transform: translateY(-2px);
+}
+
+.garage-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.85rem;
+  padding: 4rem 1.5rem;
+  border-radius: 2rem;
+  border: 1px dashed var(--border-color);
+  background: color-mix(in srgb, var(--bg-surface) 62%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.garage-empty-icon {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  border-radius: 1.5rem;
   background: rgba(132, 204, 22, 0.1);
   border: 1px solid rgba(132, 204, 22, 0.2);
   color: #84cc16;
-  padding: 0.3rem 1rem;
-  border-radius: 2rem;
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
 }
 
-.pro-data-grid { 
-  display: grid; 
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem; 
-  margin-bottom: 2rem;
+.garage-empty h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
 }
 
-/* Cajas de cristal */
-.pro-stat-box {
-  background: rgba(255, 255, 255, 0.015);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 1.5rem;
-  padding: 1.2rem;
+.garage-empty p {
+  max-width: 420px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.garage-empty button {
+  min-height: 52px;
+  margin-top: 0.5rem;
+  padding: 0 1.75rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #84cc16, #65a30d);
+  color: #000;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(132, 204, 22, 0.25);
+}
+
+.garage-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.garage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+}
+
+.garage-card {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  border-radius: 2rem;
+  border: 1px solid var(--border-color);
+  background: linear-gradient(180deg, rgba(22, 22, 22, 0.92), rgba(12, 12, 12, 1));
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+  min-width: 0;
+  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.garage-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(132, 204, 22, 0.5);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55), 0 0 40px rgba(132, 204, 22, 0.08);
+}
+
+.garage-stage-wrap {
+  position: relative;
+  grid-column: span 5;
+  min-width: 0;
+  min-height: 500px;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  border-radius: 2rem;
+  border: 1px solid var(--border-color);
+  background:
+    radial-gradient(circle at 50% 40%, rgba(132, 204, 22, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(18, 18, 18, 0.92), rgba(8, 8, 8, 1));
+  overflow: hidden;
+}
+
+.garage-feature-grid > .garage-feature-panel {
+  grid-column: span 7;
+}
+
+.garage-card .garage-stage-wrap {
+  grid-column: auto;
+  min-height: 310px;
+  padding: 1.5rem;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
+}
+
+.garage-card-glow {
+  position: absolute;
+  width: 90%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(132, 204, 22, 0.18), transparent 68%);
+  filter: blur(30px);
+  pointer-events: none;
+}
+
+.garage-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+}
+
+.garage-stage-ring {
+  position: absolute;
+  width: min(78%, 380px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid rgba(132, 204, 22, 0.16);
+  box-shadow: 0 0 60px rgba(132, 204, 22, 0.08) inset;
+}
+
+.garage-moto-img {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 440px);
+  max-height: 360px;
+  object-fit: contain;
+  filter: drop-shadow(0 34px 28px rgba(0, 0, 0, 0.7));
+  animation: garageLevitate 6s ease-in-out infinite;
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+.garage-card:hover .garage-moto-img,
+.garage-stage-wrap:hover .garage-moto-img {
+  transform: scale(1.05) translateY(-6px);
+  filter: drop-shadow(0 42px 34px rgba(0, 0, 0, 0.8));
+}
+
+@keyframes garageLevitate {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-11px); }
+}
+
+.garage-floor {
+  position: absolute;
+  bottom: 12%;
+  width: min(58%, 300px);
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(132, 204, 22, 0.2);
+  filter: blur(18px);
+}
+
+.garage-no-photo {
+  position: relative;
+  z-index: 2;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.garage-body {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.garage-feature-panel {
+  border-radius: 2rem;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-surface) 80%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  padding: 2rem;
+}
+
+.garage-delete {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-base) 60%, transparent);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+}
+
+.garage-delete:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.garage-card-head {
+  padding-right: 3.25rem;
+}
+
+.garage-eyebrow {
+  color: #84cc16;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.garage-card-head h3 {
+  margin: 0.4rem 0 0;
+  font-size: clamp(1.35rem, 2.8vw, 2.15rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.garage-card-head h3 span {
+  color: var(--text-muted);
+  font-weight: 700;
+  margin: 0 0.15rem;
+}
+
+.garage-year {
+  display: inline-block;
+  margin-top: 0.6rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(132, 204, 22, 0.3);
+  background: rgba(132, 204, 22, 0.1);
+  color: #a3e635;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.garage-traffic {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-base) 45%, transparent);
+}
+
+.garage-traffic-dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border-radius: 50%;
+  background: #a3a3a3;
+  box-shadow: 0 0 14px currentColor;
+}
+
+.garage-traffic div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.garage-traffic strong {
+  font-size: 0.88rem;
+  font-weight: 900;
+}
+
+.garage-traffic small {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.garage-traffic.tone-ok { border-color: rgba(74, 222, 128, 0.28); }
+.garage-traffic.tone-ok .garage-traffic-dot { background: #4ade80; color: #4ade80; }
+.garage-traffic.tone-ok strong { color: #4ade80; }
+.garage-traffic.tone-warn { border-color: rgba(251, 191, 36, 0.28); }
+.garage-traffic.tone-warn .garage-traffic-dot { background: #fbbf24; color: #fbbf24; }
+.garage-traffic.tone-warn strong { color: #fbbf24; }
+.garage-traffic.tone-danger { border-color: rgba(248, 113, 113, 0.32); }
+.garage-traffic.tone-danger .garage-traffic-dot { background: #f87171; color: #f87171; }
+.garage-traffic.tone-danger strong { color: #f87171; }
+
+.garage-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.garage-metric {
+  position: relative;
+  min-width: 0;
+  min-height: 92px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+  gap: 0.35rem;
+  padding: 0.9rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-base) 45%, transparent);
 }
 
-.pro-stat-label { 
-  font-size: 0.65rem; 
-  color: #666; 
-  font-weight: 800; 
+.garage-metric > span {
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.12em; 
-  margin-bottom: 0.4rem;
 }
 
-.pro-stat-value { 
-  font-size: 1.8rem; 
-  font-weight: 900; 
-  color: #ffffff; 
-  line-height: 1; 
-  display: flex;
-  align-items: baseline;
-  gap: 0.2rem;
+.garage-metric strong {
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
 }
 
-.pro-stat-value small { 
-  font-size: 0.85rem; 
-  color: #888; 
-  font-weight: 700; 
+.garage-metric strong small {
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
 }
 
-/* Lapicito Editar KM */
-.btn-edit-km { 
+.garage-metric-text {
+  font-size: 0.95rem !important;
+  overflow-wrap: anywhere;
+}
+
+.garage-edit-km {
   position: absolute;
-  top: 0.8rem;
-  right: 0.8rem;
-  background: rgba(255, 255, 255, 0.05); 
-  border: 1px solid transparent; 
-  color: #888; 
-  cursor: pointer; 
-  transition: all 0.3s; 
-  padding: 0.4rem;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
   border-radius: 50%;
-}
-.btn-edit-km:hover { 
-  color: #84cc16; 
-  background: rgba(132, 204, 22, 0.1);
-  border-color: rgba(132, 204, 22, 0.2);
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
-/* Botón Ver Bitácora (Eléctrico) */
-.btn-bitacora {
-  width: 100%;
+.garage-edit-km:hover {
+  color: #84cc16;
+  background: rgba(132, 204, 22, 0.1);
+  border-color: rgba(132, 204, 22, 0.3);
+}
+
+.garage-history {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0.9rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-base) 40%, transparent);
+}
+
+.garage-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.garage-history-head span {
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.garage-history-head button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: none;
+  background: none;
+  color: #84cc16;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.garage-history ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.garage-history li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.garage-history-dot {
+  width: 7px;
+  height: 7px;
+  margin-top: 0.35rem;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: #84cc16;
+  box-shadow: 0 0 10px rgba(132, 204, 22, 0.7);
+}
+
+.garage-history li div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.garage-history li strong {
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.garage-history li small {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.garage-history-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.garage-actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.garage-action-primary {
+  min-height: 54px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.03);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  font-weight: 800;
-  font-size: 1rem;
-  padding: 1.1rem;
-  border-radius: 1.2rem;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 0.55rem;
+  padding: 0 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-base) 55%, transparent);
+  color: var(--text-main);
+  font-size: 0.86rem;
+  font-weight: 900;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
 }
-.btn-bitacora:hover {
+
+.garage-action-primary:hover {
   background: #84cc16;
   border-color: #84cc16;
-  color: #000000;
-  box-shadow: 0 10px 25px rgba(132, 204, 22, 0.3);
+  color: #000;
   transform: translateY(-2px);
 }
-.btn-bitacora:active { transform: scale(0.97); }
 
-/* ==========================================================================
-   MODALES (ESTILO VISION OS / GLASS)
-   ========================================================================== */
-.modal-overlay { 
-  position: fixed; 
-  inset: 0; 
-  background-color: rgba(0, 0, 0, 0.85); 
-  backdrop-filter: blur(20px); 
-  -webkit-backdrop-filter: blur(20px); 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  z-index: 99999; 
-  padding: 1rem; 
-  animation: fadeIn 0.3s ease-out; 
+.garage-action-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
 }
 
-.modal-content { 
-  background: linear-gradient(180deg, rgba(30, 30, 30, 0.95) 0%, rgba(15, 15, 15, 1) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1); 
-  border-radius: 2.2rem; 
-  padding: 2.5rem 2rem; 
-  width: 100%; 
-  max-width: 420px; 
-  max-height: 90vh; 
-  overflow-y: auto; 
-  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05); 
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
-}
-@keyframes slideUp { 
-  from { opacity: 0; transform: translateY(50px) scale(0.95); } 
-  to { opacity: 1; transform: translateY(0) scale(1); } 
+.garage-action-secondary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
 }
 
-.modal-header { text-align: center; margin-bottom: 2.5rem; }
-.modal-title { margin: 0; font-size: 1.8rem; font-weight: 900; color: #ffffff; letter-spacing: -0.02em; }
-.modal-subtitle { margin: 0.5rem 0 0 0; color: #888; font-size: 0.95rem; }
-
-.modal-form { display: flex; flex-direction: column; gap: 1.5rem; }
-.input-group label { display: block; font-size: 0.75rem; font-weight: 800; color: #888; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
-
-.input-field, .input-file { 
-  width: 100%; 
-  background-color: rgba(0,0,0,0.3); 
-  border: 1px solid rgba(255, 255, 255, 0.08); 
-  color: #ffffff; 
-  padding: 1.2rem; 
-  border-radius: 1.2rem; 
-  outline: none; 
-  font-size: 1.1rem; 
-  transition: all 0.3s ease; 
-  box-sizing: border-box; 
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-}
-.input-field:focus { 
-  border-color: #84cc16; 
-  background-color: rgba(132, 204, 22, 0.02);
-  box-shadow: 0 0 0 4px rgba(132, 204, 22, 0.1), inset 0 2px 4px rgba(0,0,0,0.2); 
-}
-.input-file::-webkit-file-upload-button { 
-  background-color: rgba(255,255,255,0.1); color: #ffffff; border: none; padding: 0.6rem 1.2rem; border-radius: 0.8rem; margin-right: 1rem; cursor: pointer; font-weight: 800; transition: background 0.2s;
-}
-.input-file::-webkit-file-upload-button:hover { background-color: rgba(255,255,255,0.2); }
-
-.modal-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
-.modal-actions button { 
-  flex: 1; font-weight: 900; font-size: 1.05rem; padding: 1.2rem; border-radius: 1.2rem; cursor: pointer; border: none; transition: all 0.3s; 
-}
-.btn-secondary { background-color: rgba(255,255,255,0.05); color: #ccc; }
-.btn-secondary:hover { background-color: rgba(255,255,255,0.1); color: #fff; }
-.btn-primary { background-color: #84cc16; color: #000000; box-shadow: 0 10px 25px rgba(132, 204, 22, 0.2); }
-.btn-primary:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(132, 204, 22, 0.4); }
-
-.delete-modal { max-width: 360px; text-align: center; }
-.btn-danger { background-color: #ef4444; color: #ffffff; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.2); }
-.btn-danger:hover:not(:disabled) { background-color: #dc2626; box-shadow: 0 15px 35px rgba(239, 68, 68, 0.4); transform: translateY(-3px); }
-
-.mini-modal { max-width: 340px; text-align: center; }
-.km-input-huge { 
-  font-size: 3rem !important; 
-  text-align: center; 
-  font-weight: 900; 
-  padding: 1.5rem !important;
+.garage-action-secondary:hover {
   color: #84cc16;
+  border-color: rgba(132, 204, 22, 0.45);
+  background: rgba(132, 204, 22, 0.06);
+}
+
+.biela-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.84);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  animation: garageFadeIn 0.25s ease-out;
+  overflow-y: auto;
+}
+
+.biela-modal-panel {
+  width: min(540px, 100%);
+  max-height: 85vh;
+  max-height: 85dvh;
+  overflow-y: auto;
+  padding: 2rem;
+  border-radius: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, rgba(24, 24, 24, 0.98), rgba(10, 10, 10, 1));
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  animation: garageModalUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes garageModalUp {
+  from { opacity: 0; transform: translateY(36px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.biela-modal-panel-mini {
+  width: min(400px, 100%);
+  text-align: center;
+}
+
+.biela-modal-head {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.biela-modal-badge {
+  color: #84cc16;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.biela-modal-head h2,
+.biela-modal-danger-title {
+  margin: 0.5rem 0 0;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 900;
   letter-spacing: -0.03em;
+}
+
+.biela-modal-head p,
+.biela-modal-danger-copy {
+  margin: 0.45rem 0 0;
+  color: #a3a3a3;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.biela-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.biela-modal-upload label {
+  display: block;
+  margin-top: 0.35rem;
+  color: #a3a3a3;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.biela-modal-input-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.biela-modal-input-year {
+  max-width: 110px;
+}
+
+.biela-modal-input-group {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.biela-modal-input-group label {
+  color: #a3a3a3;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.biela-modal-input-group input,
+.biela-modal-km-input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.biela-modal-input-group input::placeholder { color: #666; }
+
+.biela-modal-input-group input:focus,
+.biela-modal-km-input:focus {
+  border-color: #84cc16;
+  box-shadow: 0 0 0 4px rgba(132, 204, 22, 0.12);
+}
+
+.biela-modal-km-input {
+  min-height: 84px;
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #84cc16;
+  letter-spacing: -0.04em;
+}
+
+.biela-modal-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.biela-modal-actions button {
+  min-height: 52px;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.biela-modal-actions button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.biela-modal-btn-secondary {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #d4d4d4;
+}
+
+.biela-modal-btn-primary {
+  border: none;
+  background: linear-gradient(135deg, #84cc16, #65a30d);
+  color: #000;
+  box-shadow: 0 12px 30px rgba(132, 204, 22, 0.25);
+}
+
+.biela-modal-btn-danger {
+  border: none;
+  background: #dc2626;
+  color: #fff;
+  box-shadow: 0 12px 30px rgba(220, 38, 38, 0.25);
+}
+
+.biela-modal-danger-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.biela-modal-danger-title { margin-top: 0; }
+
+:root.light-mode .garage-section-label,
+:root.light-mode .garage-eyebrow,
+:root.light-mode .garage-year,
+:root.light-mode .garage-head-add,
+:root.light-mode .garage-history-head button {
+  color: #4d7c0f;
+}
+
+:root.light-mode .garage-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 245, 240, 1));
+  border-color: rgba(23, 23, 23, 0.1);
+  box-shadow: 0 30px 70px rgba(23, 23, 23, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+:root.light-mode .garage-stage-wrap {
+  background:
+    radial-gradient(circle at 50% 40%, rgba(132, 204, 22, 0.14), transparent 55%),
+    linear-gradient(180deg, rgba(248, 245, 240, 1), rgba(236, 230, 220, 1));
+  border-color: rgba(23, 23, 23, 0.1);
+}
+
+:root.light-mode .garage-moto-img {
+  filter: drop-shadow(0 30px 24px rgba(23, 23, 23, 0.25));
+}
+
+:root.light-mode .garage-feature-panel,
+:root.light-mode .garage-traffic,
+:root.light-mode .garage-metric,
+:root.light-mode .garage-history {
+  border-color: rgba(23, 23, 23, 0.1);
+}
+
+:root.light-mode .garage-traffic.tone-ok strong { color: #15803d; }
+:root.light-mode .garage-traffic.tone-ok .garage-traffic-dot { background: #15803d; color: #15803d; }
+:root.light-mode .garage-traffic.tone-warn strong { color: #b45309; }
+:root.light-mode .garage-traffic.tone-warn .garage-traffic-dot { background: #b45309; color: #b45309; }
+:root.light-mode .garage-traffic.tone-danger strong { color: #dc2626; }
+:root.light-mode .garage-traffic.tone-danger .garage-traffic-dot { background: #dc2626; color: #dc2626; }
+
+:root.light-mode .biela-modal-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 245, 240, 1));
+  border-color: rgba(23, 23, 23, 0.12);
+  box-shadow: 0 40px 100px rgba(23, 23, 23, 0.2);
+}
+
+:root.light-mode .biela-modal-head h2,
+:root.light-mode .biela-modal-danger-title { color: #171717; }
+:root.light-mode .biela-modal-badge { color: #4d7c0f; }
+:root.light-mode .biela-modal-head p,
+:root.light-mode .biela-modal-danger-copy,
+:root.light-mode .biela-modal-input-group label,
+:root.light-mode .biela-modal-upload label { color: #6b6560; }
+:root.light-mode .biela-modal-input-group input,
+:root.light-mode .biela-modal-km-input { background: #fff; color: #171717; border-color: rgba(23, 23, 23, 0.14); }
+:root.light-mode .biela-modal-input-group input::placeholder { color: #9a938b; }
+:root.light-mode .biela-modal-btn-secondary {
+  background: #fff;
+  color: #171717;
+  border-color: rgba(23, 23, 23, 0.14);
+}
+
+@media (max-width: 1024px) {
+  .garage-feature-grid { grid-template-columns: minmax(0, 1fr); }
+  .garage-stage-wrap,
+  .garage-feature-grid > .garage-feature-panel { grid-column: 1 / -1; }
+  .garage-stage-wrap { min-height: 420px; }
+}
+
+@media (max-width: 768px) {
+  .garage-grid { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+}
+
+@media (max-width: 640px) {
+  .garage-root { gap: 1.25rem; }
+  .garage-section-head h2 { font-size: 1.4rem; }
+  .garage-head-add span { display: none; }
+  .garage-head-add { width: 48px; padding: 0; justify-content: center; }
+  .garage-feature-grid { gap: 1rem; }
+  .garage-stage-wrap { min-height: 300px; padding: 1rem; border-radius: 1.4rem; }
+  .garage-card .garage-stage-wrap { min-height: 240px; }
+  .garage-moto-img { max-height: 240px; }
+  .garage-no-photo { width: 130px; height: 130px; }
+  .garage-feature-panel { padding: 1.25rem; border-radius: 1.4rem; }
+  .garage-body { padding: 1.25rem; }
+  .garage-card { border-radius: 1.4rem; }
+  .garage-card-head h3 { font-size: 1.3rem; }
+  .garage-action-primary { font-size: 0.78rem; }
+  .garage-action-row { grid-template-columns: minmax(0, 1fr); }
+  .biela-modal-panel { padding: 1.35rem; border-radius: 1.5rem; }
+  .biela-modal-input-row { grid-template-columns: minmax(0, 1fr); }
+  .biela-modal-input-year { max-width: none; }
 }

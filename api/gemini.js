@@ -26,7 +26,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { promptUsuario, contextoVehiculo, historial, imagenBase64, nombreUsuario, motoId } = req.body;
+    const { promptUsuario, contextoVehiculo, historial, imagenBase64, nombreUsuario, motoId, esEmergencia } = req.body;
+    const modoEmergencia = esEmergencia === true;
 
     const apiKey = process.env.OPENROUTER_API_KEY;
     const modelo = process.env.OPENROUTER_MODEL || 'openrouter/free';
@@ -41,6 +42,7 @@ export default async function handler(req, res) {
 
     const systemPrompt = `Eres "BujIA", el mecánico de confianza de Biela para motociclistas en Venezuela.
 Hablas con ${nombreCliente}. Vehículo en contexto: ${vehiculoActual}.
+${modoEmergencia ? `ALERTA DE EMERGENCIA EN VÍA: El usuario está accidentado en la calle. Responde en formato ultra-corto, en 3 pasos numerados de revisión rápida (qué revisar primero con las manos o herramientas básicas en 2 minutos), advierte seguridad vial (orillarse, luces) y recomiéndale revisar la pestaña Tiendas/Auxilio Vial de Biela si necesita grúa o cauchera. NUNCA intentes registrar en bitácora durante una emergencia.` : ''}
 
 PERSONALIDAD Y ESTILO:
 - Habla como un pana mecánico venezolano natural, cercano y fluido. Sé claro y útil, sin sonar robótico.
@@ -112,8 +114,8 @@ OPCIÓN B - CHAT NORMAL (default):
       body: JSON.stringify({
         model: modelo,
         messages,
-        max_tokens: 1024,
-        temperature: 0.4,
+        max_tokens: modoEmergencia ? 512 : 1024,
+        temperature: modoEmergencia ? 0.2 : 0.4,
         response_format: { type: 'json_object' },
       }),
     });
@@ -141,6 +143,9 @@ OPCIÓN B - CHAT NORMAL (default):
 
     if (!respuestaIA || typeof respuestaIA !== 'object') {
       respuestaIA = { intencion: 'chat', respuesta_usuario: 'No pude procesar eso bien. Intenta de nuevo.' };
+    }
+    if (modoEmergencia && respuestaIA.intencion === 'registrar_mantenimiento') {
+      respuestaIA.intencion = 'chat';
     }
     if (respuestaIA.intencion !== 'registrar_mantenimiento' || !esOrdenDeRegistroExplicita(promptUsuario)) {
       if (respuestaIA.intencion === 'registrar_mantenimiento') {

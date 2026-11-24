@@ -135,6 +135,13 @@ export default function MotoDetail() {
     cargarDatos();
   }, [id]);
 
+  useEffect(() => {
+    if (cargandoInicial || !moto) return undefined;
+    if (new URLSearchParams(window.location.search).get('exportar') !== 'pdf') return undefined;
+    const temporizador = window.setTimeout(() => window.print(), 700);
+    return () => window.clearTimeout(temporizador);
+  }, [cargandoInicial, moto]);
+
   const cargarDatos = async () => {
     try {
       const { data: motoData } = await supabase.from('motos').select('*').eq('id', id).single();
@@ -231,22 +238,45 @@ export default function MotoDetail() {
     setIsModalOpen(true);
   };
 
+  const exportarHojaDeVida = () => {
+    const tituloAnterior = document.title;
+    document.title = `Hoja_de_Vida_${moto.marca}_${moto.modelo}`;
+    const restaurarTitulo = () => {
+      document.title = tituloAnterior;
+      window.removeEventListener('afterprint', restaurarTitulo);
+    };
+    window.addEventListener('afterprint', restaurarTitulo);
+    window.print();
+  };
+
   const finanzas = calcularFinanzas(historialGasolina);
+  const mantenimientosReporte = [...historial].sort((a, b) => String(a.fecha_servicio).localeCompare(String(b.fecha_servicio)));
+  const totalLitrosReporte = historialGasolina.reduce((total, registro) => total + (Number(registro.litros) || 0), 0);
+  const codigoVerificacion = String(moto?.id ?? '').slice(0, 8).toUpperCase();
+  const fechaEmision = new Date().toLocaleDateString('es-VE', { day: '2-digit', month: 'long', year: 'numeric' });
 
   if (cargandoInicial) return <MotoDetailSkeleton />;
 if (!moto) return <div className="min-h-screen flex items-center justify-center text-[var(--text-main)]">No encontramos esta moto.</div>;
 
   return (
     <>
-      <div className="biela-fade-in min-h-screen pb-32 fade-in bg-transparent">
+      <div className="biela-fade-in no-print min-h-screen pb-32 fade-in bg-transparent">
         
         {/* HEADER PREMIUM (ADAPTATIVO) */}
-        <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-black/5 dark:border-white/5 bg-white/70 dark:bg-[#111111]/80 px-6 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-black/5 dark:border-white/5 bg-white/70 dark:bg-[#111111]/80 px-6 py-4 flex flex-wrap items-center justify-between gap-y-2">
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white font-bold transition-colors">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Garaje
           </button>
           <h1 className="text-lg font-black tracking-tight uppercase text-neutral-900 dark:text-white">{moto.marca} <span className="opacity-50">/</span> {moto.modelo}</h1>
+          <button
+            type="button"
+            onClick={exportarHojaDeVida}
+            title="Descargar hoja de vida en PDF"
+            className="btn-exportar-pdf flex shrink-0 items-center gap-2 rounded-xl border border-neutral-300 dark:border-white/10 bg-white/60 dark:bg-white/5 px-3 py-2 text-[11px] font-extrabold text-neutral-700 dark:text-neutral-200 transition-colors hover:border-lime-500 hover:text-lime-700 dark:hover:text-lime-300 sm:text-xs"
+          >
+            📄 Hoja de Vida (PDF)
+          </button>
         </header>
 
         <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 text-neutral-900 dark:text-white">
@@ -439,7 +469,7 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
       {/* BOTÓN FLOTANTE SURTIR GASOLINA */}
       <button 
         onClick={() => setMostrarModalGasolina(true)}
-        className="fixed bottom-24 right-6 bg-gradient-to-r from-lime-400 to-lime-600 p-4 rounded-full shadow-[0_5px_20px_rgba(132,204,22,0.4)] hover:scale-105 active:scale-95 transition-transform z-[6000] flex items-center justify-center text-black"
+        className="no-print fixed bottom-24 right-6 bg-gradient-to-r from-lime-400 to-lime-600 p-4 rounded-full shadow-[0_5px_20px_rgba(132,204,22,0.4)] hover:scale-105 active:scale-95 transition-transform z-[6000] flex items-center justify-center text-black"
         title="Surtir Gasolina"
       >
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -460,7 +490,7 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
 
       {/* MODAL: NUEVO SERVICIO */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="no-print fixed inset-0 z-[99999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gradient-to-b dark:from-[#1a1a1a] dark:to-[#0a0a0a] border border-neutral-200 dark:border-white/10 w-full max-w-sm rounded-[2rem] p-8 shadow-2xl">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-black text-neutral-900 dark:text-white">Servicio</h2>
@@ -516,7 +546,7 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
 
       {/* MODAL: CONFIRMAR ELIMINACIÓN */}
       {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="no-print fixed inset-0 z-[99999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#111] border border-red-500/20 w-full max-w-xs rounded-3xl p-6 shadow-2xl text-center">
             <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100 dark:border-red-500/20 text-red-500">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -543,6 +573,83 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
           </div>
         </div>
       )}
+
+      <section className="print-only-report hidden print:block">
+        <div className="print-report-sheet">
+          <header className="print-report-header">
+            <h1 className="print-report-title">BIELA — HOJA DE VIDA VEHICULAR</h1>
+            <div className="print-report-meta">
+              <p><span>Fecha de emisión</span><strong>{fechaEmision}</strong></p>
+              <p><span>Código de verificación</span><strong>{codigoVerificacion}</strong></p>
+            </div>
+          </header>
+
+          <section className="print-report-block">
+            <h2>Ficha Técnica del Vehículo</h2>
+            <div className="print-report-grid">
+              <div className="print-report-field"><span>Marca</span><strong>{moto.marca}</strong></div>
+              <div className="print-report-field"><span>Modelo</span><strong>{moto.modelo}</strong></div>
+              <div className="print-report-field"><span>Año</span><strong>{moto.year}</strong></div>
+              <div className="print-report-field"><span>Odómetro Verificado</span><strong>{Number(moto.kilometraje).toLocaleString('en-US')} KM</strong></div>
+              <div className="print-report-field"><span>Aceite recomendado</span><strong>{moto.tipo_aceite || 'No registrado'}</strong></div>
+              <div className="print-report-field">
+                <span>Rendimiento Promedio</span>
+                <strong>{finanzas.rendimientoListo ? `${finanzas.rendimiento.toFixed(1)} Km/L` : 'Sin datos suficientes'}</strong>
+              </div>
+            </div>
+          </section>
+
+          <section className="print-report-block">
+            <h2>Tabla Cronológica de Mantenimientos Realizados</h2>
+            <table className="print-report-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Servicio Realizado</th>
+                  <th>Kilometraje</th>
+                  <th>Próximo Cambio</th>
+                  <th>Notas / Observaciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {mantenimientosReporte.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="print-report-empty">No hay mantenimientos registrados hasta la fecha.</td>
+                  </tr>
+                ) : (
+                  mantenimientosReporte.map((item) => {
+                    const intervalo = Number(item.catalogo_servicios?.intervalo_km) || 0;
+                    const kmProximo = Number(item.km_al_momento) + intervalo;
+
+                    return (
+                      <tr key={item.id}>
+                        <td>{item.fecha_servicio}</td>
+                        <td>{item.catalogo_servicios?.nombre || 'Mantenimiento General'}</td>
+                        <td>{Number(item.km_al_momento).toLocaleString('en-US')} KM</td>
+                        <td>{intervalo > 0 ? `${kmProximo.toLocaleString('en-US')} KM` : '—'}</td>
+                        <td>{item.notas || '—'}</td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </section>
+
+          <section className="print-report-block">
+            <h2>Resumen de Consumo de Combustible</h2>
+            <div className="print-report-stats">
+              <div><span>Total de recargas</span><strong>{historialGasolina.length}</strong></div>
+              <div><span>Total de litros consumidos</span><strong>{totalLitrosReporte.toFixed(2)} L</strong></div>
+              <div><span>Inversión acumulada</span><strong>{formatearUsd(finanzas.gastoHistorico)}</strong></div>
+            </div>
+          </section>
+
+          <footer className="print-report-footer">
+            Documento generado digitalmente por Biela App (biela-app.vercel.app) — Historial de mantenimiento preventivo.
+          </footer>
+        </div>
+      </section>
     </>
   );
 }

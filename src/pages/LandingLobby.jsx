@@ -7,12 +7,13 @@ import {
   Bot,
   Check,
   ChevronDown,
-  Download,
   Eye,
   EyeOff,
+  FileText,
   Fuel,
   Gauge,
   KeyRound,
+  LifeBuoy,
   Loader2,
   Lock,
   Mail,
@@ -20,9 +21,9 @@ import {
   Menu,
   MessageCircle,
   ShieldCheck,
-  Smartphone,
   Sparkles,
   Star,
+  Wallet,
   Wrench,
   X,
 } from 'lucide-react';
@@ -30,61 +31,62 @@ import { supabase } from '../supabase';
 import './LandingLobby.css';
 
 const NAV_LINKS = [
-  { label: 'Funciones', href: '#funciones' },
-  { label: 'Comunidad', href: '#comunidad' },
+  { label: 'El Pasaporte Digital', href: '#pasaporte' },
+  { label: 'Ecosistema', href: '#ecosistema' },
+  { label: 'Auxilio 24/7', href: '#auxilio' },
   { label: 'Preguntas', href: '#preguntas' },
-];
-
-const FLOATING_ICONS = [
-  { icon: Wrench, label: 'Llave mecánica', className: 'float-one' },
-  { icon: Fuel, label: 'Surtidor', className: 'float-two' },
-  { icon: Bot, label: 'IA BujIA', className: 'float-three' },
-  { icon: ShieldCheck, label: 'Mantenimiento', className: 'float-four' },
-];
-
-const BENEFITS = [
-  { icon: Wrench, title: 'Bitácora Inteligente', desc: 'Control exacto de aceite, bujía y repuestos.' },
-  { icon: Gauge, title: 'Rendimiento Real', desc: 'Calcula cuánto te rinde cada litro en dólares.' },
-  { icon: MapPin, title: 'Radar Comunitario', desc: 'Reportes en vivo de estaciones surtiendo.' },
-  { icon: Bot, title: 'Diagnóstico BujIA', desc: 'Envía fotos o describe fallas al instante.' },
-  { icon: Activity, title: 'Salud Visual', desc: 'Radiografía interactiva de cada pieza de tu moto.' },
-];
-
-const METRICS = [
-  { value: '24/7', label: 'Asistencia mecánica IA' },
-  { value: '100%', label: 'Gratis para motorizados' },
-  { value: '5+', label: 'Sistemas de moto monitoreados' },
-  { value: 'En Vivo', label: 'Mapa comunitario Vzla' },
-];
-
-const FAQS = [
-  {
-    question: '¿Cómo creo mi cuenta en Biela?',
-    answer: 'Toca «Entrar al Garaje», cambia a «Crear Cuenta», escribe tu correo y contraseña. Si tu proveedor de correo exige confirmación, revisa tu bandeja y luego inicia sesión.',
-  },
-  {
-    question: '¿Cómo funciona el asistente mecánico BujIA?',
-    answer: 'Cuéntale qué le pasa a tu moto o envía una foto desde el chat. BujIA analiza el contexto, te da una orientación preventiva y te recomienda cuándo acudir a un taller certificado.',
-  },
-  {
-    question: '¿El mapa de gasolina funciona en toda Venezuela?',
-    answer: 'El radar es comunitario: muestra reportes de estaciones en Venezuela y se mejora con cada motorizado que comparte si una bomba está surtiendo, cerrada o solo con gasoil.',
-  },
-  {
-    question: '¿Tiene algún costo usar la aplicación?',
-    answer: 'No. Biela es gratis para motorizados. Puedes instalarla como PWA y usar el garaje, la bitácora, el radar y BujIA sin suscripción.',
-  },
-  {
-    question: '¿Puedo registrar varias motos en mi garaje?',
-    answer: 'Sí. Desde tu Garaje puedes añadir todas tus motos, llevar una bitácora independiente por vehículo y revisar el odómetro y mantenimientos de cada una.',
-  },
 ];
 
 const AVATARS = [
   'https://api.dicebear.com/7.x/avataaars/svg?seed=Andres&backgroundColor=84cc16',
   'https://api.dicebear.com/7.x/avataaars/svg?seed=María&backgroundColor=ffd5dc',
   'https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos&backgroundColor=b6e3f4',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Luisa&backgroundColor=c0aede',
+];
+
+const TESTIMONIALS = [
+  {
+    kicker: 'COMPRA-VENTA TRANSPARENTE',
+    quote: 'Vendí mi Bera en dos días. Le pasé el enlace de mi Biela-Historial por WhatsApp y el comprador vio cada aceite, repuesto y kilómetro. Se acabaron los cuentos y hasta defendí mejor precio.',
+    name: 'Andrés R.',
+    role: 'Motorizado · Caracas',
+    avatar: AVATARS[0],
+    variant: 'lime',
+  },
+  {
+    kicker: 'RESCATE EN RUTA',
+    quote: 'Se me espichó un caucho de noche. Toqué el Modo Emergencia de BujIA, seguí los 3 pasos y desde Auxilio Vial contacté una cauchera 24/7. No me quedé varada sin rumbo.',
+    name: 'María G.',
+    role: 'Bera + Empire · Maracay',
+    avatar: AVATARS[1],
+    variant: 'dark',
+  },
+  {
+    kicker: 'CONTROL DE GASTOS',
+    quote: 'Ahora sé exactamente cuánto me cuesta cada kilómetro. Con la tasa BCV integrada veo rendimiento en Km/L y gasto mensual en USD y bolívares sin hacer cuentas a mano.',
+    name: 'Carlos M.',
+    role: 'Motorizado · Valencia',
+    avatar: AVATARS[2],
+    variant: 'dark',
+  },
+];
+
+const FAQS = [
+  {
+    question: '¿Tus datos están seguros?',
+    answer: 'Sí. Tu garaje, bitácora y reportes viven en Supabase con autenticación por correo y acceso por usuario. Nadie ve tu historial salvo que tú compartas el enlace verificable o exportes tu PDF.',
+  },
+  {
+    question: '¿Realmente es gratis?',
+    answer: 'Sí. Biela es gratis para motorizados: garaje, bitácora, BujIA, radar comunitario, directorio de auxilio y exportación de la Hoja de Vida PDF sin suscripción.',
+  },
+  {
+    question: '¿Funciona sin internet?',
+    answer: 'Biela se instala como PWA y abre desde tu pantalla de inicio. La interfaz y tus datos recientes quedan disponibles en el teléfono; cuando vuelve la conexión, se sincronizan los cambios.',
+  },
+  {
+    question: '¿Cómo exporto la Hoja de Vida PDF?',
+    answer: 'Desde el detalle de tu moto toca «Hoja de Vida (PDF)». Biela arma un documento con ficha técnica, odómetro certificado, servicios, repuestos y rendimiento real, listo para compartir al traspasar.',
+  },
 ];
 
 function mapAuthError(message) {
@@ -99,90 +101,171 @@ function mapAuthError(message) {
   return message || 'Ocurrió un error. Intenta de nuevo.';
 }
 
-function PhoneMockup() {
+function HeroVisual() {
   return (
-    <div className="landing-phone" aria-hidden="true">
-      <div className="landing-phone-notch" />
-      <div className="landing-phone-screen">
-        <div className="landing-phone-top">
-          <div className="landing-phone-brand">
-            <span className="landing-phone-brand-mark"><Wrench size={12} strokeWidth={3} /></span>
-            Biela
-          </div>
-          <span className="landing-phone-time">8:42</span>
+    <motion.div
+      className="landing-hero-visual"
+      initial={{ opacity: 0, y: 34, rotate: -1.5 }}
+      animate={{ opacity: 1, y: 0, rotate: 0 }}
+      transition={{ duration: 0.7, delay: 0.08 }}
+    >
+      <div className="landing-visual-orbit" aria-hidden="true" />
+
+      <motion.div
+        className="landing-float-widget landing-float-doc"
+        initial={{ opacity: 0, x: -18 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.35 }}
+        whileHover={{ y: -4 }}
+      >
+        <span className="landing-float-icon landing-float-icon-doc"><FileText size={18} /></span>
+        <span>
+          <strong>📄 Biela-Historial PDF</strong>
+          <small>Verificado</small>
+        </span>
+        <span className="landing-float-check"><Check size={14} strokeWidth={3} /></span>
+      </motion.div>
+
+      <motion.div
+        className="landing-float-widget landing-float-fuel"
+        initial={{ opacity: 0, x: 18 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.45 }}
+        whileHover={{ y: -4 }}
+      >
+        <span className="landing-float-icon landing-float-icon-fuel"><Fuel size={18} /></span>
+        <span>
+          <strong>⛽ Rendimiento: 38.4 Km/L</strong>
+          <small>$0.013/km</small>
+        </span>
+      </motion.div>
+
+      <div className="landing-app-frame">
+        <div className="landing-app-top">
+          <span className="landing-app-brand"><Wrench size={14} strokeWidth={3} /> Biela</span>
+          <span className="landing-app-status"><span /> En vivo</span>
         </div>
 
-        <div className="landing-phone-card">
-          <div className="landing-phone-card-head">
+        <div className="landing-moto-card">
+          <div className="landing-moto-card-glow" aria-hidden="true" />
+          <div className="landing-moto-card-head">
             <div>
-              <span className="landing-phone-overline">MI GARAJE</span>
+              <span>MI GARAJE</span>
               <strong>Bera 150</strong>
             </div>
-            <span className="landing-phone-chip">OK</span>
+            <span className="landing-moto-card-badge">OK</span>
           </div>
-          <div className="landing-phone-odometer">
-            <Gauge size={16} />
-            <span>8.420</span>
-            <small>KM</small>
+          <div className="landing-moto-odometer">
+            <Gauge size={18} />
+            <strong>8.420</strong>
+            <span>KM</span>
           </div>
-          <div className="landing-phone-bar"><span /></div>
-          <div className="landing-phone-row">
-            <span>Aceite</span>
-            <strong>20W-50 · 72%</strong>
+          <div className="landing-moto-traffic">🟢 Aceite óptimo • Faltan 1,240 km</div>
+          <div className="landing-moto-meter"><span /></div>
+          <div className="landing-moto-meta">
+            <span>Aceite 20W-50</span>
+            <strong>72%</strong>
           </div>
-          <div className="landing-phone-row">
-            <span>Próximo service</span>
-            <strong>1.580 km</strong>
+          <div className="landing-moto-meta">
+            <span>Rendimiento</span>
+            <strong>38.4 Km/L</strong>
           </div>
         </div>
 
-        <div className="landing-phone-chat">
-          <div className="landing-phone-bujia">
-            <Bot size={16} />
-            <span>BujIA</span>
-          </div>
-          <p>Todo al día. Te aviso antes de que toque el cambio de aceite. 🏍️</p>
+        <div className="landing-app-bars" aria-hidden="true">
+          <span style={{ height: '38%' }} />
+          <span style={{ height: '62%' }} />
+          <span style={{ height: '48%' }} />
+          <span style={{ height: '84%' }} />
+          <span style={{ height: '56%' }} />
+          <span style={{ height: '94%' }} />
+          <span style={{ height: '70%' }} />
         </div>
 
-        <div className="landing-phone-tabs">
-          <span className="active"><Gauge size={14} /></span>
-          <span><Fuel size={14} /></span>
-          <span><MessageCircle size={14} /></span>
-          <span><ShieldCheck size={14} /></span>
+        <div className="landing-app-bottom">
+          <span><FileText size={15} /> Hoja de Vida</span>
+          <span><LifeBuoy size={15} /> Auxilio 24/7</span>
+          <span><Bot size={15} /> BujIA</span>
         </div>
       </div>
-    </div>
+
+      <motion.div
+        className="landing-phone-mini"
+        initial={{ opacity: 0, y: 22, rotate: 5 }}
+        animate={{ opacity: 1, y: 0, rotate: 0 }}
+        transition={{ duration: 0.6, delay: 0.28 }}
+        whileHover={{ y: -5 }}
+      >
+        <div className="landing-phone-mini-top">
+          <span className="landing-phone-mini-avatar"><Bot size={15} /></span>
+          <span>BujIA</span>
+          <span className="landing-phone-mini-live">EN VÍA</span>
+        </div>
+        <p>Modo Emergencia activo. Te conecto con una cauchera cerca de ti. 🛞</p>
+        <div className="landing-phone-mini-chips">
+          <span>🔌 Sin chispa</span>
+          <span>🛞 Caucho espichado</span>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
-function RadarMockup() {
+function CertificatePreview() {
   return (
-    <div className="landing-radar-mockup" aria-hidden="true">
-      <div className="landing-radar-grid" />
-      <div className="landing-radar-road landing-radar-road-a" />
-      <div className="landing-radar-road landing-radar-road-b" />
-      <span className="landing-radar-pin pin-a"><Fuel size={14} /></span>
-      <span className="landing-radar-pin pin-b"><Fuel size={14} /></span>
-      <span className="landing-radar-pin pin-c"><Fuel size={14} /></span>
-      <div className="landing-radar-card">
-        <div className="landing-radar-card-head">
-          <div>
-            <span>Radar en vivo</span>
-            <strong>3 bombas surtiendo</strong>
-          </div>
-          <span className="landing-live-dot" />
+    <motion.div
+      className="landing-certificate"
+      initial={{ opacity: 0, y: 28, rotate: 2 }}
+      whileInView={{ opacity: 1, y: 0, rotate: 1 }}
+      viewport={{ once: true, amount: 0.25 }}
+      whileHover={{ rotate: 0, y: -6 }}
+      transition={{ duration: 0.5, type: 'spring', stiffness: 160, damping: 20 }}
+    >
+      <div className="landing-certificate-head">
+        <div>
+          <span className="landing-certificate-mark">BIELA</span>
+          <strong>BIELA — HOJA DE VIDA VEHICULAR</strong>
         </div>
-        <div className="landing-radar-lines">
-          <span />
-          <span />
-          <span />
+        <span className="landing-certificate-code"><ShieldCheck size={13} /> #BIE-894A</span>
+      </div>
+
+      <div className="landing-certificate-hero">
+        <div>
+          <span>VEHÍCULO</span>
+          <strong>Bera 150 · 2022</strong>
+        </div>
+        <div>
+          <span>ODÓMETRO CERTIFICADO</span>
+          <strong>8.420 km</strong>
         </div>
       </div>
-      <div className="landing-radar-chat">
-        <span className="landing-radar-chat-icon"><Bot size={15} /></span>
-        <p>Arranca ya, hay una bomba cerca de ti.</p>
+
+      <div className="landing-certificate-table">
+        <div className="landing-certificate-row landing-certificate-row-head">
+          <span>SERVICIO</span>
+          <span>KM</span>
+          <span>ESTADO</span>
+        </div>
+        <div className="landing-certificate-row">
+          <span>Cambio de Aceite 20W-50</span>
+          <span>7.180</span>
+          <span><Check size={12} /> Verificado</span>
+        </div>
+        <div className="landing-certificate-row">
+          <span>Kit de Arrastre</span>
+          <span>6.940</span>
+          <span><Check size={12} /> Verificado</span>
+        </div>
+        <div className="landing-certificate-row">
+          <span>Bujía NGK</span>
+          <span>6.120</span>
+          <span><Check size={12} /> Verificado</span>
+        </div>
       </div>
-    </div>
+
+      <div className="landing-certificate-stamp">LISTO PARA TRASPASO</div>
+      <p className="landing-certificate-note">Emitido por Biela · Historial verificable por enlace</p>
+    </motion.div>
   );
 }
 
@@ -312,10 +395,10 @@ function AuthModal({ initialMode, onClose }) {
 
         <div className="auth-tabs" role="tablist" aria-label="Modo de acceso">
           <button type="button" role="tab" aria-selected={tab === 'login'} className={tab === 'login' ? 'active' : ''} onClick={() => { setTab('login'); setError(''); setInfo(''); }}>
-            Iniciar sesión
+            Iniciar Sesión
           </button>
           <button type="button" role="tab" aria-selected={tab === 'register'} className={tab === 'register' ? 'active' : ''} onClick={() => { setTab('register'); setError(''); setInfo(''); }}>
-            Crear cuenta
+            Crear Cuenta
           </button>
         </div>
 
@@ -433,10 +516,18 @@ export default function LandingLobby({ session }) {
 
   if (session) return <Navigate to="/dashboard" replace />;
 
+  const scrollTo = (href) => {
+    const target = document.querySelector(href);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setMenuOpen(false);
+  };
+
   return (
     <div className="landing-root">
-      <div className="landing-glow" aria-hidden="true" />
-      <div className="landing-grid" aria-hidden="true" />
+      <div className="landing-dot-grid" aria-hidden="true" />
+      <div className="landing-ambient landing-ambient-one" aria-hidden="true" />
+      <div className="landing-ambient landing-ambient-two" aria-hidden="true" />
+      <div className="landing-ambient landing-ambient-three" aria-hidden="true" />
 
       <div className="landing-shell">
         <header className="landing-nav-wrap">
@@ -446,14 +537,15 @@ export default function LandingLobby({ session }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <a className="landing-logo" href="#top" aria-label="Biela, volver arriba">
+            <button type="button" className="landing-logo" onClick={() => scrollTo('#top')} aria-label="Biela, volver arriba">
               <span className="landing-logo-mark"><Wrench size={16} strokeWidth={3} /></span>
               <span>Biela</span>
-            </a>
+              <span className="landing-logo-country">VZLA</span>
+            </button>
 
             <div className="landing-nav-links">
               {NAV_LINKS.map((link) => (
-                <a key={link.href} href={link.href}>{link.label}</a>
+                <button type="button" key={link.href} onClick={() => scrollTo(link.href)}>{link.label}</button>
               ))}
             </div>
 
@@ -461,8 +553,8 @@ export default function LandingLobby({ session }) {
               <button type="button" className="landing-btn landing-btn-ghost" onClick={() => openAuth('login')}>
                 Iniciar sesión
               </button>
-              <button type="button" className="landing-btn landing-btn-primary" onClick={() => openAuth('login')}>
-                Entrar al Garaje <ArrowRight size={16} />
+              <button type="button" className="landing-btn landing-btn-primary" onClick={() => openAuth('register')}>
+                Abrir mi Garaje <ArrowRight size={16} />
               </button>
               <button
                 type="button"
@@ -485,10 +577,10 @@ export default function LandingLobby({ session }) {
                 exit={{ opacity: 0, y: -8 }}
               >
                 {NAV_LINKS.map((link) => (
-                  <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</a>
+                  <button type="button" key={link.href} onClick={() => scrollTo(link.href)}>{link.label}</button>
                 ))}
                 <button type="button" onClick={() => openAuth('login')}>Iniciar sesión</button>
-                <button type="button" className="landing-mobile-menu-primary" onClick={() => openAuth('login')}>Entrar al Garaje</button>
+                <button type="button" className="landing-mobile-menu-primary" onClick={() => openAuth('register')}>Abrir mi Garaje</button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -498,234 +590,234 @@ export default function LandingLobby({ session }) {
           <section className="landing-hero" id="top">
             <motion.div
               className="landing-hero-copy"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 22 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55 }}
             >
-              <div className="landing-eyebrow">
-                <span className="landing-pulse-dot" />
-                TALLER INTELIGENTE &amp; RADAR VZLA
+              <div className="landing-pill">
+                <span className="landing-pill-dot" />
+                🟢 NUEVO • HOJA DE VIDA DIGITAL PARA COMPRA-VENTA DE MOTOS
               </div>
 
               <h1 className="landing-title">
-                Tu moto.<br />
-                Tu control.<br />
-                <span>Una sola app.</span>
+                El historial inteligente que cuida tu moto y <span>multiplica su valor.</span>
               </h1>
 
               <p className="landing-subtitle">
-                Bitácora digital, rendimiento real de combustible, radar de gasolina y asistencia mecánica con <strong>BujIA</strong>. Todo pensado para la ruta venezolana.
+                Registra mantenimientos, calcula tu rendimiento real en Km/L (USD/Bs), pide auxilio vial 24/7 por WhatsApp y entrega un certificado PDF verificado cuando vendas tu moto.
               </p>
 
               <div className="landing-hero-actions">
-                <button type="button" className="landing-btn landing-btn-primary landing-btn-lg" onClick={() => openAuth('login')}>
-                  Abrir mi Garaje <ArrowRight size={18} />
+                <button type="button" className="landing-btn landing-btn-primary landing-btn-xl" onClick={() => openAuth('register')}>
+                  Crear mi Garaje Gratis <ArrowRight size={18} />
                 </button>
-                <a className="landing-link-button" href="#funciones">Ver funciones</a>
+                <button type="button" className="landing-btn landing-btn-outline landing-btn-xl" onClick={() => scrollTo('#pasaporte')}>
+                  Ver cómo funciona el Biela-Historial
+                </button>
               </div>
 
               <div className="landing-trust-row">
-                <span><Check size={14} /> Gratis para motorizados</span>
-                <span><Check size={14} /> Funciona como PWA</span>
+                <span><Check size={15} /> 100% Gratis</span>
+                <span><Check size={15} /> Funciona en cualquier teléfono</span>
+                <span><Check size={15} /> Tasa BCV integrada</span>
               </div>
             </motion.div>
 
-            <motion.div
-              className="landing-phone-stage"
-              initial={{ opacity: 0, y: 28, rotate: -3 }}
-              animate={{ opacity: 1, y: 0, rotate: 0 }}
-              transition={{ duration: 0.65, delay: 0.08 }}
-            >
-              <div className="landing-phone-halo" aria-hidden="true" />
-              <PhoneMockup />
-            </motion.div>
-
-            <motion.aside
-              className="landing-social-card"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.14 }}
-            >
-              <div className="landing-avatar-stack">
-                {AVATARS.map((src, index) => (
-                  <img key={src} src={src} alt="" style={{ zIndex: AVATARS.length - index }} />
-                ))}
-              </div>
-              <p className="landing-social-label">Comunidad Activa</p>
-              <strong className="landing-social-value">24/7 en ruta</strong>
-              <p className="landing-social-copy">Pilotos compartiendo reportes reales para no quedarse varado.</p>
-              <div className="landing-pwa-badge">
-                <Download size={16} />
-                <span>Acceso rápido PWA</span>
-              </div>
-            </motion.aside>
+            <HeroVisual />
           </section>
 
-          <section className="landing-lime-banner" id="comunidad">
-            <span className="landing-watermark" aria-hidden="true">CONTROLA TU NAVE</span>
+          <section className="landing-passport" id="pasaporte">
             <motion.div
-              className="landing-banner-content"
+              className="landing-passport-copy"
+              initial={{ opacity: 0, y: 22 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.55 }}
+            >
+              <span className="landing-section-label">EL CARFAX DE LAS MOTOS EN VENEZUELA</span>
+              <h2>¿Vas a vender o comprar una moto usada? <em>No compres a ciegas.</em></h2>
+              <p>
+                Como dueño, exportas tu <strong>Hoja de Vida PDF</strong> o compartes un enlace verificable por WhatsApp. Como comprador, ves cada cambio de aceite, cada repuesto y el kilometraje certificado antes de soltar el dinero.
+              </p>
+              <div className="landing-passport-points">
+                <span><FileText size={17} /> PDF listo para traspaso</span>
+                <span><MessageCircle size={17} /> Enlace compartible por WhatsApp</span>
+                <span><ShieldCheck size={17} /> Odómetro y servicios verificados</span>
+              </div>
+              <button type="button" className="landing-btn landing-btn-primary landing-btn-lg" onClick={() => openAuth('register')}>
+                Crear mi Biela-Historial <ArrowRight size={18} />
+              </button>
+            </motion.div>
+
+            <CertificatePreview />
+          </section>
+
+          <section className="landing-ecosystem" id="ecosistema">
+            <div className="landing-section-heading">
+              <span className="landing-section-label">ECOSISTEMA BIELA</span>
+              <h2>Todo lo que tu moto necesita, en una sola app.</h2>
+              <p>De la falla en la vía al precio de reventa: cada módulo resuelve un problema real del motorizado venezolano.</p>
+            </div>
+
+            <div className="landing-bento">
+              <motion.article
+                className="landing-bento-card landing-bento-emergency"
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.45 }}
+                whileHover={{ y: -5 }}
+              >
+                <div className="landing-bento-top">
+                  <span className="landing-bento-icon"><Bot size={21} /></span>
+                  <span className="landing-bento-tag">IA + RESCATE</span>
+                </div>
+                <h3>BujIA + Modo Emergencia en Vía</h3>
+                <p>Diagnóstico instantáneo por foto y pasos claros cuando estás varado. Sin cuentos, sin registrar en la bitácora durante la emergencia.</p>
+                <div className="landing-emergency-chips">
+                  <span>🔌 Sin chispa</span>
+                  <span>🛞 Caucho espichado</span>
+                  <span>⛓️ Cadena partida</span>
+                </div>
+                <div className="landing-emergency-reply">
+                  <span><Bot size={15} /> BujIA</span>
+                  <p>Modo Emergencia activo: revisa la bujía, luego te conecto con talleres cerca de ti.</p>
+                </div>
+              </motion.article>
+
+              <motion.article
+                className="landing-bento-card landing-bento-store"
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.45, delay: 0.05 }}
+                whileHover={{ y: -5 }}
+              >
+                <div className="landing-bento-top">
+                  <span className="landing-bento-icon"><LifeBuoy size={21} /></span>
+                  <span className="landing-bento-tag">24/7</span>
+                </div>
+                <h3>Tienda & Auxilio Vial 24/7</h3>
+                <p>Caucheras, grúas y repuesteras verificadas cerca de ti.</p>
+                <div className="landing-store-list">
+                  <span><MapPin size={14} /> Cauchera 24h · 1.2 km</span>
+                  <span><MapPin size={14} /> Repuestos · 2.8 km</span>
+                  <span><MapPin size={14} /> Grúa ligera · 4.1 km</span>
+                </div>
+                <button type="button" className="landing-bento-link" onClick={() => openAuth('register')}>
+                  Abrir directorio <ArrowRight size={15} />
+                </button>
+              </motion.article>
+
+              <motion.article
+                className="landing-bento-card landing-bento-finance"
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.45, delay: 0.1 }}
+                whileHover={{ y: -5 }}
+              >
+                <div className="landing-bento-top">
+                  <span className="landing-bento-icon"><Wallet size={21} /></span>
+                  <span className="landing-bento-tag">BCV</span>
+                </div>
+                <h3>Finanzas Multimoneda (USD / Bs)</h3>
+                <p>Km/L real y gasto mensual con tasa BCV integrada.</p>
+                <div className="landing-finance-values">
+                  <div><span>Rendimiento</span><strong>38.4 Km/L</strong></div>
+                  <div><span>Costo / km</span><strong>$0.013</strong></div>
+                </div>
+              </motion.article>
+
+              <motion.article
+                className="landing-bento-card landing-bento-radar"
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.45, delay: 0.15 }}
+                whileHover={{ y: -5 }}
+              >
+                <div className="landing-bento-top">
+                  <span className="landing-bento-icon"><Activity size={21} /></span>
+                  <span className="landing-bento-tag">SALUD + RADAR</span>
+                </div>
+                <h3>Radiografía Interactiva & Radar de Gasolina</h3>
+                <p>Desgaste real de cada pieza y reportes en vivo de bombas surtiendo en tu ciudad.</p>
+                <div className="landing-radar-content">
+                  <div className="landing-health-mini">
+                    <span><Gauge size={15} /> Aceite <strong>72%</strong></span>
+                    <span><Wrench size={15} /> Cadena <strong>48%</strong></span>
+                    <span><Activity size={15} /> Frenos <strong>86%</strong></span>
+                  </div>
+                  <div className="landing-radar-mini">
+                    <div className="landing-radar-mini-head"><Fuel size={15} /> Radar en vivo <span /></div>
+                    <p>3 bombas surtiendo cerca de ti · Dólares y Subsidiada</p>
+                  </div>
+                </div>
+              </motion.article>
+            </div>
+          </section>
+
+          <section className="landing-impact" id="auxilio">
+            <span className="landing-impact-watermark" aria-hidden="true">RUEDA SEGURO</span>
+            <motion.div
+              className="landing-impact-inner"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="landing-banner-kicker"><Sparkles size={16} /> PLATAFORMA TODO EN UNO</div>
-              <h2>
-                La plataforma todo en uno que está revolucionando el cuidado de tu moto en Venezuela.
-              </h2>
-              <div className="landing-banner-badges">
-                <span><Wrench size={16} /> Garaje Digital</span>
-                <span><Fuel size={16} /> Radar de Gasolina</span>
-                <span><Bot size={16} /> Asistente BujIA</span>
+              <div className="landing-impact-title">
+                <Sparkles size={19} />
+                <span>UNA SOLA APP PARA CADA RUTA</span>
+              </div>
+              <div className="landing-impact-metrics">
+                <div><strong>24/7</strong><span>Rescate IA</span></div>
+                <div><strong>PDF</strong><span>Certificado</span></div>
+                <div><strong>USD / Bs</strong><span>Tasa BCV</span></div>
+                <div><strong>100%</strong><span>Gratis</span></div>
               </div>
             </motion.div>
           </section>
 
-          <section className="landing-value" id="funciones">
-            <div className="landing-value-orbit" aria-hidden="true">
-              {FLOATING_ICONS.map(({ icon: Icon, label, className }) => (
-                <motion.div
-                  key={label}
-                  className={`landing-float-card ${className}`}
-                  title={label}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4 }}
-                  whileHover={{ y: -4 }}
-                >
-                  <Icon size={22} strokeWidth={2.3} />
-                </motion.div>
-              ))}
-            </div>
-
-            <motion.div
-              className="landing-value-copy"
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.5 }}
-            >
-              <span className="landing-section-label">UNA APP, CERO COMPLICACIONES</span>
-              <h2>Nuestra app es la solución todo en uno para gestionar tu moto y tus rutas diarias.</h2>
-              <button type="button" className="landing-btn landing-btn-primary landing-btn-lg" onClick={() => openAuth('register')}>
-                Empezar ahora <ArrowRight size={18} />
-              </button>
-            </motion.div>
-          </section>
-
-          <section className="landing-benefits">
+          <section className="landing-testimonials">
             <div className="landing-section-heading">
-              <span className="landing-section-label">BENEFICIOS</span>
-              <h2>Hecho para llevar tu moto más lejos</h2>
-              <p>Cada función nace de un problema real de quien maneja todos los días.</p>
+              <span className="landing-section-label">HISTORIAS REALES</span>
+              <h2>Motorizados que ya ruedan con Biela.</h2>
             </div>
-
-            <div className="landing-benefit-grid">
-              {BENEFITS.map(({ icon: Icon, title, desc }, index) => (
+            <div className="landing-testimonial-grid">
+              {TESTIMONIALS.map((item, index) => (
                 <motion.article
-                  key={title}
-                  className="landing-benefit-card"
-                  initial={{ opacity: 0, y: 16 }}
+                  key={item.name}
+                  className={`landing-review landing-review-${item.variant}`}
+                  initial={{ opacity: 0, y: 18 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.25 }}
-                  transition={{ duration: 0.4, delay: index * 0.04 }}
-                  whileHover={{ y: -4 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: index * 0.07 }}
                 >
-                  <div className="landing-benefit-icon"><Icon size={22} strokeWidth={2.2} /></div>
-                  <h3>{title}</h3>
-                  <p>{desc}</p>
+                  <div className="landing-review-head">
+                    <span className="landing-review-kicker">{item.kicker}</span>
+                    <div className="landing-stars" aria-label="5 estrellas">
+                      {[0, 1, 2, 3, 4].map((star) => <Star key={star} size={14} fill="currentColor" />)}
+                    </div>
+                  </div>
+                  <blockquote>«{item.quote}»</blockquote>
+                  <div className="landing-review-author">
+                    <img src={item.avatar} alt={`Avatar de ${item.name}`} />
+                    <div>
+                      <strong>{item.name}</strong>
+                      <span>{item.role}</span>
+                    </div>
+                  </div>
                 </motion.article>
               ))}
             </div>
           </section>
 
-          <section className="landing-showcase">
-            <span className="landing-watermark landing-showcase-watermark" aria-hidden="true">FUNCIONES</span>
-            <motion.div
-              className="landing-showcase-stage"
-              initial={{ opacity: 0, y: 26 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.55 }}
-            >
-              <RadarMockup />
-              <div className="landing-showcase-chip chip-left"><MapPin size={15} /> Radar comunitario</div>
-              <div className="landing-showcase-chip chip-right"><Bot size={15} /> BujIA al instante</div>
-            </motion.div>
-          </section>
-
-          <section className="landing-metrics">
-            <div className="landing-metrics-title">
-              <span className="landing-section-label">DATOS Y CIFRAS</span>
-              <h2>La ruta se vive mejor con información</h2>
-            </div>
-            <div className="landing-metrics-grid">
-              {METRICS.map((metric, index) => (
-                <motion.div
-                  key={metric.value}
-                  className="landing-metric"
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }}
-                >
-                  <strong>{metric.value}</strong>
-                  <span>{metric.label}</span>
-                </motion.div>
-              ))}
-            </div>
-          </section>
-
-          <section className="landing-testimonials">
-            <motion.article
-              className="landing-review landing-review-lime"
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45 }}
-            >
-              <span className="landing-review-kicker">CONTROL TOTAL</span>
-              <blockquote>
-                «Desde que uso Biela nunca se me pasa un cambio de aceite ni me quedo accidentado sin saber qué tiene la moto.»
-              </blockquote>
-              <div className="landing-review-author">
-                <img src={AVATARS[0]} alt="Avatar de Andrés" />
-                <div>
-                  <strong>Andrés R.</strong>
-                  <span>Motorizado · Caracas</span>
-                </div>
-              </div>
-            </motion.article>
-
-            <motion.article
-              className="landing-review landing-review-dark"
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45, delay: 0.08 }}
-            >
-              <div className="landing-stars" aria-label="5 estrellas">
-                {[0, 1, 2, 3, 4].map((star) => <Star key={star} size={16} fill="currentColor" />)}
-              </div>
-              <blockquote>
-                «Andaba en mi Bera y no encontraba gasolina. Abrí el radar, vi una bomba surtiendo y BujIA me dijo qué revisar antes de seguir ruta. Mi Empire también está en el garaje.»
-              </blockquote>
-              <div className="landing-review-author">
-                <img src={AVATARS[1]} alt="Avatar de María" />
-                <div>
-                  <strong>María G.</strong>
-                  <span>Bera + Empire · Maracay</span>
-                </div>
-              </div>
-            </motion.article>
-          </section>
-
           <section className="landing-faq" id="preguntas">
-            <div className="landing-section-heading landing-faq-heading">
+            <div className="landing-section-heading">
               <span className="landing-section-label">PREGUNTAS FRECUENTES</span>
-              <h2>Todo lo que necesitas saber</h2>
+              <h2>Todo lo que necesitas saber.</h2>
               <p>Si aún tienes dudas, BujIA también puede ayudarte desde el chat.</p>
             </div>
 
@@ -764,16 +856,16 @@ export default function LandingLobby({ session }) {
           <section className="landing-final-cta">
             <motion.div
               className="landing-final-card"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <Smartphone size={26} />
-              <h2>Empieza a organizar tu moto hoy mismo</h2>
-              <p>Registra tu primera nave, lleva tu bitácora y únete al radar comunitario.</p>
-              <button type="button" className="landing-btn landing-btn-primary landing-btn-lg" onClick={() => openAuth('register')}>
-                Entrar al Garaje <ArrowRight size={18} />
+              <span className="landing-final-kicker"><Sparkles size={16} /> TU BITÁCORA, TU VALOR</span>
+              <h2>Tu moto merece una bitácora profesional.</h2>
+              <p>Regístrala hoy, cuida cada kilómetro y entrega un historial que hable por ti al momento de vender.</p>
+              <button type="button" className="landing-btn landing-btn-primary landing-btn-xl" onClick={() => openAuth('register')}>
+                Entrar a Biela Ahora <ArrowRight size={20} />
               </button>
             </motion.div>
           </section>
@@ -784,15 +876,35 @@ export default function LandingLobby({ session }) {
             <div className="landing-logo">
               <span className="landing-logo-mark"><Wrench size={16} strokeWidth={3} /></span>
               <span>Biela</span>
+              <span className="landing-logo-country">VZLA</span>
             </div>
-            <p>La app venezolana para cuidar tu moto, planear tu ruta y llegar tranquilo.</p>
+            <p>La app venezolana que convierte el mantenimiento de tu moto en valor, confianza y seguridad en la ruta.</p>
+            <span className="landing-footer-location">Hecho en Venezuela 🛵</span>
           </div>
-          <div className="landing-footer-links">
-            <a href="#funciones">Funciones</a>
-            <a href="#comunidad">Comunidad</a>
-            <a href="#preguntas">Soporte</a>
+
+          <div className="landing-footer-column">
+            <strong>Funciones</strong>
+            <button type="button" onClick={() => scrollTo('#pasaporte')}>Hoja de Vida PDF</button>
+            <button type="button" onClick={() => scrollTo('#ecosistema')}>BujIA Emergencia</button>
+            <button type="button" onClick={() => scrollTo('#ecosistema')}>Auxilio Vial</button>
+            <button type="button" onClick={() => scrollTo('#ecosistema')}>Finanzas USD/Bs</button>
           </div>
-          <p className="landing-copyright">© {new Date().getFullYear()} Biela. Hecho en Venezuela para quienes ruedan.</p>
+
+          <div className="landing-footer-column">
+            <strong>Comunidad / Soporte</strong>
+            <button type="button" onClick={() => scrollTo('#ecosistema')}>Radar de Gasolina</button>
+            <button type="button" onClick={() => scrollTo('#auxilio')}>Rescate 24/7</button>
+            <button type="button" onClick={() => scrollTo('#preguntas')}>Preguntas frecuentes</button>
+            <button type="button" onClick={() => openAuth('login')}>Acceder al Garaje</button>
+          </div>
+
+          <div className="landing-footer-column">
+            <strong>Legal / Versión</strong>
+            <span>Privacidad de datos</span>
+            <span>Términos de uso</span>
+            <span>Biela PWA · v1.0</span>
+            <span>© {new Date().getFullYear()} Biela</span>
+          </div>
         </footer>
       </div>
 

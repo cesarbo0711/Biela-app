@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import './ChatBot.css';
+
+const EMERGENCIAS = [
+  '🔌 No prende / Sin chispa',
+  '🌡️ Se recalienta / Botando humo',
+  '🛞 Caucho espichado / Rin',
+  '⛓️ Cadena partida / Trancada',
+  '🛑 Falla de frenos',
+  '⛽ Me quedé sin gasolina',
+];
 
 const SUGGESTED = [
   'Mi moto no quiere encender, ¿qué reviso primero?',
@@ -14,6 +24,7 @@ const GREETING = {
 };
 
 export default function ChatBot({ usuario }) {
+  const navigate = useNavigate();
   const [nombreUsuario, setNombreUsuario] = useState('');
   const [motoId, setMotoId] = useState(null);
 
@@ -62,6 +73,7 @@ export default function ChatBot({ usuario }) {
   const [cargando, setCargando] = useState(false);
   const [contextoVehiculo, setContextoVehiculo] = useState('Motocicleta general');
   const [errorChat, setErrorChat] = useState('');
+  const [modoEmergencia, setModoEmergencia] = useState(false);
 
   const chatEndRef = useRef(null);
 
@@ -111,10 +123,11 @@ export default function ChatBot({ usuario }) {
     setMensajes([{ ...GREETING }]);
     setErrorChat('');
     setInputTexto('');
+    setModoEmergencia(false);
     quitarImagen();
   };
 
-  const enviarTexto = async (texto, imagenB64 = null, preview = null) => {
+  const enviarTexto = async (texto, imagenB64 = null, preview = null, esEmergencia = false) => {
     const textoLimpio = (texto || '').trim();
     if ((!textoLimpio && !imagenB64) || cargando) return;
 
@@ -143,6 +156,7 @@ export default function ChatBot({ usuario }) {
           imagenBase64: imagenB64,
           nombreUsuario,
           motoId,
+          esEmergencia,
         }),
       });
 
@@ -172,6 +186,12 @@ export default function ChatBot({ usuario }) {
     }
   };
 
+  const enviarReporteEmergencia = (texto) => {
+    if (cargando) return;
+    setModoEmergencia(true);
+    enviarTexto(texto, null, null, true);
+  };
+
   const enviarMensaje = async (e) => {
     e.preventDefault();
     if ((!inputTexto.trim() && !imagenArchivo) || cargando) return;
@@ -186,7 +206,7 @@ export default function ChatBot({ usuario }) {
         reader.readAsDataURL(imagenArchivo);
       });
     }
-    await enviarTexto(inputTexto, imagenBase64, preview);
+    await enviarTexto(inputTexto, imagenBase64, preview, modoEmergencia);
   };
 
   const usarSugerencia = (texto) => {
@@ -194,7 +214,7 @@ export default function ChatBot({ usuario }) {
     setInputTexto(texto);
   };
 
-  const showSuggestions = mensajes.length <= 1 && !cargando;
+  const showSuggestions = mensajes.length <= 1 && !cargando && !modoEmergencia;
 
   return (
     <div className="chatbot-container fade-in">
@@ -209,10 +229,50 @@ export default function ChatBot({ usuario }) {
           <h2>Taller Mecánico (BujIA)</h2>
           <span className="bot-status">● En línea</span>
         </div>
+        <button
+          type="button"
+          aria-pressed={modoEmergencia}
+          onClick={() => setModoEmergencia((valor) => !valor)}
+          className={`btn-emergency ${
+            modoEmergencia
+              ? 'bg-red-600 border-red-600 text-white'
+              : 'bg-red-500/15 border-red-500/40 text-red-500'
+          }`}
+        >
+          🚨 Emergencia en vía
+        </button>
         <button type="button" className="btn-clear-chat" onClick={limpiarConversacion} title="Limpiar conversación">
           Limpiar
         </button>
       </header>
+
+      {modoEmergencia && (
+        <section className="chat-emergency-panel" aria-label="Reportes rápidos de emergencia">
+          <p className="chat-emergency-title">
+            Reporte rápido · BujIA responderá en 3 pasos
+          </p>
+          <div className="chat-emergency-chips">
+            {EMERGENCIAS.map((falla) => (
+              <button
+                key={falla}
+                type="button"
+                className="chat-emergency-chip"
+                disabled={cargando}
+                onClick={() => enviarReporteEmergencia(falla)}
+              >
+                {falla}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="chat-emergency-action"
+            onClick={() => navigate('/tiendas')}
+          >
+            📞 Buscar Grúa / Cauchera Cercana
+          </button>
+        </section>
+      )}
 
       <div className="chat-safety-banner">
         Asistente preventivo IA • Ante fallas críticas de frenos o motor, consulta un taller certificado.
@@ -275,7 +335,7 @@ export default function ChatBot({ usuario }) {
 
         <input
           type="text"
-          placeholder="Escribe tu duda mecánica..."
+          placeholder={modoEmergencia ? 'Describe tu emergencia o toca una falla...' : 'Escribe tu duda mecánica...'}
           value={inputTexto}
           onChange={(e) => setInputTexto(e.target.value)}
           className="chat-input"

@@ -156,3 +156,197 @@
     margin-top: 0.5rem; 
   }
 }
+
+.btn-exportar-pdf { min-height: 44px; }
+.print-only-report { display: none; }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html,
+  body,
+  #root {
+    background: #ffffff !important;
+    color: #111111 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .no-print,
+  .gdock,
+  nav,
+  button,
+  .fixed,
+  [role="dialog"],
+  [aria-label="Navegación principal"] {
+    display: none !important;
+  }
+
+  .print-only-report {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  .print-report-sheet {
+    width: 100%;
+    background: #ffffff;
+    color: #111111;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 10pt;
+    line-height: 1.35;
+  }
+
+  .print-report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12mm;
+    padding-bottom: 4mm;
+    border-bottom: 1px solid #333333;
+  }
+
+  .print-report-title {
+    margin: 0;
+    color: #111111;
+    font-size: 16pt;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+  }
+
+  .print-report-meta {
+    flex: 0 0 auto;
+    text-align: right;
+    font-size: 8pt;
+  }
+
+  .print-report-meta p { margin: 0 0 1.5mm; }
+  .print-report-meta span {
+    display: block;
+    color: #666666;
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .print-report-meta strong { color: #111111; font-size: 9pt; }
+
+  .print-report-block {
+    margin-top: 6mm;
+    break-inside: avoid;
+  }
+
+  .print-report-block h2 {
+    margin: 0 0 3mm;
+    color: #111111;
+    font-size: 10pt;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .print-report-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3mm;
+  }
+
+  .print-report-field {
+    padding: 2.5mm;
+    border: 1px solid #d4d4d4;
+  }
+
+  .print-report-field span {
+    display: block;
+    color: #666666;
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .print-report-field strong {
+    display: block;
+    margin-top: 1mm;
+    color: #111111;
+    font-size: 9pt;
+  }
+
+  .print-report-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 8pt;
+  }
+
+  .print-report-table th,
+  .print-report-table td {
+    padding: 2mm;
+    border: 1px solid #d4d4d4;
+    color: #111111;
+    text-align: left;
+    vertical-align: top;
+    word-break: break-word;
+  }
+
+  .print-report-table th {
+    background: #f2f2f2;
+    font-size: 7pt;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .print-report-table tr { break-inside: avoid; }
+  .print-report-empty { color: #666666; font-style: italic; text-align: center !important; }
+
+  .print-report-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3mm;
+  }
+
+  .print-report-stats div {
+    padding: 3mm;
+    border: 1px solid #d4d4d4;
+  }
+
+  .print-report-stats span {
+    display: block;
+    color: #666666;
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .print-report-stats strong {
+    display: block;
+    margin-top: 1.5mm;
+    color: #111111;
+    font-size: 11pt;
+  }
+
+  .print-report-footer {
+    margin-top: 8mm;
+    padding-top: 3mm;
+    border-top: 1px solid #333333;
+    color: #555555;
+    font-size: 7.5pt;
+    text-align: center;
+  }
+}
