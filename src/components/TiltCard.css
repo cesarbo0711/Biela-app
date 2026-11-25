@@ -1,0 +1,68 @@
+/* ══ Tilt ═══════════════════════════════════════════════════
+   A picture card that gives under the pointer. Almost nothing
+   is here: the rotation, both gradients and the shadow are
+   written per frame from the pointer's position, and a rule
+   in this file that also had an opinion about any of them
+   would be a second author. What is left is the things that
+   are true whatever the pointer is doing. */
+.tlt {
+  position: relative;
+  width: 100%;
+  --surface-2: var(--bg-surface, #ffffff);
+  touch-action: pan-y;
+  /* The frame is what the pointer is measured against and it
+     is deliberately the ONLY thing in here that never moves.
+     The perspective lives on it rather than on the card for
+     the usual reason: on the card itself, `perspective` is
+     applied per element and the vanishing point rides along
+     with the rotation instead of staying put in the room. */
+}
+
+.dark .tlt {
+  --surface-2: var(--bg-surface, #141414);
+}
+
+.tlt-card {
+  position: relative;
+  width: 100%;
+  background-color: var(--surface-2);
+  background-size: cover;
+  background-position: center;
+  transform-style: preserve-3d;
+  /* `cover` and a responsive frame, so the artwork is fitted
+     to the card instead of cropping a second time on top of
+     the image itself. */
+  /* NO `will-change`. It would hold a composited layer for
+     every copy of this block on the wall, permanently, to
+     save one frame on a hover that may never come — the same
+     bookkeeping CLAUDE.md objects to for permanent rAF. The
+     browser promotes this on its own once the transform
+     starts moving. */
+}
+
+.tlt-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* ── the dent and the rim ───────────────────────────────────
+   One element, two gradients, both placed from the pointer —
+   the dark one under it and the light one at its mirror. It
+   inherits the corner rather than being told one, so the knob
+   only has to reach the card. */
+.tlt-sheen {
+  --tlt-dark-alpha: calc(var(--tlt-shade, 0) * 0.0055 * var(--tlt-lit, 0));
+  --tlt-rim-alpha: calc(var(--tlt-shade, 0) * 0.0034 * var(--tlt-lit, 0));
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background-image:
+    radial-gradient(42% 34% at var(--tlt-px, 50%) var(--tlt-py, 50%), rgba(9, 14, 28, var(--tlt-dark-alpha)) 0%, rgba(9, 14, 28, 0) 100%),
+    radial-gradient(52% 42% at var(--tlt-mx, 50%) var(--tlt-my, 50%), rgba(255, 255, 255, var(--tlt-rim-alpha)) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+
+.dark .tlt-sheen {
+  --tlt-rim-alpha: calc(var(--tlt-shade, 0) * 0.0034 * var(--tlt-lit, 0) * 0.55);
+}

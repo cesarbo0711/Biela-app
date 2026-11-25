@@ -3,6 +3,7 @@ import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, Bike, Droplets, Gauge, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { UploadDropzone } from '../components/UploadDropzone.jsx';
+import TiltCard from '../components/TiltCard.jsx';
 import './Garage.css';
 
 function formatearKm(valor) {
@@ -31,12 +32,12 @@ function MotoCard({ moto, servicios, onVer, onEditarKm, onEliminar }) {
   const estado = estadoAceite(moto, servicios);
 
   return (
-    <article className="gpane moto-card rounded-[2rem]">
-      <button type="button" className="moto-delete" onClick={onEliminar} title="Eliminar vehículo" aria-label="Eliminar vehículo">
+    <TiltCard className="gpane moto-card rounded-[2rem]">
+      <button type="button" className="moto-delete" onClick={onEliminar} onPointerDown={(e) => e.stopPropagation()} title="Eliminar vehículo" aria-label="Eliminar vehículo">
         <Trash2 size={16} />
       </button>
 
-      <button type="button" className="moto-visual" onClick={onVer} aria-label={`Ver bitácora de ${moto.marca} ${moto.modelo}`}>
+      <button type="button" className="moto-visual" onClick={onVer} onPointerDown={(e) => e.stopPropagation()} aria-label={`Ver bitácora de ${moto.marca} ${moto.modelo}`}>
         {moto.imagen_url ? (
           <img src={moto.imagen_url} alt={`${moto.marca} ${moto.modelo}`} className="moto-image h-56 w-full object-contain" />
         ) : (
@@ -64,7 +65,7 @@ function MotoCard({ moto, servicios, onVer, onEditarKm, onEliminar }) {
             <div className="moto-fact-value tabular-nums">
               {formatearKm(moto.kilometraje)} <small>km</small>
             </div>
-            <button type="button" className="moto-fact-edit" onClick={onEditarKm} title="Ajustar kilometraje" aria-label="Ajustar kilometraje">
+            <button type="button" className="moto-fact-edit" onClick={onEditarKm} onPointerDown={(e) => e.stopPropagation()} title="Ajustar kilometraje" aria-label="Ajustar kilometraje">
               <Pencil size={13} />
             </button>
           </div>
@@ -74,11 +75,11 @@ function MotoCard({ moto, servicios, onVer, onEditarKm, onEliminar }) {
           </div>
         </div>
 
-        <button type="button" className="moto-open" onClick={onVer}>
+        <button type="button" className="moto-open" onClick={onVer} onPointerDown={(e) => e.stopPropagation()}>
           Ver bitácora <ArrowUpRight size={16} />
         </button>
       </div>
-    </article>
+    </TiltCard>
   );
 }
 
