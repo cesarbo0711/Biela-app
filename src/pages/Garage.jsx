@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, FileText, Gauge, Pencil, Plus, Trash2, Wrench } from 'lucide-react';
+import { ArrowUpRight, Bike, Droplets, Gauge, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { UploadDropzone } from '../components/UploadDropzone.jsx';
 import './Garage.css';
 
@@ -12,11 +12,7 @@ function formatearKm(valor) {
 function estadoAceite(moto, servicios) {
   const registros = servicios.filter((servicio) => servicio.moto_id === moto.id);
   if (!registros.length) {
-    return {
-      label: '🟠 Por registrar service',
-      detail: 'Carga tu primer mantenimiento en la bitácora.',
-      tone: 'warn',
-    };
+    return { label: 'Aceite por registrar', tone: 'neutral' };
   }
 
   const ultimo = [...registros].sort((a, b) =>
@@ -26,117 +22,62 @@ function estadoAceite(moto, servicios) {
   const restante = Number(ultimo?.km_al_momento || 0) + intervalo - Number(moto.kilometraje || 0);
   const km = Math.abs(Math.round(restante));
 
-  if (restante <= 0) return { label: '🔴 Service vencido', detail: `${km} km de retraso`, tone: 'danger' };
-  if (restante <= 300) return { label: `🟠 Próximo cambio en ${km} km`, detail: 'Programa tu próximo service.', tone: 'warn' };
-  return { label: '🟢 Todo al día', detail: `Próximo cambio en ${km} km`, tone: 'ok' };
+  if (restante <= 0) return { label: `Cambio vencido · ${km} km de retraso`, tone: 'danger' };
+  if (restante <= 300) return { label: `Cambio próximo · ${km} km restantes`, tone: 'warn' };
+  return { label: `Aceite al día · ${km} km restantes`, tone: 'ok' };
 }
 
-function MotoStage({ moto }) {
-  return (
-    <div className="garage-stage-wrap">
-      <div className="garage-card-glow" aria-hidden="true" />
-      <div className="garage-stage">
-        <span className="garage-stage-ring" aria-hidden="true" />
-        {moto.imagen_url ? (
-          <img src={moto.imagen_url} alt={`${moto.marca} ${moto.modelo}`} className="garage-moto-img" />
-        ) : (
-          <div className="garage-no-photo"><Gauge size={30} /><span>Sin foto</span></div>
-        )}
-        <span className="garage-floor" aria-hidden="true" />
-      </div>
-    </div>
-  );
-}
-
-function MotoDetails({ moto, servicios, destacada, onVer, onEditarKm, onEliminar, onExportar }) {
+function MotoCard({ moto, servicios, onVer, onEditarKm, onEliminar }) {
   const estado = estadoAceite(moto, servicios);
-  const historial = servicios
-    .filter((servicio) => servicio.moto_id === moto.id)
-    .sort((a, b) => String(b.fecha_servicio || '').localeCompare(String(a.fecha_servicio || '')))
-    .slice(0, 3);
 
   return (
-    <div className={`garage-body${destacada ? ' garage-feature-panel' : ''}`}>
-      <button type="button" className="garage-delete" onClick={onEliminar} title="Borrar vehículo" aria-label="Borrar vehículo">
+    <article className="gpane moto-card rounded-[2rem]">
+      <button type="button" className="moto-delete" onClick={onEliminar} title="Eliminar vehículo" aria-label="Eliminar vehículo">
         <Trash2 size={16} />
       </button>
 
-      <header className="garage-card-head">
-        <div>
-          <span className="garage-eyebrow">{destacada ? 'VEHÍCULO PRINCIPAL' : 'EN FLOTA'}</span>
-          <h3>{moto.marca} <span>/</span> {moto.modelo}</h3>
-        </div>
-        <span className="garage-year">{moto.year || 'N/A'}</span>
-      </header>
+      <button type="button" className="moto-visual" onClick={onVer} aria-label={`Ver bitácora de ${moto.marca} ${moto.modelo}`}>
+        {moto.imagen_url ? (
+          <img src={moto.imagen_url} alt={`${moto.marca} ${moto.modelo}`} className="moto-image h-56 w-full object-contain" />
+        ) : (
+          <span className="moto-placeholder">
+            <Bike size={30} strokeWidth={1.6} />
+            <span>Sin foto</span>
+          </span>
+        )}
+      </button>
 
-      <div className={`garage-traffic tone-${estado.tone}`}>
-        <span className="garage-traffic-dot" aria-hidden="true" />
-        <div>
-          <strong>{estado.label}</strong>
-          <small>{estado.detail}</small>
+      <div className="moto-info">
+        <div className="moto-title-row">
+          <h3>{moto.marca} {moto.modelo}</h3>
+          <span className="moto-year tabular-nums">{moto.year || '—'}</span>
         </div>
-      </div>
 
-      <div className="garage-metrics">
-        <div className="garage-metric">
-          <span>Kilometraje</span>
-          <strong>{formatearKm(moto.kilometraje)} <small>KM</small></strong>
-          <button type="button" className="garage-edit-km" onClick={onEditarKm} title="Actualizar Kilometraje" aria-label="Actualizar Kilometraje">
-            <Pencil size={14} />
-          </button>
+        <div className={`moto-status tone-${estado.tone}`}>
+          <span className="w-2 h-2 rounded-full moto-status-dot" aria-hidden="true" />
+          <span>{estado.label}</span>
         </div>
-        <div className="garage-metric">
-          <span>Aceite configurado</span>
-          <strong className="garage-metric-text">{moto.tipo_aceite || 'N/A'}</strong>
-        </div>
-      </div>
 
-      {destacada && (
-        <div className="garage-history">
-          <div className="garage-history-head">
-            <span>Últimos mantenimientos</span>
-            <button type="button" onClick={onVer}>Ver todos <ArrowRight size={13} /></button>
+        <div className="moto-facts">
+          <div className="moto-fact">
+            <div className="moto-fact-label"><Gauge size={14} /> Odómetro</div>
+            <div className="moto-fact-value tabular-nums">
+              {formatearKm(moto.kilometraje)} <small>km</small>
+            </div>
+            <button type="button" className="moto-fact-edit" onClick={onEditarKm} title="Ajustar kilometraje" aria-label="Ajustar kilometraje">
+              <Pencil size={13} />
+            </button>
           </div>
-          {historial.length ? (
-            <ul>
-              {historial.map((servicio) => (
-                <li key={servicio.id}>
-                  <span className="garage-history-dot" aria-hidden="true" />
-                  <div>
-                    <strong>{servicio.catalogo_servicios?.nombre || 'Mantenimiento'}</strong>
-                    <small>{servicio.fecha_servicio || 'Sin fecha'} · {formatearKm(servicio.km_al_momento)} km</small>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="garage-history-empty">Tu bitácora está lista para el primer registro.</p>
-          )}
+          <div className="moto-fact">
+            <div className="moto-fact-label"><Droplets size={14} /> Aceite</div>
+            <div className="moto-fact-value moto-fact-value-text">{moto.tipo_aceite || 'Por definir'}</div>
+          </div>
         </div>
-      )}
 
-      <div className="garage-actions">
-        <button type="button" className="garage-action-primary" onClick={onVer}>
-          <Wrench size={17} /> Abrir Bitácora & Finanzas <ArrowRight size={17} />
+        <button type="button" className="moto-open" onClick={onVer}>
+          Ver bitácora <ArrowUpRight size={16} />
         </button>
-        <div className="garage-action-row">
-          <button type="button" className="garage-action-secondary" onClick={onEditarKm}>
-            <Gauge size={16} /> Ajustar KM
-          </button>
-          <button type="button" className="garage-action-secondary" onClick={onExportar}>
-            <FileText size={16} /> Hoja de Vida PDF
-          </button>
-        </div>
       </div>
-    </div>
-  );
-}
-
-function MotoCard(props) {
-  return (
-    <article className="garage-card">
-      <MotoStage moto={props.moto} />
-      <MotoDetails {...props} />
     </article>
   );
 }
@@ -148,7 +89,6 @@ export default function Garage({
   recargar,
   abrirModalAdd = false,
   setAbrirModalAdd,
-  onExportar,
 }) {
   const navigate = useNavigate();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -172,14 +112,6 @@ export default function Garage({
   const abrirEliminacion = (moto) => {
     setMotoActiva(moto);
     setIsDeleteModalOpen(true);
-  };
-
-  const exportarMoto = (moto) => {
-    if (onExportar) {
-      onExportar(moto);
-      return;
-    }
-    navigate(`/moto/${moto.id}?exportar=pdf`);
   };
 
   const registrarMoto = async (e) => {
@@ -264,40 +196,28 @@ export default function Garage({
   };
 
   return (
-    <section className="garage-root biela-fade-in">
-      <div className="garage-section-head">
-        <div>
-          <span className="garage-section-label">GARAJE DIGITAL</span>
-          <h2>Tus vehículos</h2>
-          <p>Una vista de cockpit para cada nave en tu flota.</p>
-        </div>
-        <button type="button" className="garage-head-add" onClick={() => setAbrirModalAdd(true)}>
-          <Plus size={17} strokeWidth={3} /> <span>Añadir moto</span>
-        </button>
-      </div>
-
+    <section className="garage-root">
       {motos.length === 0 ? (
-        <div className="garage-empty">
-          <span className="garage-empty-icon"><Wrench size={32} /></span>
-          <h3>Tu garaje está esperando su primera nave.</h3>
-          <p>Registra tu moto y BujIA construirá su historial inteligente desde el primer kilómetro.</p>
-          <button type="button" onClick={() => setAbrirModalAdd(true)}>+ Registrar Moto</button>
+        <div className="gpane moto-empty">
+          <span className="moto-empty-icon"><Bike size={26} strokeWidth={1.6} /></span>
+          <h2>Tu garaje está vacío</h2>
+          <p>Añade tu primera moto para empezar la bitácora.</p>
+          <button type="button" onClick={() => setAbrirModalAdd(true)}>
+            <Plus size={16} /> Añadir moto
+          </button>
         </div>
       ) : motos.length === 1 ? (
-        <div className="garage-feature-grid">
-          <MotoStage moto={motos[0]} />
-          <MotoDetails
+        <div className="moto-single max-w-lg mx-auto">
+          <MotoCard
             moto={motos[0]}
             servicios={servicios}
-            destacada
             onVer={() => navigate(`/moto/${motos[0].id}`)}
             onEditarKm={() => abrirEdicionKm(motos[0])}
             onEliminar={() => abrirEliminacion(motos[0])}
-            onExportar={() => exportarMoto(motos[0])}
           />
         </div>
       ) : (
-        <div className="garage-grid">
+        <div className="moto-grid grid grid-cols-1 md:grid-cols-2 gap-10 max-w-4xl mx-auto">
           {motos.map((moto) => (
             <MotoCard
               key={moto.id}
@@ -306,7 +226,6 @@ export default function Garage({
               onVer={() => navigate(`/moto/${moto.id}`)}
               onEditarKm={() => abrirEdicionKm(moto)}
               onEliminar={() => abrirEliminacion(moto)}
-              onExportar={() => exportarMoto(moto)}
             />
           ))}
         </div>
@@ -316,44 +235,47 @@ export default function Garage({
         <div className="biela-modal-overlay" role="presentation" onMouseDown={(e) => {
           if (e.target === e.currentTarget) setAbrirModalAdd(false);
         }}>
-          <div className="biela-modal-panel">
+          <div className="gpane biela-modal-panel">
+            <button type="button" className="biela-modal-close" onClick={() => setAbrirModalAdd(false)} aria-label="Cerrar">
+              <X size={16} />
+            </button>
             <div className="biela-modal-head">
-              <span className="biela-modal-badge">NUEVA NAVE</span>
-              <h2>Añadir al Garaje</h2>
-              <p>Registra los datos de tu vehículo y su bitácora nace aquí.</p>
+              <span className="biela-modal-badge">Nueva moto</span>
+              <h2>Añadir al garaje</h2>
+              <p>Registra los datos esenciales de tu vehículo.</p>
             </div>
             <form onSubmit={registrarMoto} className="biela-modal-form">
               <div className="biela-modal-upload">
                 <UploadDropzone onFileSelect={(imagen_url) => setImagenArchivo(imagen_url)} />
-                <label>Foto de tu Moto</label>
+                <label>Foto de la moto</label>
               </div>
-              <div className="biela-modal-input-group">
+              <div className="biela-modal-field">
                 <label htmlFor="garage-marca">Marca</label>
-                <input id="garage-marca" type="text" placeholder="ej. Bera" value={marca} onChange={(e) => setMarca(e.target.value)} required />
+                <input id="garage-marca" type="text" placeholder="Ej. Bera" value={marca} onChange={(e) => setMarca(e.target.value)} required />
               </div>
-              <div className="biela-modal-input-row">
-                <div className="biela-modal-input-group">
+              <div className="biela-modal-row">
+                <div className="biela-modal-field">
                   <label htmlFor="garage-modelo">Modelo</label>
-                  <input id="garage-modelo" type="text" placeholder="ej. BR" value={modelo} onChange={(e) => setModelo(e.target.value)} required />
+                  <input id="garage-modelo" type="text" placeholder="Ej. BR" value={modelo} onChange={(e) => setModelo(e.target.value)} required />
                 </div>
-                <div className="biela-modal-input-group biela-modal-input-year">
+                <div className="biela-modal-field biela-modal-year">
                   <label htmlFor="garage-year">Año</label>
                   <input id="garage-year" type="text" placeholder="2026" value={year} onChange={(e) => setYear(e.target.value)} required />
                 </div>
               </div>
-              <div className="biela-modal-input-row">
-                <div className="biela-modal-input-group">
+              <div className="biela-modal-row">
+                <div className="biela-modal-field">
                   <label htmlFor="garage-km">Kilometraje</label>
-                  <input id="garage-km" type="number" min="0" placeholder="ej. 820" value={kilometraje} onChange={(e) => setKilometraje(e.target.value)} required />
+                  <input id="garage-km" type="number" min="0" placeholder="Ej. 820" value={kilometraje} onChange={(e) => setKilometraje(e.target.value)} required />
                 </div>
-                <div className="biela-modal-input-group">
+                <div className="biela-modal-field">
                   <label htmlFor="garage-aceite">Aceite</label>
-                  <input id="garage-aceite" type="text" placeholder="ej. 20W-50" value={tipoAceite} onChange={(e) => setTipoAceite(e.target.value)} />
+                  <input id="garage-aceite" type="text" placeholder="Ej. 20W-50" value={tipoAceite} onChange={(e) => setTipoAceite(e.target.value)} />
                 </div>
               </div>
               <div className="biela-modal-actions">
-                <button type="button" className="biela-modal-btn-secondary" onClick={() => setAbrirModalAdd(false)}>Cancelar</button>
-                <button type="submit" className="biela-modal-btn-primary" disabled={cargando}>{cargando ? 'Guardando...' : 'Guardar moto'}</button>
+                <button type="button" className="biela-modal-secondary" onClick={() => setAbrirModalAdd(false)}>Cancelar</button>
+                <button type="submit" className="biela-modal-primary" disabled={cargando}>{cargando ? 'Guardando...' : 'Guardar moto'}</button>
               </div>
             </form>
           </div>
@@ -364,11 +286,14 @@ export default function Garage({
         <div className="biela-modal-overlay" role="presentation" onMouseDown={(e) => {
           if (e.target === e.currentTarget) setIsKmModalOpen(false);
         }}>
-          <div className="biela-modal-panel biela-modal-panel-mini">
+          <div className="gpane biela-modal-panel biela-modal-panel-mini">
+            <button type="button" className="biela-modal-close" onClick={() => setIsKmModalOpen(false)} aria-label="Cerrar">
+              <X size={16} />
+            </button>
             <div className="biela-modal-head">
-              <span className="biela-modal-badge">ODÓMETRO</span>
-              <h2>Ajustar Kilometraje</h2>
-              <p>Actualiza la lectura actual de {motoActiva?.marca} {motoActiva?.modelo}.</p>
+              <span className="biela-modal-badge">Odómetro</span>
+              <h2>Ajustar kilometraje</h2>
+              <p>{motoActiva?.marca} {motoActiva?.modelo}</p>
             </div>
             <form onSubmit={actualizarKm} className="biela-modal-form">
               <input
@@ -382,8 +307,8 @@ export default function Garage({
                 aria-label="Nuevo kilometraje"
               />
               <div className="biela-modal-actions">
-                <button type="button" className="biela-modal-btn-secondary" onClick={() => setIsKmModalOpen(false)}>Cancelar</button>
-                <button type="submit" className="biela-modal-btn-primary" disabled={cargando}>{cargando ? '...' : 'Actualizar'}</button>
+                <button type="button" className="biela-modal-secondary" onClick={() => setIsKmModalOpen(false)}>Cancelar</button>
+                <button type="submit" className="biela-modal-primary" disabled={cargando}>{cargando ? '...' : 'Actualizar'}</button>
               </div>
             </form>
           </div>
@@ -397,13 +322,16 @@ export default function Garage({
             setMotoActiva(null);
           }
         }}>
-          <div className="biela-modal-panel biela-modal-panel-mini">
-            <span className="biela-modal-danger-icon"><Trash2 size={24} /></span>
-            <h2 className="biela-modal-danger-title">¿Eliminar vehículo?</h2>
+          <div className="gpane biela-modal-panel biela-modal-panel-mini">
+            <button type="button" className="biela-modal-close" onClick={() => { setIsDeleteModalOpen(false); setMotoActiva(null); }} aria-label="Cerrar">
+              <X size={16} />
+            </button>
+            <span className="biela-modal-danger-icon"><Trash2 size={22} strokeWidth={1.7} /></span>
+            <h2 className="biela-modal-danger-title">Eliminar vehículo</h2>
             <p className="biela-modal-danger-copy">Se borrará toda la bitácora de forma permanente.</p>
             <div className="biela-modal-actions">
-              <button type="button" className="biela-modal-btn-secondary" onClick={() => { setIsDeleteModalOpen(false); setMotoActiva(null); }}>Cancelar</button>
-              <button type="button" className="biela-modal-btn-danger" onClick={confirmarEliminacion} disabled={cargando}>{cargando ? 'Borrando...' : 'Eliminar'}</button>
+              <button type="button" className="biela-modal-secondary" onClick={() => { setIsDeleteModalOpen(false); setMotoActiva(null); }}>Cancelar</button>
+              <button type="button" className="biela-modal-danger" onClick={confirmarEliminacion} disabled={cargando}>{cargando ? 'Borrando...' : 'Eliminar'}</button>
             </div>
           </div>
         </div>

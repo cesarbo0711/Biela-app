@@ -1,598 +1,315 @@
-.biela-fade-in {
-  animation: garageFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes garageFadeIn {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 .garage-root {
+  min-width: 0;
+}
+
+.moto-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
   min-width: 0;
-}
-
-.garage-section-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.garage-section-label {
-  color: #84cc16;
-  font-size: 0.62rem;
-  font-weight: 900;
-  letter-spacing: 0.18em;
-}
-
-.garage-section-head h2 {
-  margin: 0.35rem 0 0.2rem;
-  font-size: clamp(1.5rem, 3vw, 2.1rem);
-  font-weight: 900;
-  letter-spacing: -0.04em;
-}
-
-.garage-section-head p {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.82rem;
-}
-
-.garage-head-add {
-  min-height: 48px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0 1.1rem;
-  border-radius: 999px;
-  border: 1px solid rgba(132, 204, 22, 0.35);
-  background: rgba(132, 204, 22, 0.08);
-  color: #a3e635;
-  font-size: 0.82rem;
-  font-weight: 900;
-  cursor: pointer;
-  transition: background 0.25s ease, transform 0.25s ease;
-}
-
-.garage-head-add:hover {
-  background: rgba(132, 204, 22, 0.16);
-  transform: translateY(-2px);
-}
-
-.garage-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.85rem;
-  padding: 4rem 1.5rem;
-  border-radius: 2rem;
-  border: 1px dashed var(--border-color);
-  background: color-mix(in srgb, var(--bg-surface) 62%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-.garage-empty-icon {
-  width: 72px;
-  height: 72px;
-  display: grid;
-  place-items: center;
-  border-radius: 1.5rem;
-  background: rgba(132, 204, 22, 0.1);
-  border: 1px solid rgba(132, 204, 22, 0.2);
-  color: #84cc16;
-}
-
-.garage-empty h3 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 900;
-  letter-spacing: -0.03em;
-}
-
-.garage-empty p {
-  max-width: 420px;
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-.garage-empty button {
-  min-height: 52px;
-  margin-top: 0.5rem;
-  padding: 0 1.75rem;
-  border: none;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #84cc16, #65a30d);
-  color: #000;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 12px 30px rgba(132, 204, 22, 0.25);
-}
-
-.garage-feature-grid {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 1.5rem;
-  align-items: stretch;
-}
-
-.garage-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2rem;
-}
-
-.garage-card {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  border-radius: 2rem;
-  border: 1px solid var(--border-color);
-  background: linear-gradient(180deg, rgba(22, 22, 22, 0.92), rgba(12, 12, 12, 1));
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  overflow: hidden;
-  min-width: 0;
-  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
-}
-
-.garage-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(132, 204, 22, 0.5);
-  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55), 0 0 40px rgba(132, 204, 22, 0.08);
-}
-
-.garage-stage-wrap {
-  position: relative;
-  grid-column: span 5;
-  min-width: 0;
-  min-height: 500px;
-  display: grid;
-  place-items: center;
-  padding: 2rem;
-  border-radius: 2rem;
-  border: 1px solid var(--border-color);
-  background:
-    radial-gradient(circle at 50% 40%, rgba(132, 204, 22, 0.12), transparent 55%),
-    linear-gradient(180deg, rgba(18, 18, 18, 0.92), rgba(8, 8, 8, 1));
-  overflow: hidden;
-}
-
-.garage-feature-grid > .garage-feature-panel {
-  grid-column: span 7;
-}
-
-.garage-card .garage-stage-wrap {
-  grid-column: auto;
-  min-height: 310px;
   padding: 1.5rem;
-  border: none;
-  border-bottom: 1px solid var(--border-color);
-  border-radius: 0;
-}
-
-.garage-card-glow {
-  position: absolute;
-  width: 90%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(132, 204, 22, 0.18), transparent 68%);
-  filter: blur(30px);
-  pointer-events: none;
-}
-
-.garage-stage {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  z-index: 1;
-}
-
-.garage-stage-ring {
-  position: absolute;
-  width: min(78%, 380px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 1px solid rgba(132, 204, 22, 0.16);
-  box-shadow: 0 0 60px rgba(132, 204, 22, 0.08) inset;
-}
-
-.garage-moto-img {
-  position: relative;
-  z-index: 2;
-  width: min(100%, 440px);
-  max-height: 360px;
-  object-fit: contain;
-  filter: drop-shadow(0 34px 28px rgba(0, 0, 0, 0.7));
-  animation: garageLevitate 6s ease-in-out infinite;
-  transition: transform 0.4s ease, filter 0.4s ease;
-}
-
-.garage-card:hover .garage-moto-img,
-.garage-stage-wrap:hover .garage-moto-img {
-  transform: scale(1.05) translateY(-6px);
-  filter: drop-shadow(0 42px 34px rgba(0, 0, 0, 0.8));
-}
-
-@keyframes garageLevitate {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-11px); }
-}
-
-.garage-floor {
-  position: absolute;
-  bottom: 12%;
-  width: min(58%, 300px);
-  height: 18px;
-  border-radius: 50%;
-  background: rgba(132, 204, 22, 0.2);
-  filter: blur(18px);
-}
-
-.garage-no-photo {
-  position: relative;
-  z-index: 2;
-  width: 180px;
-  height: 180px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-muted);
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.garage-body {
-  position: relative;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
-}
-
-.garage-feature-panel {
   border-radius: 2rem;
-  border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-surface) 80%, transparent);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  padding: 2rem;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
+  transition: border-color 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
 }
 
-.garage-delete {
+.moto-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(132, 204, 22, 0.35);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.16);
+}
+
+.moto-delete {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-base) 60%, transparent);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease;
-}
-
-.garage-delete:hover {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.12);
-  border-color: rgba(239, 68, 68, 0.4);
-}
-
-.garage-card-head {
-  padding-right: 3.25rem;
-}
-
-.garage-eyebrow {
-  color: #84cc16;
-  font-size: 0.6rem;
-  font-weight: 900;
-  letter-spacing: 0.16em;
-}
-
-.garage-card-head h3 {
-  margin: 0.4rem 0 0;
-  font-size: clamp(1.35rem, 2.8vw, 2.15rem);
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: -0.04em;
-  line-height: 1.05;
-  overflow-wrap: anywhere;
-}
-
-.garage-card-head h3 span {
-  color: var(--text-muted);
-  font-weight: 700;
-  margin: 0 0.15rem;
-}
-
-.garage-year {
-  display: inline-block;
-  margin-top: 0.6rem;
-  padding: 0.3rem 0.8rem;
-  border-radius: 999px;
-  border: 1px solid rgba(132, 204, 22, 0.3);
-  background: rgba(132, 204, 22, 0.1);
-  color: #a3e635;
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-}
-
-.garage-traffic {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
-  border-radius: 1rem;
-  border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-base) 45%, transparent);
-}
-
-.garage-traffic-dot {
-  width: 10px;
-  height: 10px;
-  flex: 0 0 10px;
-  border-radius: 50%;
-  background: #a3a3a3;
-  box-shadow: 0 0 14px currentColor;
-}
-
-.garage-traffic div {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  min-width: 0;
-}
-
-.garage-traffic strong {
-  font-size: 0.88rem;
-  font-weight: 900;
-}
-
-.garage-traffic small {
-  color: var(--text-muted);
-  font-size: 0.7rem;
-}
-
-.garage-traffic.tone-ok { border-color: rgba(74, 222, 128, 0.28); }
-.garage-traffic.tone-ok .garage-traffic-dot { background: #4ade80; color: #4ade80; }
-.garage-traffic.tone-ok strong { color: #4ade80; }
-.garage-traffic.tone-warn { border-color: rgba(251, 191, 36, 0.28); }
-.garage-traffic.tone-warn .garage-traffic-dot { background: #fbbf24; color: #fbbf24; }
-.garage-traffic.tone-warn strong { color: #fbbf24; }
-.garage-traffic.tone-danger { border-color: rgba(248, 113, 113, 0.32); }
-.garage-traffic.tone-danger .garage-traffic-dot { background: #f87171; color: #f87171; }
-.garage-traffic.tone-danger strong { color: #f87171; }
-
-.garage-metrics {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.garage-metric {
-  position: relative;
-  min-width: 0;
-  min-height: 92px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.35rem;
-  padding: 0.9rem;
-  border-radius: 1rem;
-  border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-base) 45%, transparent);
-}
-
-.garage-metric > span {
-  color: var(--text-muted);
-  font-size: 0.62rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.garage-metric strong {
-  font-size: 1.3rem;
-  font-weight: 900;
-  letter-spacing: -0.03em;
-}
-
-.garage-metric strong small {
-  color: var(--text-muted);
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-}
-
-.garage-metric-text {
-  font-size: 0.95rem !important;
-  overflow-wrap: anywhere;
-}
-
-.garage-edit-km {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  width: 30px;
-  height: 30px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(128, 128, 128, 0.06);
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  transition: color 0.22s ease, background 0.22s ease, border-color 0.22s ease;
 }
 
-.garage-edit-km:hover {
-  color: #84cc16;
-  background: rgba(132, 204, 22, 0.1);
-  border-color: rgba(132, 204, 22, 0.3);
+.moto-delete:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.24);
 }
 
-.garage-history {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  padding: 0.9rem;
-  border-radius: 1rem;
-  border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-base) 40%, transparent);
-}
-
-.garage-history-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.garage-history-head span {
-  color: var(--text-muted);
-  font-size: 0.62rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.garage-history-head button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  border: none;
-  background: none;
-  color: #84cc16;
-  font-size: 0.72rem;
-  font-weight: 800;
+.moto-visual {
+  position: relative;
+  width: 100%;
+  min-height: 16rem;
+  display: grid;
+  place-items: center;
+  margin-top: -0.5rem;
+  padding: 0.5rem 0 1.5rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
 }
 
-.garage-history ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.garage-history li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-}
-
-.garage-history-dot {
-  width: 7px;
-  height: 7px;
-  margin-top: 0.35rem;
-  flex: 0 0 7px;
+.moto-visual::before {
+  content: '';
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  width: 70%;
+  height: 60%;
   border-radius: 50%;
-  background: #84cc16;
-  box-shadow: 0 0 10px rgba(132, 204, 22, 0.7);
+  background: radial-gradient(circle, rgba(132, 204, 22, 0.08), transparent 68%);
+  filter: blur(22px);
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
-.garage-history li div {
+.moto-visual::after {
+  content: '';
+  position: absolute;
+  bottom: 1.1rem;
+  width: 58%;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.28);
+  filter: blur(14px);
+  pointer-events: none;
+}
+
+.moto-image {
+  position: relative;
+  z-index: 1;
+  height: 14rem;
+  object-fit: contain;
+  filter: drop-shadow(0 24px 20px rgba(0, 0, 0, 0.38));
+  animation: motoFloat 7s ease-in-out infinite;
+}
+
+@keyframes motoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.moto-placeholder {
+  position: relative;
+  z-index: 1;
+  width: 130px;
+  height: 130px;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-}
-
-.garage-history li strong {
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-
-.garage-history li small {
-  color: var(--text-muted);
-  font-size: 0.68rem;
-}
-
-.garage-history-empty {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-}
-
-.garage-actions {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.garage-action-primary {
-  min-height: 54px;
-  display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
-  padding: 0 1rem;
-  border-radius: 1rem;
-  border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-base) 55%, transparent);
-  color: var(--text-main);
-  font-size: 0.86rem;
-  font-weight: 900;
-  cursor: pointer;
-  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  border-radius: 50%;
+  background: rgba(128, 128, 128, 0.06);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
-.garage-action-primary:hover {
-  background: #84cc16;
-  border-color: #84cc16;
-  color: #000;
-  transform: translateY(-2px);
+.moto-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
 }
 
-.garage-action-row {
+.moto-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-right: 2.75rem;
+}
+
+.moto-title-row h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.moto-year {
+  flex: 0 0 auto;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(128, 128, 128, 0.08);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.moto-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-weight: 500;
+}
+
+.moto-status-dot {
+  flex: 0 0 auto;
+  background: var(--text-muted);
+}
+
+.moto-status.tone-ok .moto-status-dot { background: #4ade80; }
+.moto-status.tone-warn .moto-status-dot { background: #fbbf24; }
+.moto-status.tone-danger .moto-status-dot { background: #f87171; }
+
+.moto-facts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.6rem;
+  gap: 0.65rem;
 }
 
-.garage-action-secondary {
+.moto-fact {
+  position: relative;
+  min-width: 0;
+  min-height: 88px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.85rem;
+  border-radius: 18px;
+  background: rgba(128, 128, 128, 0.06);
+}
+
+.moto-fact-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.moto-fact-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.moto-fact-value small {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.moto-fact-value-text {
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.moto-fact-edit {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.22s ease, background 0.22s ease;
+}
+
+.moto-fact-edit:hover {
+  color: var(--accent-color);
+  background: rgba(128, 128, 128, 0.1);
+}
+
+.moto-open {
   min-height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  padding: 0 0.75rem;
-  border-radius: 1rem;
   border: 1px solid var(--border-color);
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  font-weight: 800;
+  border-radius: 999px;
+  background: rgba(128, 128, 128, 0.06);
+  color: var(--text-main);
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  transition: border-color 0.22s ease, background 0.22s ease, transform 0.22s ease;
 }
 
-.garage-action-secondary:hover {
-  color: #84cc16;
-  border-color: rgba(132, 204, 22, 0.45);
-  background: rgba(132, 204, 22, 0.06);
+.moto-open:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent-color);
+  background: rgba(128, 128, 128, 0.1);
+}
+
+.moto-empty {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.moto-empty-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: rgba(128, 128, 128, 0.06);
+  color: var(--accent-color);
+}
+
+.moto-empty h2 {
+  margin: 0.35rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.moto-empty p {
+  max-width: 320px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.moto-empty button {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+  padding: 0 1.2rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--accent-color);
+  color: #080808;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .biela-modal-overlay {
@@ -603,29 +320,22 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.84);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  animation: garageFadeIn 0.25s ease-out;
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   overflow-y: auto;
+  animation: bielaOverlayIn 0.24s ease-out;
 }
 
 .biela-modal-panel {
-  width: min(540px, 100%);
+  position: relative;
+  width: min(500px, 100%);
   max-height: 85vh;
   max-height: 85dvh;
   overflow-y: auto;
-  padding: 2rem;
-  border-radius: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: linear-gradient(180deg, rgba(24, 24, 24, 0.98), rgba(10, 10, 10, 1));
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  animation: garageModalUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes garageModalUp {
-  from { opacity: 0; transform: translateY(36px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  padding: 1.75rem;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.16);
+  animation: bielaPanelIn 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .biela-modal-panel-mini {
@@ -633,249 +343,236 @@
   text-align: center;
 }
 
+.biela-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: rgba(128, 128, 128, 0.06);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
 .biela-modal-head {
   margin-bottom: 1.5rem;
-  text-align: center;
+  padding-right: 2rem;
 }
 
 .biela-modal-badge {
-  color: #84cc16;
-  font-size: 0.62rem;
-  font-weight: 900;
-  letter-spacing: 0.16em;
+  color: var(--accent-color);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .biela-modal-head h2,
 .biela-modal-danger-title {
   margin: 0.5rem 0 0;
-  color: #fff;
-  font-size: 1.5rem;
-  font-weight: 900;
+  font-size: 1.35rem;
+  font-weight: 700;
   letter-spacing: -0.03em;
 }
 
 .biela-modal-head p,
 .biela-modal-danger-copy {
-  margin: 0.45rem 0 0;
-  color: #a3a3a3;
-  font-size: 0.8rem;
-  line-height: 1.45;
+  margin: 0.35rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
 .biela-modal-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.9rem;
 }
 
 .biela-modal-upload label {
   display: block;
   margin-top: 0.35rem;
-  color: #a3a3a3;
-  font-size: 0.65rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-align: center;
   text-transform: uppercase;
 }
 
-.biela-modal-input-row {
+.biela-modal-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 
-.biela-modal-input-year {
+.biela-modal-year {
   max-width: 110px;
 }
 
-.biela-modal-input-group {
+.biela-modal-field {
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
 }
 
-.biela-modal-input-group label {
-  color: #a3a3a3;
-  font-size: 0.65rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
+.biela-modal-field label {
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.biela-modal-input-group input,
+.biela-modal-field input,
 .biela-modal-km-input {
   width: 100%;
-  min-height: 52px;
-  padding: 0 1rem;
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.35);
-  color: #fff;
+  min-height: 48px;
+  padding: 0 0.9rem;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  background: rgba(128, 128, 128, 0.06);
+  color: var(--text-main);
   font-size: 16px;
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition: border-color 0.22s ease;
 }
 
-.biela-modal-input-group input::placeholder { color: #666; }
-
-.biela-modal-input-group input:focus,
+.biela-modal-field input:focus,
 .biela-modal-km-input:focus {
-  border-color: #84cc16;
-  box-shadow: 0 0 0 4px rgba(132, 204, 22, 0.12);
+  border-color: var(--accent-color);
 }
 
 .biela-modal-km-input {
-  min-height: 84px;
+  min-height: 76px;
   text-align: center;
-  font-size: 2.2rem;
-  font-weight: 900;
-  color: #84cc16;
+  font-size: 2rem;
+  font-weight: 700;
   letter-spacing: -0.04em;
 }
 
 .biela-modal-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.5rem;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
 }
 
 .biela-modal-actions button {
-  min-height: 52px;
-  border-radius: 1rem;
-  font-size: 0.85rem;
-  font-weight: 900;
+  min-height: 46px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
   cursor: pointer;
 }
 
-.biela-modal-actions button:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.biela-modal-btn-secondary {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.05);
-  color: #d4d4d4;
+.biela-modal-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.biela-modal-btn-primary {
-  border: none;
-  background: linear-gradient(135deg, #84cc16, #65a30d);
-  color: #000;
-  box-shadow: 0 12px 30px rgba(132, 204, 22, 0.25);
+.biela-modal-secondary {
+  border: 1px solid var(--border-color);
+  background: rgba(128, 128, 128, 0.06);
+  color: var(--text-main);
 }
 
-.biela-modal-btn-danger {
-  border: none;
+.biela-modal-primary {
+  border: 1px solid transparent;
+  background: var(--accent-color);
+  color: #080808;
+}
+
+.biela-modal-danger {
+  border: 1px solid transparent;
   background: #dc2626;
   color: #fff;
-  box-shadow: 0 12px 30px rgba(220, 38, 38, 0.25);
 }
 
 .biela-modal-danger-icon {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 1rem;
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 0.75rem;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 18px;
+  background: rgba(239, 68, 68, 0.08);
   color: #ef4444;
 }
 
-.biela-modal-danger-title { margin-top: 0; }
-
-:root.light-mode .garage-section-label,
-:root.light-mode .garage-eyebrow,
-:root.light-mode .garage-year,
-:root.light-mode .garage-head-add,
-:root.light-mode .garage-history-head button {
-  color: #4d7c0f;
+@keyframes bielaOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-:root.light-mode .garage-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 245, 240, 1));
-  border-color: rgba(23, 23, 23, 0.1);
-  box-shadow: 0 30px 70px rgba(23, 23, 23, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+@keyframes bielaPanelIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-:root.light-mode .garage-stage-wrap {
-  background:
-    radial-gradient(circle at 50% 40%, rgba(132, 204, 22, 0.14), transparent 55%),
-    linear-gradient(180deg, rgba(248, 245, 240, 1), rgba(236, 230, 220, 1));
-  border-color: rgba(23, 23, 23, 0.1);
+:root.light-mode .moto-card {
+  box-shadow: 0 14px 40px rgba(23, 23, 23, 0.07);
 }
 
-:root.light-mode .garage-moto-img {
-  filter: drop-shadow(0 30px 24px rgba(23, 23, 23, 0.25));
+:root.light-mode .moto-card:hover {
+  border-color: rgba(255, 155, 113, 0.5);
+  box-shadow: 0 18px 48px rgba(23, 23, 23, 0.1);
 }
 
-:root.light-mode .garage-feature-panel,
-:root.light-mode .garage-traffic,
-:root.light-mode .garage-metric,
-:root.light-mode .garage-history {
-  border-color: rgba(23, 23, 23, 0.1);
-}
-
-:root.light-mode .garage-traffic.tone-ok strong { color: #15803d; }
-:root.light-mode .garage-traffic.tone-ok .garage-traffic-dot { background: #15803d; color: #15803d; }
-:root.light-mode .garage-traffic.tone-warn strong { color: #b45309; }
-:root.light-mode .garage-traffic.tone-warn .garage-traffic-dot { background: #b45309; color: #b45309; }
-:root.light-mode .garage-traffic.tone-danger strong { color: #dc2626; }
-:root.light-mode .garage-traffic.tone-danger .garage-traffic-dot { background: #dc2626; color: #dc2626; }
-
-:root.light-mode .biela-modal-panel {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 245, 240, 1));
-  border-color: rgba(23, 23, 23, 0.12);
-  box-shadow: 0 40px 100px rgba(23, 23, 23, 0.2);
-}
-
-:root.light-mode .biela-modal-head h2,
-:root.light-mode .biela-modal-danger-title { color: #171717; }
-:root.light-mode .biela-modal-badge { color: #4d7c0f; }
-:root.light-mode .biela-modal-head p,
-:root.light-mode .biela-modal-danger-copy,
-:root.light-mode .biela-modal-input-group label,
-:root.light-mode .biela-modal-upload label { color: #6b6560; }
-:root.light-mode .biela-modal-input-group input,
-:root.light-mode .biela-modal-km-input { background: #fff; color: #171717; border-color: rgba(23, 23, 23, 0.14); }
-:root.light-mode .biela-modal-input-group input::placeholder { color: #9a938b; }
-:root.light-mode .biela-modal-btn-secondary {
-  background: #fff;
-  color: #171717;
-  border-color: rgba(23, 23, 23, 0.14);
-}
-
-@media (max-width: 1024px) {
-  .garage-feature-grid { grid-template-columns: minmax(0, 1fr); }
-  .garage-stage-wrap,
-  .garage-feature-grid > .garage-feature-panel { grid-column: 1 / -1; }
-  .garage-stage-wrap { min-height: 420px; }
-}
-
-@media (max-width: 768px) {
-  .garage-grid { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
-}
+:root.light-mode .moto-visual::before { background: radial-gradient(circle, rgba(255, 155, 113, 0.1), transparent 68%); }
+:root.light-mode .moto-visual::after { background: rgba(23, 23, 23, 0.16); }
+:root.light-mode .moto-image { filter: drop-shadow(0 20px 16px rgba(23, 23, 23, 0.18)); }
+:root.light-mode .moto-status.tone-ok .moto-status-dot { background: #15803d; }
+:root.light-mode .moto-status.tone-warn .moto-status-dot { background: #b45309; }
+:root.light-mode .moto-status.tone-danger .moto-status-dot { background: #dc2626; }
+:root.light-mode .biela-modal-panel { box-shadow: 0 18px 50px rgba(23, 23, 23, 0.1); }
 
 @media (max-width: 640px) {
-  .garage-root { gap: 1.25rem; }
-  .garage-section-head h2 { font-size: 1.4rem; }
-  .garage-head-add span { display: none; }
-  .garage-head-add { width: 48px; padding: 0; justify-content: center; }
-  .garage-feature-grid { gap: 1rem; }
-  .garage-stage-wrap { min-height: 300px; padding: 1rem; border-radius: 1.4rem; }
-  .garage-card .garage-stage-wrap { min-height: 240px; }
-  .garage-moto-img { max-height: 240px; }
-  .garage-no-photo { width: 130px; height: 130px; }
-  .garage-feature-panel { padding: 1.25rem; border-radius: 1.4rem; }
-  .garage-body { padding: 1.25rem; }
-  .garage-card { border-radius: 1.4rem; }
-  .garage-card-head h3 { font-size: 1.3rem; }
-  .garage-action-primary { font-size: 0.78rem; }
-  .garage-action-row { grid-template-columns: minmax(0, 1fr); }
-  .biela-modal-panel { padding: 1.35rem; border-radius: 1.5rem; }
-  .biela-modal-input-row { grid-template-columns: minmax(0, 1fr); }
-  .biela-modal-input-year { max-width: none; }
+  .moto-card {
+    padding: 1.15rem;
+    border-radius: 2rem;
+  }
+
+  .moto-visual {
+    min-height: 15rem;
+  }
+
+  .moto-image {
+    height: 13rem;
+  }
+
+  .moto-title-row h3 {
+    font-size: 1rem;
+  }
+
+  .moto-facts {
+    gap: 0.5rem;
+  }
+
+  .moto-fact {
+    padding: 0.7rem;
+  }
+
+  .moto-fact-value {
+    font-size: 1rem;
+  }
+
+  .biela-modal-panel {
+    padding: 1.35rem;
+    border-radius: 24px;
+  }
+
+  .biela-modal-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .biela-modal-year {
+    max-width: none;
+  }
 }

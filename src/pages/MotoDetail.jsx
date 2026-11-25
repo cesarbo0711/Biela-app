@@ -135,13 +135,6 @@ export default function MotoDetail() {
     cargarDatos();
   }, [id]);
 
-  useEffect(() => {
-    if (cargandoInicial || !moto) return undefined;
-    if (new URLSearchParams(window.location.search).get('exportar') !== 'pdf') return undefined;
-    const temporizador = window.setTimeout(() => window.print(), 700);
-    return () => window.clearTimeout(temporizador);
-  }, [cargandoInicial, moto]);
-
   const cargarDatos = async () => {
     try {
       const { data: motoData } = await supabase.from('motos').select('*').eq('id', id).single();

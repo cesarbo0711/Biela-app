@@ -1,22 +1,44 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabase';
 import { ProfileSkeleton } from '../components/BielaSkeletons.jsx';
 import { useNavigate } from 'react-router-dom';
+import { Camera, LifeBuoy, LogOut, Moon, RefreshCw, Settings, Sun, User, X } from 'lucide-react';
 import { ThemeBall } from '../components/ThemeBall';
 import './Profile.css';
 
+const ESTILOS_AVATAR = [
+  { key: 'notionists', label: 'Trazo' },
+  { key: 'micah', label: 'Retrato' },
+  { key: 'glass', label: 'Abstracto' },
+];
+
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
+
+function crearSemilla() {
+  return Math.random().toString(36).substring(2, 10);
+}
+
+function urlDiceBear(estilo, semilla) {
+  return `https://api.dicebear.com/9.x/${estilo}/svg?seed=${encodeURIComponent(semilla || 'piloto')}`;
+}
+
 export default function Profile({ usuario, isLightMode, toggleTheme }) {
   const navigate = useNavigate();
+  const inputFotoRef = useRef(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [cargandoInicial, setCargandoInicial] = useState(true);
-  
+  const [subiendoAvatar, setSubiendoAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
+
   const [perfil, setPerfil] = useState({
-    nombre: 'César Borrego', 
+    nombre: 'César Borrego',
     telefono: '',
     residencia: 'San Juan de los Morros, Venezuela',
-    avatar_seed: '' // <--- Nuevo campo para guardar el avatar elegido
+    avatar_seed: crearSemilla(),
+    avatar_style: 'notionists',
+    avatar_url: '',
   });
 
   useEffect(() => {
@@ -38,11 +60,13 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
             nombre: data.nombre || 'César Borrego',
             telefono: data.telefono || '',
             residencia: data.residencia || 'San Juan de los Morros, Venezuela',
-            avatar_seed: data.avatar_seed || ''
+            avatar_seed: data.avatar_seed || crearSemilla(),
+            avatar_style: data.avatar_style || 'notionists',
+            avatar_url: data.avatar_url || '',
           });
         }
       } catch (error) {
-        console.error("Error al cargar el perfil:", error);
+        console.error('Error al cargar el perfil:', error);
       } finally {
         setCargandoInicial(false);
       }
@@ -57,20 +81,65 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
 
   const manejarCambio = (e) => {
     const { name, value } = e.target;
-    setPerfil(prev => ({ ...prev, [name]: value }));
+    setPerfil((prev) => ({ ...prev, [name]: value }));
   };
 
-  // --- NUEVA FUNCIÓN: Cambiar el Avatar ---
   const refrescarAvatar = () => {
-    // Generamos un código aleatorio (ej: "x7b9q2")
-    const semillaAleatoria = Math.random().toString(36).substring(2, 10);
-    setPerfil(prev => ({ ...prev, avatar_seed: semillaAleatoria }));
+    setAvatarError('');
+    setPerfil((prev) => ({ ...prev, avatar_seed: crearSemilla(), avatar_url: '' }));
+  };
+
+  const seleccionarEstilo = (estilo) => {
+    setAvatarError('');
+    setPerfil((prev) => ({
+      ...prev,
+      avatar_style: estilo,
+      avatar_seed: prev.avatar_seed || crearSemilla(),
+      avatar_url: '',
+    }));
+  };
+
+  const subirFoto = async (e) => {
+    const archivo = e.target.files?.[0];
+    e.target.value = '';
+    if (!archivo || !usuario?.id) return;
+
+    if (!archivo.type.startsWith('image/')) {
+      setAvatarError('Selecciona una imagen válida.');
+      return;
+    }
+
+    if (archivo.size > MAX_AVATAR_BYTES) {
+      setAvatarError('La imagen debe pesar menos de 5 MB.');
+      return;
+    }
+
+    setSubiendoAvatar(true);
+    setAvatarError('');
+
+    try {
+      const extension = archivo.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const ruta = `${usuario.id}/avatar-${Date.now()}-${crearSemilla()}.${extension}`;
+      const { error: uploadError } = await supabase.storage
+        .from('vehiculos')
+        .upload(ruta, archivo, { upsert: true, contentType: archivo.type });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('vehiculos').getPublicUrl(ruta);
+      setPerfil((prev) => ({ ...prev, avatar_url: data.publicUrl }));
+    } catch (error) {
+      console.error('Error subiendo avatar:', error);
+      setAvatarError('No se pudo subir la foto. Intenta de nuevo.');
+    } finally {
+      setSubiendoAvatar(false);
+    }
   };
 
   const guardarPerfil = async (e) => {
     e.preventDefault();
     setGuardando(true);
-    
+
     const { error } = await supabase
       .from('perfiles')
       .upsert({
@@ -78,115 +147,138 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
         nombre: perfil.nombre,
         telefono: perfil.telefono,
         residencia: perfil.residencia,
-        avatar_seed: perfil.avatar_seed, // Guardamos la foto elegida
-        updated_at: new Date()
+        avatar_seed: perfil.avatar_seed,
+        avatar_style: perfil.avatar_style,
+        avatar_url: perfil.avatar_url || null,
+        updated_at: new Date(),
       });
 
     if (error) {
-      console.error("Error guardando perfil:", error);
-      alert("Hubo un error al guardar los cambios.");
+      console.error('Error guardando perfil:', error);
+      alert('Hubo un error al guardar los cambios.');
     } else {
       setIsModalOpen(false);
     }
     setGuardando(false);
   };
 
-  // El avatar ahora usa la semilla aleatoria, y si no hay, usa el nombre
   const semillaBase = perfil.avatar_seed || perfil.nombre || 'piloto';
-  const semillaAvatar = encodeURIComponent(semillaBase);
-  const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${semillaAvatar}&backgroundColor=e5e5e5`;
+  const avatarUrl = perfil.avatar_url || urlDiceBear(perfil.avatar_style, semillaBase);
 
   if (cargandoInicial) return <ProfileSkeleton />;
 
   return (
     <div className="biela-fade-in profile-container fade-in">
       <ThemeBall isLightMode={isLightMode} toggleTheme={toggleTheme} />
-      
-      {/* CABECERA PRINCIPAL */}
+
       <div className="profile-header">
         <div className="avatar-wrapper-main">
-          <img src={avatarUrl} alt="Avatar" className="profile-avatar-img" />
+          <img src={avatarUrl} alt="Avatar de perfil" className="profile-avatar-img" />
         </div>
         <h2 className="profile-email">{perfil.nombre || usuario?.email}</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '-5px', marginBottom: '10px' }}>
-          {perfil.residencia}
-        </p>
-        <span className="profile-badge">Piloto Oficial</span>
+        <p className="profile-residencia">{perfil.residencia}</p>
+        <span className="profile-badge">
+          <User size={12} strokeWidth={2.4} /> Piloto Oficial
+        </span>
       </div>
 
-      {/* BOTONES */}
       <div className="profile-actions">
-        <button className="btn-menu-item" onClick={() => setIsModalOpen(true)}>
-          ⚙️ Configuración de cuenta
+        <button type="button" className="btn-menu-item gpane" onClick={() => setIsModalOpen(true)}>
+          <Settings size={18} strokeWidth={1.8} />
+          <span>Configuración de cuenta</span>
         </button>
-        <button className="btn-menu-item">🎧 Soporte y Ayuda</button>
-        
-        <button 
-          onClick={toggleTheme} 
-          style={{
-            padding: '10px 20px',
-            borderRadius: '20px',
-            border: '1px solid var(--accent-color)',
-            color: 'var(--text-main)',
-            backgroundColor: 'var(--bg-surface)',
-            cursor: 'pointer',
-            width: '100%',
-            fontWeight: '600'
-          }}
-        >
-          {isLightMode ? '🌙 Cambiar a Modo Oscuro' : '☀️ Cambiar a Modo Claro'}
+        <button type="button" className="btn-menu-item gpane">
+          <LifeBuoy size={18} strokeWidth={1.8} />
+          <span>Soporte y Ayuda</span>
         </button>
-
-        <button onClick={cerrarSesion} className="btn-logout-large">
-          Cerrar Sesión
+        <button type="button" onClick={toggleTheme} className="btn-theme gpane">
+          {isLightMode ? <Moon size={17} strokeWidth={1.8} /> : <Sun size={17} strokeWidth={1.8} />}
+          <span>{isLightMode ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}</span>
+        </button>
+        <button type="button" onClick={cerrarSesion} className="btn-logout-large gpane">
+          <LogOut size={18} strokeWidth={1.8} />
+          <span>Cerrar sesión</span>
         </button>
       </div>
 
-      {/* MODAL DE EDICIÓN */}
       {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <button className="btn-close-modal" onClick={() => setIsModalOpen(false)}>✕</button>
+        <div className="modal-overlay" role="presentation" onMouseDown={(e) => {
+          if (e.target === e.currentTarget) setIsModalOpen(false);
+        }}>
+          <div className="modal-content gpane" role="dialog" aria-modal="true" aria-label="Editar perfil">
+            <button type="button" className="btn-close-modal" onClick={() => setIsModalOpen(false)} aria-label="Cerrar">
+              <X size={17} />
+            </button>
             <h3>Editar Perfil</h3>
-            
+
             <form onSubmit={guardarPerfil} className="profile-form">
-              
-              {/* --- NUEVA SECCIÓN DE AVATAR EN EL MODAL --- */}
               <div className="avatar-edit-container">
-                <img src={avatarUrl} alt="Preview Avatar" className="avatar-preview-small" />
-                <button type="button" onClick={refrescarAvatar} className="btn-refresh-avatar">
-                  🎲 Cambiar Avatar
+                <div className="avatar-preview-wrap">
+                  <img src={avatarUrl} alt="Vista previa del avatar" className="avatar-preview-small" />
+                  <button type="button" onClick={refrescarAvatar} className="btn-refresh-avatar" aria-label="Generar nuevo avatar" title="Generar nuevo avatar">
+                    <RefreshCw size={15} strokeWidth={2} />
+                  </button>
+                </div>
+
+                <div className="avatar-style-picker" role="group" aria-label="Estilo del avatar">
+                  {ESTILOS_AVATAR.map(({ key, label }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className={`avatar-style-option${perfil.avatar_style === key && !perfil.avatar_url ? ' is-active' : ''}`}
+                      onClick={() => seleccionarEstilo(key)}
+                      aria-pressed={perfil.avatar_style === key && !perfil.avatar_url}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+
+                <input
+                  ref={inputFotoRef}
+                  type="file"
+                  accept="image/*"
+                  className="avatar-file-input"
+                  onChange={subirFoto}
+                />
+                <button type="button" className="btn-upload-avatar" onClick={() => inputFotoRef.current?.click()} disabled={subiendoAvatar}>
+                  <Camera size={15} strokeWidth={1.8} />
+                  <span>{subiendoAvatar ? 'Subiendo...' : 'Subir foto propia'}</span>
                 </button>
+                {avatarError && <p className="avatar-error">{avatarError}</p>}
               </div>
 
               <div className="form-group">
-                <label>Nombre Completo</label>
-                <input 
-                  type="text" 
+                <label htmlFor="perfil-nombre">Nombre Completo</label>
+                <input
+                  id="perfil-nombre"
+                  type="text"
                   name="nombre"
-                  value={perfil.nombre} 
+                  value={perfil.nombre}
                   onChange={manejarCambio}
                   placeholder="Ej: Carlos Pérez"
                 />
               </div>
 
               <div className="form-group">
-                <label>Lugar de Residencia</label>
-                <input 
-                  type="text" 
+                <label htmlFor="perfil-residencia">Lugar de Residencia</label>
+                <input
+                  id="perfil-residencia"
+                  type="text"
                   name="residencia"
-                  value={perfil.residencia} 
+                  value={perfil.residencia}
                   onChange={manejarCambio}
                   placeholder="Ej: Caracas"
                 />
               </div>
 
               <div className="form-group">
-                <label>Número de Teléfono</label>
-                <input 
-                  type="tel" 
+                <label htmlFor="perfil-telefono">Número de Teléfono</label>
+                <input
+                  id="perfil-telefono"
+                  type="tel"
                   name="telefono"
-                  value={perfil.telefono} 
+                  value={perfil.telefono}
                   onChange={manejarCambio}
                   placeholder="Ej: 0414-1234567"
                 />
@@ -199,7 +291,6 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
           </div>
         </div>
       )}
-
     </div>
   );
 }

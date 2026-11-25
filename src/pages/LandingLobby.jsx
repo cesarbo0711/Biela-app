@@ -38,9 +38,9 @@ const NAV_LINKS = [
 ];
 
 const AVATARS = [
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Andres&backgroundColor=84cc16',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=María&backgroundColor=ffd5dc',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos&backgroundColor=b6e3f4',
+  'https://api.dicebear.com/9.x/notionists/svg?seed=Andres',
+  'https://api.dicebear.com/9.x/micah/svg?seed=Maria',
+  'https://api.dicebear.com/9.x/glass/svg?seed=Carlos',
 ];
 
 const TESTIMONIALS = [
