@@ -1,8 +1,5 @@
-html {
-  scroll-behavior: smooth;
-}
-
-.landing-root {
+.landing-root,
+.landing-container {
   --landing-bg: var(--bg-base);
   --landing-surface: var(--bg-surface);
   --landing-text: var(--text-main);
@@ -19,12 +16,22 @@ html {
   position: relative;
   isolation: isolate;
   width: 100%;
+  height: auto;
   min-height: 100dvh;
   overflow-x: clip;
+  overflow-y: visible;
+  overscroll-behavior-y: auto;
   color: var(--landing-text);
   background:
     radial-gradient(circle at 15% 8%, rgba(132, 204, 22, 0.1), transparent 38rem),
     linear-gradient(180deg, #070a06 0%, var(--landing-bg) 46%, #040404 100%);
+}
+
+.landing-passport,
+.landing-ecosystem,
+.landing-impact,
+.landing-faq {
+  scroll-margin-top: 96px;
 }
 
 .landing-root *,
@@ -140,6 +147,46 @@ html {
   box-shadow: 0 0 22px rgba(132, 204, 22, 0.34);
 }
 
+.landing-logo-img {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(132, 204, 22, 0.28));
+}
+
+.landing-logo-badge {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--landing-border);
+  border-radius: 12px;
+  background: var(--landing-surface);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.landing-logo-badge .landing-logo-img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+  filter: none;
+}
+
+.landing-logo-badge-auth {
+  width: 38px;
+  height: 38px;
+  border-radius: 16px;
+}
+
+.auth-logo-img {
+  width: 34px;
+  height: 34px;
+}
+
 .landing-logo-country {
   padding: 0.16rem 0.42rem;
   border: 1px solid rgba(132, 204, 22, 0.36);
@@ -159,19 +206,24 @@ html {
   min-width: 0;
 }
 
+.landing-nav-links a,
 .landing-nav-links button {
   min-height: 46px;
+  display: inline-flex;
+  align-items: center;
   padding: 0;
   border: 0;
   color: var(--landing-muted);
   background: transparent;
   font-size: 0.86rem;
   font-weight: 750;
+  text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
+.landing-nav-links a:hover,
 .landing-nav-links button:hover {
   color: var(--landing-accent-bright);
 }
@@ -181,6 +233,29 @@ html {
   align-items: center;
   gap: 0.55rem;
   flex: 0 0 auto;
+}
+
+.landing-theme-toggle {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--landing-border);
+  border-radius: 50%;
+  color: var(--landing-text);
+  background: var(--landing-card-bg);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.landing-theme-toggle:hover {
+  color: var(--landing-accent-bright);
+  border-color: var(--landing-accent);
+}
+
+.landing-theme-toggle:active {
+  transform: scale(0.94);
 }
 
 .landing-btn {
@@ -279,6 +354,7 @@ html {
   box-shadow: 0 26px 60px rgba(0, 0, 0, 0.48);
 }
 
+.landing-mobile-menu a,
 .landing-mobile-menu button {
   min-height: 48px;
   display: flex;
@@ -289,10 +365,12 @@ html {
   color: var(--landing-text);
   background: transparent;
   font-weight: 750;
+  text-decoration: none;
   text-align: left;
   cursor: pointer;
 }
 
+.landing-mobile-menu a:hover,
 .landing-mobile-menu button:hover {
   background: var(--landing-card-bg);
 }
@@ -410,7 +488,7 @@ html {
   width: 118%;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(132, 204, 22, 0.2), transparent 62%);
+  background: radial-gradient(circle, var(--landing-accent-soft), transparent 62%);
   filter: blur(42px);
   pointer-events: none;
 }
@@ -423,8 +501,8 @@ html {
   padding: clamp(1.1rem, 2.3vw, 1.6rem);
   border-radius: 2.1rem;
   border: 1px solid var(--landing-border);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.015)), var(--landing-surface);
-  box-shadow: 0 50px 110px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: var(--landing-surface);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.26), inset 0 1px 0 var(--landing-border);
   transform: perspective(1400px) rotateY(-5deg) rotateX(2deg);
 }
 
@@ -444,6 +522,32 @@ html {
   font-weight: 950;
 }
 
+.landing-app-brand-logo {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.landing-app-brand-logo-wrap {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--landing-border);
+  border-radius: 8px;
+  background: var(--landing-surface);
+}
+
+.landing-app-brand-logo-wrap .landing-app-brand-logo {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
 .landing-app-status {
   display: inline-flex;
   align-items: center;
@@ -456,7 +560,7 @@ html {
   height: 7px;
   border-radius: 50%;
   background: var(--landing-accent);
-  box-shadow: 0 0 10px rgba(132, 204, 22, 0.8);
+  box-shadow: 0 0 10px var(--landing-accent-soft);
 }
 
 .landing-moto-card {
@@ -464,12 +568,10 @@ html {
   overflow: hidden;
   padding: clamp(1.1rem, 2.4vw, 1.6rem);
   border-radius: 1.6rem;
-  border: 1px solid rgba(132, 204, 22, 0.22);
-  color: #f5f5f5;
-  background:
-    radial-gradient(circle at 88% 8%, rgba(132, 204, 22, 0.28), transparent 46%),
-    linear-gradient(145deg, #1a2412 0%, #0b0d09 60%, #070707 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--landing-border);
+  color: var(--landing-text);
+  background: radial-gradient(circle at 88% 8%, var(--landing-accent-soft), transparent 46%), var(--landing-surface);
+  box-shadow: inset 0 1px 0 var(--landing-border);
 }
 
 .landing-moto-card-glow {
@@ -494,7 +596,7 @@ html {
 .landing-moto-card-head span {
   display: block;
   margin-bottom: 0.3rem;
-  color: #a3e635;
+  color: var(--landing-accent-bright);
   font-size: 0.62rem;
   font-weight: 900;
   letter-spacing: 0.14em;
@@ -508,8 +610,8 @@ html {
 .landing-moto-card-badge {
   padding: 0.25rem 0.55rem;
   border-radius: 999px;
-  color: #a3e635;
-  background: rgba(132, 204, 22, 0.16);
+  color: var(--landing-accent-bright);
+  background: var(--landing-accent-soft);
   font-size: 0.6rem;
   font-weight: 950;
   letter-spacing: 0.08em;
@@ -521,11 +623,11 @@ html {
   align-items: baseline;
   gap: 0.4rem;
   margin: 1.2rem 0 0.7rem;
-  color: #a3e635;
+  color: var(--landing-accent-bright);
 }
 
 .landing-moto-odometer strong {
-  color: #fafafa;
+  color: var(--landing-text);
   font-size: clamp(2.4rem, 4.2vw, 3.5rem);
   line-height: 1;
   font-weight: 950;
@@ -533,7 +635,7 @@ html {
 }
 
 .landing-moto-odometer span {
-  color: #9ca3af;
+  color: var(--landing-muted);
   font-size: 0.72rem;
   font-weight: 900;
 }
@@ -543,9 +645,9 @@ html {
   display: inline-flex;
   padding: 0.38rem 0.7rem;
   border-radius: 999px;
-  color: #d9f99d;
-  background: rgba(132, 204, 22, 0.14);
-  border: 1px solid rgba(132, 204, 22, 0.24);
+  color: var(--landing-accent-bright);
+  background: var(--landing-accent-soft);
+  border: 1px solid var(--landing-border);
   font-size: 0.72rem;
   font-weight: 800;
 }
@@ -556,7 +658,7 @@ html {
   overflow: hidden;
   margin-top: 1.1rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.09);
+  background: var(--landing-border);
 }
 
 .landing-moto-meter span {
@@ -564,7 +666,7 @@ html {
   width: 72%;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #65a30d, #bef264);
+  background: linear-gradient(90deg, var(--landing-accent), var(--landing-accent-bright));
 }
 
 .landing-moto-meta {
@@ -574,12 +676,12 @@ html {
   justify-content: space-between;
   gap: 1rem;
   margin-top: 0.7rem;
-  color: #9ca3af;
+  color: var(--landing-muted);
   font-size: 0.72rem;
 }
 
 .landing-moto-meta strong {
-  color: #e5e5e5;
+  color: var(--landing-text);
 }
 
 .landing-app-bars {
@@ -598,7 +700,7 @@ html {
   flex: 1;
   min-width: 0;
   border-radius: 0.35rem 0.35rem 0 0;
-  background: linear-gradient(180deg, rgba(132, 204, 22, 0.9), rgba(132, 204, 22, 0.12));
+  background: linear-gradient(180deg, var(--landing-accent), var(--landing-accent-soft));
 }
 
 .landing-app-bottom {
@@ -698,7 +800,7 @@ html {
   flex: 0 0 auto;
   margin-left: auto;
   border-radius: 50%;
-  color: #050505;
+  color: var(--landing-ink);
   background: var(--landing-accent);
 }
 
@@ -711,10 +813,10 @@ html {
   min-width: 0;
   padding: 0.95rem;
   border-radius: 1.35rem;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #f5f5f5;
-  background: linear-gradient(145deg, #1a1a1a, #080808);
-  box-shadow: 0 32px 70px rgba(0, 0, 0, 0.62);
+  border: 1px solid var(--landing-border);
+  color: var(--landing-text);
+  background: var(--landing-surface);
+  box-shadow: 0 32px 70px rgba(0, 0, 0, 0.32);
 }
 
 .landing-phone-mini-top {
@@ -731,20 +833,20 @@ html {
   width: 26px;
   height: 26px;
   border-radius: 8px;
-  color: #050505;
-  background: #a3e635;
+  color: var(--landing-ink);
+  background: var(--landing-accent);
 }
 
 .landing-phone-mini-live {
   margin-left: auto;
-  color: #a3e635;
+  color: var(--landing-accent-bright);
   font-size: 0.55rem;
   letter-spacing: 0.1em;
 }
 
 .landing-phone-mini p {
   margin: 0.7rem 0;
-  color: #d4d4d4;
+  color: var(--landing-muted);
   font-size: 0.7rem;
   line-height: 1.5;
 }
@@ -1228,8 +1330,8 @@ html {
   padding: clamp(2.75rem, 5vw, 4.5rem);
   border-radius: 2.5rem;
   color: var(--landing-ink);
-  background: #84cc16;
-  box-shadow: 0 36px 90px rgba(132, 204, 22, 0.22);
+  background: var(--landing-accent);
+  box-shadow: 0 36px 90px var(--landing-accent-soft);
 }
 
 .landing-impact-watermark {
@@ -2207,9 +2309,47 @@ body.light-mode .landing-certificate-stamp {
   border-color: #9a3412;
 }
 
+:root.light-mode .landing-app-frame,
+body.light-mode .landing-app-frame,
+:root.light-mode .landing-moto-card,
+body.light-mode .landing-moto-card,
+:root.light-mode .landing-phone-mini,
+body.light-mode .landing-phone-mini {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+}
+
+:root.light-mode .landing-phone-mini,
+body.light-mode .landing-phone-mini {
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.14);
+}
+
+:root.light-mode .landing-phone-mini-chips span,
+body.light-mode .landing-phone-mini-chips span {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.22);
+}
+
+:root.light-mode .landing-float-fuel .landing-float-icon,
+body.light-mode .landing-float-fuel .landing-float-icon {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.14);
+}
+
+:root.light-mode .landing-emergency-chips span,
+body.light-mode .landing-emergency-chips span,
+:root.light-mode .auth-alert-error,
+body.light-mode .auth-alert-error {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.22);
+}
+
 @media (max-width: 1180px) {
   .landing-nav { gap: 1rem; }
   .landing-nav-links { gap: 0.85rem; }
+  .landing-nav-links a,
   .landing-nav-links button { font-size: 0.8rem; }
   .landing-hero { gap: 2.5rem; }
   .landing-title { font-size: clamp(2.8rem, 5.2vw, 4.8rem); }

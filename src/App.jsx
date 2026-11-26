@@ -45,7 +45,16 @@ function AppContent({ session, isLightMode, toggleTheme }) {
               </>
             ) : (
               <>
-                <Route path="/" element={<LandingLobby session={session} />} />
+                <Route
+                  path="/"
+                  element={
+                    <LandingLobby
+                      session={session}
+                      isLightMode={isLightMode}
+                      toggleTheme={toggleTheme}
+                    />
+                  }
+                />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </>
             )}
@@ -79,6 +88,7 @@ export default function App() {
     const root = document.documentElement;
     root.classList.toggle('dark', !isLightMode);
     root.classList.toggle('light-mode', isLightMode);
+    document.body.classList.toggle('light-mode', isLightMode);
     localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
   }, [isLightMode]);
 

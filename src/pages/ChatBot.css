@@ -5,6 +5,7 @@
   height: 100dvh;
   min-height: 0;
   overflow: hidden;
+  overscroll-behavior: contain;
   background-color: var(--bg-base);
   color: var(--text-main);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

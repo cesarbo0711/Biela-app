@@ -21,23 +21,28 @@ import {
   MapPin,
   Menu,
   MessageCircle,
+  Moon,
   Phone,
   RefreshCw,
   ShieldCheck,
   Sparkles,
   Star,
+  Sun,
   User,
   Wallet,
   Wrench,
   X,
 } from 'lucide-react';
 import { supabase } from '../supabase';
+import InstallPWAButton from '../components/InstallPWAButton';
 import { AVATAR_STYLE_DEFAULT, AVATAR_STYLES_SELECTABLE, buildAvatarUrl } from '../utils/avatarStyles';
 import './LandingLobby.css';
 
+const BIELA_LOGO = '/favicon.ico';
+
 const NAV_LINKS = [
   { label: 'El Pasaporte Digital', href: '#pasaporte' },
-  { label: 'Ecosistema', href: '#ecosistema' },
+  { label: 'Funciones', href: '#funciones' },
   { label: 'Auxilio 24/7', href: '#auxilio' },
   { label: 'Preguntas', href: '#preguntas' },
 ];
@@ -131,7 +136,7 @@ function HeroVisual() {
       >
         <span className="landing-float-icon landing-float-icon-doc"><FileText size={18} /></span>
         <span>
-          <strong>📄 Biela-Historial PDF</strong>
+          <strong>Biela-Historial PDF</strong>
           <small>Verificado</small>
         </span>
         <span className="landing-float-check"><Check size={14} strokeWidth={3} /></span>
@@ -146,14 +151,19 @@ function HeroVisual() {
       >
         <span className="landing-float-icon landing-float-icon-fuel"><Fuel size={18} /></span>
         <span>
-          <strong>⛽ Rendimiento: 38.4 Km/L</strong>
+          <strong>Rendimiento: 38.4 Km/L</strong>
           <small>$0.013/km</small>
         </span>
       </motion.div>
 
       <div className="landing-app-frame">
         <div className="landing-app-top">
-          <span className="landing-app-brand"><Wrench size={14} strokeWidth={3} /> Biela</span>
+          <span className="landing-app-brand">
+            <span className="landing-app-brand-logo-wrap rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-sm">
+              <img src={BIELA_LOGO} alt="" className="landing-app-brand-logo object-cover" />
+            </span>
+            BIELA
+          </span>
           <span className="landing-app-status"><span /> En vivo</span>
         </div>
 
@@ -171,7 +181,7 @@ function HeroVisual() {
             <strong>8.420</strong>
             <span>KM</span>
           </div>
-          <div className="landing-moto-traffic">🟢 Aceite óptimo • Faltan 1,240 km</div>
+          <div className="landing-moto-traffic">Aceite óptimo • Faltan 1,240 km</div>
           <div className="landing-moto-meter"><span /></div>
           <div className="landing-moto-meta">
             <span>Aceite 20W-50</span>
@@ -212,10 +222,10 @@ function HeroVisual() {
           <span>BujIA</span>
           <span className="landing-phone-mini-live">EN VÍA</span>
         </div>
-        <p>Modo Emergencia activo. Te conecto con una cauchera cerca de ti. 🛞</p>
+        <p>Modo Emergencia activo. Te conecto con una cauchera cerca de ti.</p>
         <div className="landing-phone-mini-chips">
-          <span>🔌 Sin chispa</span>
-          <span>🛞 Caucho espichado</span>
+          <span>Sin chispa</span>
+          <span>Caucho espichado</span>
         </div>
       </motion.div>
     </motion.div>
@@ -481,8 +491,10 @@ function AuthModal({ initialMode, onClose }) {
 
         <div className="auth-head">
           <div className="auth-logo">
-            <span className="auth-logo-mark"><Wrench size={17} strokeWidth={3} /></span>
-            Biela
+            <span className="landing-logo-badge landing-logo-badge-auth rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 shadow-sm">
+              <img src={BIELA_LOGO} alt="" className="landing-logo-img auth-logo-img object-cover" />
+            </span>
+            BIELA
           </div>
           <h2>{tab === 'login' ? 'Entra a tu Garaje' : 'Crea tu cuenta'}</h2>
           <p>{tab === 'login' ? 'Tu bitácora y tu radar están a un clic.' : 'Empieza a cuidar tu moto hoy mismo.'}</p>
@@ -803,7 +815,7 @@ function AuthModal({ initialMode, onClose }) {
   );
 }
 
-export default function LandingLobby({ session }) {
+export default function LandingLobby({ session, isLightMode, toggleTheme }) {
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -820,13 +832,20 @@ export default function LandingLobby({ session }) {
   if (session) return <Navigate to="/dashboard" replace />;
 
   const scrollTo = (href) => {
-    const target = document.querySelector(href);
+    const id = href.startsWith('#') ? href.slice(1) : href;
+    const target = document.getElementById(id);
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setMenuOpen(false);
   };
 
+  const handleAnchorClick = (event, href) => {
+    event.preventDefault();
+    scrollTo(href);
+    window.history.replaceState(null, '', href);
+  };
+
   return (
-    <div className="landing-root">
+    <div className="landing-container landing-root">
       <div className="landing-dot-grid" aria-hidden="true" />
       <div className="landing-ambient landing-ambient-one" aria-hidden="true" />
       <div className="landing-ambient landing-ambient-two" aria-hidden="true" />
@@ -840,19 +859,31 @@ export default function LandingLobby({ session }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <button type="button" className="landing-logo" onClick={() => scrollTo('#top')} aria-label="Biela, volver arriba">
-              <span className="landing-logo-mark"><Wrench size={16} strokeWidth={3} /></span>
-              <span>Biela</span>
-              <span className="landing-logo-country">VZLA</span>
-            </button>
+              <button type="button" className="landing-logo" onClick={() => scrollTo('#top')} aria-label="Biela, volver arriba">
+                <span className="landing-logo-badge rounded-xl overflow-hidden border border-black/10 dark:border-white/10 shadow-sm">
+                  <img src={BIELA_LOGO} alt="" className="landing-logo-img object-cover" />
+                </span>
+                <span>BIELA</span>
+                <span className="landing-logo-country">VZLA</span>
+              </button>
 
             <div className="landing-nav-links">
               {NAV_LINKS.map((link) => (
-                <button type="button" key={link.href} onClick={() => scrollTo(link.href)}>{link.label}</button>
+                <a key={link.href} href={link.href} onClick={(event) => handleAnchorClick(event, link.href)}>{link.label}</a>
               ))}
             </div>
 
             <div className="landing-nav-actions">
+              <InstallPWAButton variant="navbar" />
+              <button
+                type="button"
+                className="landing-theme-toggle"
+                onClick={toggleTheme}
+                aria-label={isLightMode ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}
+                title={isLightMode ? 'Modo oscuro' : 'Modo claro'}
+              >
+                {isLightMode ? <Moon size={17} strokeWidth={1.9} /> : <Sun size={17} strokeWidth={1.9} />}
+              </button>
               <button type="button" className="landing-btn landing-btn-ghost" onClick={() => openAuth('login')}>
                 Iniciar sesión
               </button>
@@ -880,8 +911,11 @@ export default function LandingLobby({ session }) {
                 exit={{ opacity: 0, y: -8 }}
               >
                 {NAV_LINKS.map((link) => (
-                  <button type="button" key={link.href} onClick={() => scrollTo(link.href)}>{link.label}</button>
+                  <a key={link.href} href={link.href} onClick={(event) => handleAnchorClick(event, link.href)}>{link.label}</a>
                 ))}
+                <button type="button" onClick={toggleTheme}>
+                  {isLightMode ? 'Modo oscuro' : 'Modo claro'}
+                </button>
                 <button type="button" onClick={() => openAuth('login')}>Iniciar sesión</button>
                 <button type="button" className="landing-mobile-menu-primary" onClick={() => openAuth('register')}>Abrir mi Garaje</button>
               </motion.div>
@@ -899,7 +933,7 @@ export default function LandingLobby({ session }) {
             >
               <div className="landing-pill">
                 <span className="landing-pill-dot" />
-                🟢 NUEVO • HOJA DE VIDA DIGITAL PARA COMPRA-VENTA DE MOTOS
+                 NUEVO • HOJA DE VIDA DIGITAL PARA COMPRA-VENTA DE MOTOS
               </div>
 
               <h1 className="landing-title">
@@ -955,7 +989,7 @@ export default function LandingLobby({ session }) {
             <CertificatePreview />
           </section>
 
-          <section className="landing-ecosystem" id="ecosistema">
+          <section className="landing-ecosystem" id="funciones">
             <div className="landing-section-heading">
               <span className="landing-section-label">ECOSISTEMA BIELA</span>
               <h2>Todo lo que tu moto necesita, en una sola app.</h2>
@@ -978,9 +1012,9 @@ export default function LandingLobby({ session }) {
                 <h3>BujIA + Modo Emergencia en Vía</h3>
                 <p>Diagnóstico instantáneo por foto y pasos claros cuando estás varado. Sin cuentos, sin registrar en la bitácora durante la emergencia.</p>
                 <div className="landing-emergency-chips">
-                  <span>🔌 Sin chispa</span>
-                  <span>🛞 Caucho espichado</span>
-                  <span>⛓️ Cadena partida</span>
+                  <span>Sin chispa</span>
+                  <span>Caucho espichado</span>
+                  <span>Cadena partida</span>
                 </div>
                 <div className="landing-emergency-reply">
                   <span><Bot size={15} /> BujIA</span>
@@ -1177,25 +1211,27 @@ export default function LandingLobby({ session }) {
         <footer className="landing-footer">
           <div className="landing-footer-brand">
             <div className="landing-logo">
-              <span className="landing-logo-mark"><Wrench size={16} strokeWidth={3} /></span>
-              <span>Biela</span>
+              <span className="landing-logo-badge rounded-xl overflow-hidden border border-black/10 dark:border-white/10 shadow-sm">
+                <img src={BIELA_LOGO} alt="" className="landing-logo-img object-cover" />
+              </span>
+              <span>BIELA</span>
               <span className="landing-logo-country">VZLA</span>
             </div>
             <p>La app venezolana que convierte el mantenimiento de tu moto en valor, confianza y seguridad en la ruta.</p>
-            <span className="landing-footer-location">Hecho en Venezuela 🛵</span>
+            <span className="landing-footer-location">Hecho en Venezuela</span>
           </div>
 
           <div className="landing-footer-column">
             <strong>Funciones</strong>
             <button type="button" onClick={() => scrollTo('#pasaporte')}>Hoja de Vida PDF</button>
-            <button type="button" onClick={() => scrollTo('#ecosistema')}>BujIA Emergencia</button>
-            <button type="button" onClick={() => scrollTo('#ecosistema')}>Auxilio Vial</button>
-            <button type="button" onClick={() => scrollTo('#ecosistema')}>Finanzas USD/Bs</button>
+            <button type="button" onClick={() => scrollTo('#funciones')}>BujIA Emergencia</button>
+            <button type="button" onClick={() => scrollTo('#funciones')}>Auxilio Vial</button>
+            <button type="button" onClick={() => scrollTo('#funciones')}>Finanzas USD/Bs</button>
           </div>
 
           <div className="landing-footer-column">
             <strong>Comunidad / Soporte</strong>
-            <button type="button" onClick={() => scrollTo('#ecosistema')}>Radar de Gasolina</button>
+            <button type="button" onClick={() => scrollTo('#funciones')}>Radar de Gasolina</button>
             <button type="button" onClick={() => scrollTo('#auxilio')}>Rescate 24/7</button>
             <button type="button" onClick={() => scrollTo('#preguntas')}>Preguntas frecuentes</button>
             <button type="button" onClick={() => openAuth('login')}>Acceder al Garaje</button>

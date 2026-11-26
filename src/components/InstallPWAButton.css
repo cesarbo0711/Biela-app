@@ -1,0 +1,122 @@
+.pwa-install-wrap {
+  position: relative;
+  display: inline-flex;
+  min-width: 0;
+}
+
+.pwa-install-button {
+  min-height: 32px;
+  justify-content: center;
+  border-color: var(--border-color);
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--text-main) 6%, transparent);
+  cursor: pointer;
+}
+
+.pwa-install-button:hover {
+  color: var(--text-main);
+  border-color: var(--accent-color);
+  background: color-mix(in srgb, var(--text-main) 10%, transparent);
+}
+
+.pwa-install-button:active {
+  transform: scale(0.97);
+}
+
+.pwa-install-guide {
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  right: 0;
+  z-index: 10001;
+  width: min(300px, calc(100vw - 2rem));
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--bg-surface) 94%, transparent);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+}
+
+.pwa-install-guide-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.pwa-install-guide-close:hover {
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--text-main) 8%, transparent);
+}
+
+.pwa-install-guide-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 12%, transparent);
+}
+
+.pwa-install-guide h3 {
+  margin: 0.75rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.pwa-install-guide p {
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.pwa-install-guide strong {
+  color: var(--text-main);
+  font-weight: 750;
+}
+
+.pwa-install-navbar .pwa-install-button {
+  min-height: 32px;
+}
+
+.pwa-install-profile {
+  width: 100%;
+}
+
+.pwa-install-profile .pwa-install-button {
+  width: 100%;
+  min-height: 44px;
+  justify-content: flex-start;
+  border-radius: 18px;
+}
+
+.pwa-install-profile .pwa-install-guide {
+  top: auto;
+  bottom: calc(100% + 0.75rem);
+  right: auto;
+  left: 0;
+}
+
+:root.light-mode .pwa-install-guide {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 900px) {
+  .pwa-install-navbar {
+    display: none;
+  }
+}

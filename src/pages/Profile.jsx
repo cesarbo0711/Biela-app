@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabase';
 import { ProfileSkeleton } from '../components/BielaSkeletons.jsx';
+import InstallPWAButton from '../components/InstallPWAButton';
 import { useNavigate } from 'react-router-dom';
 import { Camera, HelpCircle, LogOut, Moon, RefreshCw, Settings, Sun, User, X } from 'lucide-react';
 import { ThemeBall } from '../components/ThemeBall';
@@ -233,6 +234,7 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
           <HelpCircle size={18} strokeWidth={1.8} />
           <span>Ver guía rápida de la app</span>
         </button>
+        <InstallPWAButton variant="profile" />
         <button type="button" onClick={toggleTheme} className="btn-theme gpane">
           {isLightMode ? <Moon size={17} strokeWidth={1.8} /> : <Sun size={17} strokeWidth={1.8} />}
           <span>{isLightMode ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}</span>

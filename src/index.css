@@ -14,8 +14,15 @@
   height: 0;
 }
 
-html, body {
-  overscroll-behavior-y: none;
+html {
+  height: auto;
+  min-height: 100dvh;
+  scroll-behavior: smooth;
+  overscroll-behavior-y: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -45,10 +52,14 @@ html, body {
   --border-color: #E5E5E5;
 }
 
-html, body, #root {
+body, #root {
   width: 100%;
   max-width: 100vw;
-  overflow-x: hidden;
+  height: auto;
+  min-height: 100dvh;
+  overflow-x: clip;
+  overflow-y: visible;
+  overscroll-behavior-y: auto;
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
 }
