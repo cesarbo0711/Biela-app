@@ -1,21 +1,39 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  AlertTriangle,
+  ArrowUp,
+  Bot,
+  Camera,
+  ClipboardCheck,
+  Gauge,
+  PhoneCall,
+  RotateCcw,
+  Sparkles,
+  X,
+} from 'lucide-react';
 import { supabase } from '../supabase';
 import './ChatBot.css';
 
 const EMERGENCIAS = [
-  '🔌 No prende / Sin chispa',
-  '🌡️ Se recalienta / Botando humo',
-  '🛞 Caucho espichado / Rin',
-  '⛓️ Cadena partida / Trancada',
-  '🛑 Falla de frenos',
-  '⛽ Me quedé sin gasolina',
+  'No prende / Sin chispa',
+  'Se recalienta / Humo',
+  'Caucho espichado / Rin',
+  'Cadena partida / Trancada',
+  'Falla de frenos',
+  'Me quedé sin gasolina',
 ];
 
-const SUGGESTED = [
-  'Mi moto no quiere encender, ¿qué reviso primero?',
-  '¿Cada cuánto debo ajustar la cadena?',
-  'Escucho un ruido raro en el motor, ¿puede ser grave?',
+const ACCIONES_RAPIDAS = [
+  { label: 'Anotar cambio de aceite', Icon: ClipboardCheck, texto: 'Quiero anotar un cambio de aceite en mi moto.' },
+  { label: '¿Cada cuánto cambio la bujía?', Icon: Sparkles, texto: '¿Cada cuánto debo cambiar la bujía de mi moto?' },
+  { label: 'La moto pierde fuerza al acelerar', Icon: Gauge, texto: 'La moto pierde fuerza al acelerar, ¿qué reviso primero?' },
+  {
+    label: 'Revisar foto de una pieza',
+    Icon: Camera,
+    texto: 'Revisa esta foto de una pieza y dime qué falla tiene.',
+    conFoto: true,
+  },
 ];
 
 const GREETING = {
@@ -76,6 +94,8 @@ export default function ChatBot({ usuario }) {
   const [modoEmergencia, setModoEmergencia] = useState(false);
 
   const chatEndRef = useRef(null);
+  const inputRef = useRef(null);
+  const archivoRef = useRef(null);
 
   useEffect(() => {
     async function cargarVehiculo() {
@@ -214,138 +234,191 @@ export default function ChatBot({ usuario }) {
     setInputTexto(texto);
   };
 
+  const usarAccionRapida = ({ texto, conFoto }) => {
+    usarSugerencia(texto);
+    if (conFoto) archivoRef.current?.click();
+    else inputRef.current?.focus();
+  };
+
+  const nombreMotoActiva = contextoVehiculo === 'Motocicleta general'
+    ? 'Motocicleta general'
+    : contextoVehiculo
+      .replace('El usuario maneja los siguientes vehículos: ', '')
+      .split(',')[0];
+
   const showSuggestions = mensajes.length <= 1 && !cargando && !modoEmergencia;
 
   return (
     <div className="chatbot-container fade-in">
-      <header className="chatbot-header">
-        <div className="bot-avatar">
-          <img
-            src="https://api.dicebear.com/10.x/bottts/svg?backgroundColor=&textureProbability=30&eyesVariant=frame2&headVariant=round02&mouthVariant=smile01&sidesVariant=round&textureVariant=dirty01&seed=mdf9n8af"
-            alt="BujIA"
-          />
-        </div>
-        <div className="chatbot-header-info">
-          <h2>Taller Mecánico (BujIA)</h2>
-          <span className="bot-status">● En línea</span>
-        </div>
-        <button
-          type="button"
-          aria-pressed={modoEmergencia}
-          onClick={() => setModoEmergencia((valor) => !valor)}
-          className={`btn-emergency ${
-            modoEmergencia
-              ? 'bg-red-600 border-red-600 text-white'
-              : 'bg-red-500/15 border-red-500/40 text-red-500'
-          }`}
-        >
-          🚨 Emergencia en vía
-        </button>
-        <button type="button" className="btn-clear-chat" onClick={limpiarConversacion} title="Limpiar conversación">
-          Limpiar
-        </button>
-      </header>
+      <div className="chatbot-shell">
+        <header className="chatbot-header gpane backdrop-blur-md">
+          <div className="chatbot-brand">
+            <span className="chatbot-brand-icon"><Bot size={18} strokeWidth={1.9} /></span>
+            <div className="chatbot-brand-copy">
+              <h1>BujIA</h1>
+              <span className="chatbot-moto-pill">
+                <span className="chatbot-pulse-dot" aria-hidden="true" />
+                {nombreMotoActiva} • En línea
+              </span>
+            </div>
+          </div>
 
-      {modoEmergencia && (
-        <section className="chat-emergency-panel" aria-label="Reportes rápidos de emergencia">
-          <p className="chat-emergency-title">
-            Reporte rápido · BujIA responderá en 3 pasos
-          </p>
-          <div className="chat-emergency-chips">
-            {EMERGENCIAS.map((falla) => (
-              <button
-                key={falla}
-                type="button"
-                className="chat-emergency-chip"
-                disabled={cargando}
-                onClick={() => enviarReporteEmergencia(falla)}
+          <div className="chatbot-header-actions">
+            <button
+              type="button"
+              className={`chatbot-icon-button${modoEmergencia ? ' is-active' : ''}`}
+              onClick={() => setModoEmergencia((valor) => !valor)}
+              aria-pressed={modoEmergencia}
+              aria-label="Activar reporte de emergencia"
+              title="Reporte de emergencia"
+            >
+              <AlertTriangle size={17} strokeWidth={1.9} />
+            </button>
+            <button
+              type="button"
+              className="chatbot-icon-button"
+              onClick={limpiarConversacion}
+              aria-label="Reiniciar conversación"
+              title="Reiniciar conversación"
+            >
+              <RotateCcw size={17} strokeWidth={1.9} />
+            </button>
+          </div>
+        </header>
+
+        {modoEmergencia && (
+          <section className="chat-emergency-panel gpane" aria-label="Reportes rápidos de emergencia">
+            <p className="chat-emergency-title">
+              <AlertTriangle size={14} strokeWidth={2} /> Reporte rápido · BujIA responde en 3 pasos
+            </p>
+            <div className="chat-emergency-chips">
+              {EMERGENCIAS.map((falla) => (
+                <button
+                  key={falla}
+                  type="button"
+                  className="chat-emergency-chip"
+                  disabled={cargando}
+                  onClick={() => enviarReporteEmergencia(falla)}
+                >
+                  {falla}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="chat-emergency-action"
+              onClick={() => navigate('/tiendas')}
+            >
+              <PhoneCall size={16} strokeWidth={2} /> Buscar grúa o cauchera cercana
+            </button>
+          </section>
+        )}
+
+        <main className="chatbot-messages" role="log" aria-live="polite">
+          {showSuggestions ? (
+            <section className="chat-welcome" aria-label="Bienvenida de BujIA">
+              <span className="chat-welcome-emblem gpane"><Bot size={26} strokeWidth={1.7} /></span>
+              <h2>¿Qué revisamos hoy en tu moto?</h2>
+              <p>Cuéntame el síntoma o envía una foto. Te guío paso a paso.</p>
+              <div className="chat-quick-grid">
+                {ACCIONES_RAPIDAS.map(({ label, Icon, texto, conFoto }) => (
+                  <button
+                    key={label}
+                    type="button"
+                    className="chat-quick-card gpane"
+                    onClick={() => usarAccionRapida({ texto, conFoto })}
+                    disabled={cargando}
+                  >
+                    <Icon size={18} strokeWidth={1.9} />
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ) : (
+            mensajes.map((msg, index) => (
+              <div
+                key={index}
+                className={`chat-message-row ${msg.rol === 'user' ? 'user' : 'model'}`}
               >
-                {falla}
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            className="chat-emergency-action"
-            onClick={() => navigate('/tiendas')}
-          >
-            📞 Buscar Grúa / Cauchera Cercana
-          </button>
-        </section>
-      )}
+                {msg.rol === 'model' && (
+                  <span className="chat-message-avatar"><Bot size={15} strokeWidth={2} /></span>
+                )}
+                <div className={`chat-message-surface ${msg.rol} ${msg.rol === 'user' ? 'rounded-2xl rounded-br-sm' : 'rounded-2xl rounded-bl-sm'}`}>
+                  {msg.imagen && <img src={msg.imagen} alt="Evidencia" className="chat-img-preview" />}
+                  <p>{msg.texto}</p>
+                </div>
+              </div>
+            ))
+          )}
 
-      <div className="chat-safety-banner">
-        Asistente preventivo IA • Ante fallas críticas de frenos o motor, consulta un taller certificado.
-      </div>
-
-      <div className="chatbot-messages">
-        {mensajes.map((msg, index) => (
-          <div
-            key={index}
-            className={`chat-bubble-wrapper ${msg.rol === 'user' ? 'user' : 'model'}`}
-          >
-            <div className="chat-bubble">
-              {msg.imagen && <img src={msg.imagen} alt="Evidencia" className="chat-img-preview" />}
-              <p>{msg.texto}</p>
+          {cargando && (
+            <div className="chat-message-row model">
+              <span className="chat-message-avatar"><Bot size={15} strokeWidth={2} /></span>
+              <div className="chat-message-surface model chat-typing">
+                <span className="chat-typing-dots" aria-hidden="true">
+                  <span /><span /><span />
+                </span>
+                <span>Analizando...</span>
+              </div>
             </div>
-          </div>
-        ))}
+          )}
 
-        {showSuggestions && (
-          <div className="chat-suggestions">
-            {SUGGESTED.map((s) => (
-              <button key={s} type="button" className="chat-suggestion-chip" onClick={() => usarSugerencia(s)}>
-                {s}
+          <div ref={chatEndRef} />
+        </main>
+
+        <div className="chatbot-composer">
+          {errorChat && <div className="chat-error-inline">{errorChat}</div>}
+
+          {imagenPreview && (
+            <div className="chat-attachment gpane">
+              <img src={imagenPreview} alt="Foto adjunta" />
+              <span>Foto lista para analizar</span>
+              <button type="button" onClick={quitarImagen} aria-label="Quitar imagen">
+                <X size={15} strokeWidth={2} />
               </button>
-            ))}
-          </div>
-        )}
-
-        {cargando && (
-          <div className="chat-bubble-wrapper model">
-            <div className="chat-bubble typing">
-              <span></span><span></span><span></span>
             </div>
-          </div>
-        )}
-        <div ref={chatEndRef} />
-      </div>
+          )}
 
-      {errorChat && <div className="chat-error-inline">{errorChat}</div>}
+          <form onSubmit={enviarMensaje} className="chat-compose-form gpane rounded-full backdrop-blur-md">
+            <input
+              ref={archivoRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImagenChange}
+              className="chat-file-input"
+            />
+            <button
+              type="button"
+              className="chat-attach-button"
+              onClick={() => archivoRef.current?.click()}
+              aria-label="Adjuntar foto de la falla"
+              title="Adjuntar foto"
+            >
+              <Camera size={18} strokeWidth={1.9} />
+            </button>
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Escribe tu consulta o registra un servicio..."
+              value={inputTexto}
+              onChange={(e) => setInputTexto(e.target.value)}
+              className="chat-input text-base"
+              enterKeyHint="send"
+            />
+            <button
+              type="submit"
+              className="chat-send-button"
+              disabled={cargando}
+              aria-label="Enviar mensaje"
+            >
+              <ArrowUp size={18} strokeWidth={2.4} />
+            </button>
+          </form>
 
-      {imagenPreview && (
-        <div className="preview-container">
-          <img src={imagenPreview} alt="Preview" />
-          <button type="button" onClick={quitarImagen} className="btn-remove-img" aria-label="Quitar imagen">
-            ×
-          </button>
+          <p className="chat-disclaimer">Asistente preventivo IA • Ante fallas críticas, consulta un taller.</p>
         </div>
-      )}
-
-      <form onSubmit={enviarMensaje} className="chatbot-input-form">
-        <label className="btn-attach" title="Adjuntar foto de la falla">
-          📷
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImagenChange}
-            style={{ display: 'none' }}
-          />
-        </label>
-
-        <input
-          type="text"
-          placeholder={modoEmergencia ? 'Describe tu emergencia o toca una falla...' : 'Escribe tu duda mecánica...'}
-          value={inputTexto}
-          onChange={(e) => setInputTexto(e.target.value)}
-          className="chat-input"
-          enterKeyHint="send"
-        />
-
-        <button type="submit" className="btn-send" disabled={cargando} aria-label="Enviar mensaje">
-          ➤
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

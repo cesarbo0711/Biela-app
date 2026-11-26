@@ -1,38 +1,131 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  ArrowUpRight,
+  BadgeCheck,
   Clock,
   MapPin,
   MessageCircle,
+  Plus,
   Search,
-  ShieldCheck,
   Store,
   Wrench,
   X,
 } from 'lucide-react';
 import { supabase } from '../supabase';
 import { TiendasSkeleton } from '../components/BielaSkeletons.jsx';
+import './Tiendas.css';
 
-const CATEGORIAS = ['Todas', 'Repuestos', 'Cauchera', 'Taller', 'Grúa'];
+const CATEGORIAS = ['Todas', 'Lubricantes', 'Repuestos', 'Talleres', 'Cauchos'];
 
-const ESTILOS_CATEGORIA = {
-  Repuestos: 'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300',
-  Cauchera: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
-  Taller: 'bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300',
-  Grúa: 'bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300',
+const CATEGORIA_ALIASES = {
+  Lubricantes: ['lubricantes', 'lubricante', 'aceites', 'aceite'],
+  Repuestos: ['repuestos', 'repuesto', 'accesorios'],
+  Talleres: ['talleres', 'taller', 'mecánica', 'mecanica'],
+  Cauchos: ['cauchos', 'caucho', 'cauchera', 'neumáticos', 'neumaticos'],
 };
 
-const MENSAJE_CONTACTO = encodeURIComponent(
-  'Hola, los encontré en la app Biela. Necesito consultar disponibilidad / auxilio vial para mi moto.'
-);
+const MENSAJE_CONTACTO = 'Hola, los vi en Biela... ¿Tienen disponibilidad y precio?';
 
-function enlaceWhatsApp(comercio) {
-  const telefono = String(comercio?.telefono_whatsapp ?? '').replace(/\D/g, '');
-  if (!telefono) return null;
-  return `https://wa.me/${telefono}?text=${MENSAJE_CONTACTO}`;
-}
+const COMERCIOS_EJEMPLO = [
+  {
+    id: 'demo-lubricantes-central',
+    nombre: 'Lubricantes El Central',
+    categoria: 'Lubricantes',
+    ciudad: 'Caracas',
+    direccion: 'Av. Principal de El Central',
+    horario: 'Lun a Sáb · 8:00 AM – 6:00 PM',
+    verificado: true,
+    abierto_24h: false,
+    descripcion: 'Aceites sintéticos, filtros y cambio de aceite para motos de trabajo y alto rendimiento.',
+  },
+  {
+    id: 'demo-repuestos-bandera',
+    nombre: 'Repuestos La Bandera',
+    categoria: 'Repuestos',
+    ciudad: 'Caracas',
+    direccion: 'Calle 3, La Bandera',
+    horario: 'Lun a Sáb · 9:00 AM – 7:00 PM',
+    verificado: true,
+    abierto_24h: false,
+    descripcion: 'Repuestos originales y genéricos, frenos, transmisión y piezas eléctricas para motos.',
+  },
+  {
+    id: 'demo-taller-moto-express',
+    nombre: 'Taller Moto Express',
+    categoria: 'Talleres',
+    ciudad: 'Valencia',
+    direccion: 'Av. Bolívar Norte',
+    horario: 'Abierto 24 horas',
+    verificado: false,
+    abierto_24h: true,
+    descripcion: 'Mecánica general, ajuste de motor, suspensión y diagnóstico electrónico para motos.',
+  },
+  {
+    id: 'demo-cauchos-llanera',
+    nombre: 'Cauchos La Llanera',
+    categoria: 'Cauchos',
+    ciudad: 'San Juan de los Morros',
+    direccion: 'Carrera 9, centro',
+    horario: 'Lun a Dom · 8:00 AM – 5:00 PM',
+    verificado: true,
+    abierto_24h: false,
+    descripcion: 'Cauchos para moto, balanceo, pinchaduras y reparación de cámaras con garantía.',
+  },
+];
 
 function normalizar(valor) {
   return String(valor ?? '').toLocaleLowerCase('es-VE');
+}
+
+function etiquetaCategoria(comercio) {
+  const texto = normalizar(`${comercio?.categoria ?? ''} ${comercio?.descripcion ?? ''}`);
+
+  if (texto.includes('lubric') || texto.includes('aceite')) return 'Lubricantes';
+  if (texto.includes('cauch') || texto.includes('neum')) return 'Cauchos';
+  if (texto.includes('taller') || texto.includes('mec')) return 'Talleres';
+  if (texto.includes('repuest')) return 'Repuestos';
+
+  return comercio?.categoria || 'Aliado';
+}
+
+function descripcionComercio(comercio) {
+  if (comercio?.descripcion) return comercio.descripcion;
+
+  switch (etiquetaCategoria(comercio)) {
+    case 'Lubricantes':
+      return 'Aceites, filtros y lubricantes para motos de todo tipo.';
+    case 'Repuestos':
+      return 'Piezas, frenos, transmisión y accesorios para tu moto.';
+    case 'Talleres':
+      return 'Mecánica general, diagnóstico y mantenimiento preventivo.';
+    case 'Cauchos':
+      return 'Cauchos, cámaras, balanceo y reparación de pinchaduras.';
+    default:
+      return 'Productos y servicios para motos cerca de ti.';
+  }
+}
+
+function coincideCategoria(comercio, categoria) {
+  if (categoria === 'Todas') return true;
+
+  const texto = normalizar(`${etiquetaCategoria(comercio)} ${comercio?.categoria ?? ''}`);
+  return (CATEGORIA_ALIASES[categoria] || []).some((alias) => texto.includes(alias));
+}
+
+function enlaceWhatsApp(comercio, mensaje = MENSAJE_CONTACTO) {
+  const telefono = String(comercio?.telefono_whatsapp ?? '').replace(/\D/g, '');
+  const base = telefono ? `https://wa.me/${telefono}` : 'https://wa.me/';
+  return `${base}?text=${encodeURIComponent(mensaje)}`;
+}
+
+function enlaceMapa(comercio) {
+  const destino = [comercio?.direccion, comercio?.ciudad].filter(Boolean).join(', ');
+  if (!destino) return null;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destino)}`;
+}
+
+function tonoCategoria(categoria) {
+  return `tiendas-tone-${normalizar(categoria).replace(/[^a-z]/gi, '')}`;
 }
 
 export default function Tiendas() {
@@ -41,10 +134,16 @@ export default function Tiendas() {
   const [categoria, setCategoria] = useState('Todas');
   const [solo24h, setSolo24h] = useState(false);
   const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState('');
+  const [aviso, setAviso] = useState('');
   const [recargaToken, setRecargaToken] = useState(0);
   const [solicitudAbierta, setSolicitudAbierta] = useState(false);
-  const [solicitud, setSolicitud] = useState({ nombre: '', tipo: 'Taller', ciudad: '', telefono: '' });
+  const [solicitudEnviada, setSolicitudEnviada] = useState(false);
+  const [solicitud, setSolicitud] = useState({
+    nombre: '',
+    categoria: 'Lubricantes',
+    ciudad: '',
+    telefono: '',
+  });
 
   useEffect(() => {
     let activo = true;
@@ -58,13 +157,24 @@ export default function Tiendas() {
     )
       .then(({ data, error: dbError }) => {
         if (!activo) return;
-        if (dbError) throw dbError;
-        setComercios(data || []);
-        setError('');
+
+        if (dbError) {
+          console.warn('Directorio aliado no disponible:', dbError.message);
+          setComercios(COMERCIOS_EJEMPLO);
+          setAviso('Mostrando aliados de ejemplo mientras cargamos el directorio oficial.');
+          return;
+        }
+
+        const lista = data || [];
+        setComercios(lista.length ? lista : COMERCIOS_EJEMPLO);
+        setAviso(lista.length ? '' : 'Directorio oficial vacío · mostrando aliados de ejemplo.');
       })
       .catch((err) => {
-        console.error('Error cargando comercios:', err);
-        if (activo) setError('No pudimos cargar el directorio. Revisa tu conexión e inténtalo de nuevo.');
+        console.warn('Error cargando comercios:', err);
+        if (activo) {
+          setComercios(COMERCIOS_EJEMPLO);
+          setAviso('Mostrando aliados de ejemplo mientras cargamos el directorio oficial.');
+        }
       })
       .finally(() => {
         if (activo) setCargando(false);
@@ -79,11 +189,19 @@ export default function Tiendas() {
     const termino = normalizar(busqueda).trim();
 
     return comercios.filter((comercio) => {
-      const porCategoria = categoria === 'Todas' || comercio.categoria === categoria;
+      const porCategoria = coincideCategoria(comercio, categoria);
       const porHorario = !solo24h || comercio.abierto_24h === true;
       const texto = normalizar(
-        [comercio.nombre, comercio.direccion, comercio.ciudad, comercio.categoria, comercio.horario].join(' ')
+        [
+          comercio.nombre,
+          comercio.direccion,
+          comercio.ciudad,
+          etiquetaCategoria(comercio),
+          comercio.horario,
+          descripcionComercio(comercio),
+        ].join(' ')
       );
+
       return porCategoria && porHorario && (!termino || texto.includes(termino));
     });
   }, [comercios, busqueda, categoria, solo24h]);
@@ -99,199 +217,176 @@ export default function Tiendas() {
     setSolo24h(false);
   };
 
-  const abrirSolicitudAliado = (evento) => {
+  const abrirSolicitud = () => {
+    setSolicitudEnviada(false);
+    setSolicitudAbierta(true);
+  };
+
+  const cerrarSolicitud = () => {
+    setSolicitudAbierta(false);
+    setSolicitudEnviada(false);
+    setSolicitud({ nombre: '', categoria: 'Lubricantes', ciudad: '', telefono: '' });
+  };
+
+  const enviarSolicitud = (evento) => {
     evento.preventDefault();
     if (!solicitud.nombre.trim() || !solicitud.ciudad.trim()) return;
 
-    const mensaje = encodeURIComponent(
-      `Hola Biela, quiero unirme a la red de aliados. Negocio: ${solicitud.nombre.trim()}. ` +
-        `Tipo: ${solicitud.tipo}. Ciudad: ${solicitud.ciudad.trim()}. ` +
-        `WhatsApp: ${solicitud.telefono.trim() || 'lo indico por aquí'}.`
-    );
+    const mensaje =
+      `Hola Biela, quiero registrar un comercio. ` +
+      `Nombre: ${solicitud.nombre.trim()}. ` +
+      `Categoría: ${solicitud.categoria}. ` +
+      `Ciudad: ${solicitud.ciudad.trim()}. ` +
+      `WhatsApp: ${solicitud.telefono.trim() || 'lo indico por aquí'}.`;
 
-    window.open(`https://wa.me/?text=${mensaje}`, '_blank', 'noopener,noreferrer');
-    setSolicitudAbierta(false);
-    setSolicitud({ nombre: '', tipo: 'Taller', ciudad: '', telefono: '' });
+    window.open(
+      enlaceWhatsApp({ telefono_whatsapp: solicitud.telefono }, mensaje),
+      '_blank',
+      'noopener,noreferrer'
+    );
+    setSolicitudEnviada(true);
   };
 
   if (cargando) return <TiendasSkeleton />;
 
   return (
-    <main className="biela-fade-in mx-auto w-full max-w-6xl px-4 pb-28 pt-8 text-[var(--text-main)]">
-      <header className="flex flex-col gap-3">
-        <div className="flex items-center gap-2">
-          <span
-            className="flex h-10 w-10 items-center justify-center rounded-xl"
-            style={{ background: 'var(--accent-color)', color: '#111111', boxShadow: '0 10px 24px var(--accent-shadow)' }}
-          >
-            <Store size={20} strokeWidth={2.5} />
+    <main className="tiendas-page biela-fade-in mx-auto w-full max-w-3xl px-4 pt-6 pb-28 text-[var(--text-main)]">
+      <header className="tiendas-header">
+        <div className="tiendas-header-copy">
+          <span className="tiendas-eyebrow">
+            <Store size={14} strokeWidth={1.8} />
+            Red de confianza Biela
           </span>
-          <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Tienda &amp; Auxilio Vial</h1>
+          <h1>Directorio Aliado</h1>
+          <p>Talleres, repuestos y lubricantes verificados cerca de ti</p>
         </div>
-        <p className="max-w-2xl text-sm leading-relaxed text-[var(--text-muted)]">
-          Talleres, caucheras y grúas verificadas cerca de ti, con un toque al WhatsApp.
-        </p>
+        <button type="button" onClick={abrirSolicitud} className="tiendas-register">
+          <Plus size={16} strokeWidth={1.9} />
+          Registrar comercio
+        </button>
       </header>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        <label className="relative flex min-h-[48px] flex-1 items-center">
-          <Search className="pointer-events-none absolute left-4 text-[var(--text-muted)]" size={18} />
+      <section className="tiendas-controls" aria-label="Buscar y filtrar comercios">
+        <label className="tiendas-search gpane">
+          <Search className="tiendas-search-icon" size={18} strokeWidth={1.8} />
           <input
             type="search"
             value={busqueda}
             onChange={(evento) => setBusqueda(evento.target.value)}
-            placeholder="Busca por nombre, dirección o palabra clave"
+            placeholder="Buscar aceite, frenos, taller..."
             aria-label="Buscar comercios"
-            className="min-h-[48px] w-full rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] py-3 pl-11 pr-11 text-base text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--accent-color)]"
+            className="tiendas-search-input"
           />
           {busqueda && (
             <button
               type="button"
               onClick={() => setBusqueda('')}
               aria-label="Limpiar búsqueda"
-              className="absolute right-2 flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-muted)] transition hover:bg-black/5 hover:text-[var(--text-main)] dark:hover:bg-white/10"
+              className="tiendas-search-clear"
             >
               <X size={16} />
             </button>
           )}
         </label>
 
-        <button
-          type="button"
-          onClick={() => setSolo24h((valor) => !valor)}
-          aria-pressed={solo24h}
-          className={`min-h-[48px] shrink-0 rounded-2xl border px-4 text-sm font-extrabold transition ${
-            solo24h
-              ? 'border-transparent bg-[var(--accent-color)] text-black shadow-[0_10px_24px_var(--accent-shadow)]'
-              : 'border-[var(--border-color)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
-          }`}
-        >
-          🚨 Solo 24/7
-        </button>
-      </div>
-
-      <div className="mt-5 flex gap-2 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
-        {CATEGORIAS.map((item) => (
+        <div className="tiendas-filters" role="group" aria-label="Filtrar por categoría">
+          {CATEGORIAS.map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => setCategoria(item)}
+              aria-pressed={categoria === item}
+              className={`tiendas-pill ${categoria === item ? 'is-active' : ''}`}
+            >
+              {item}
+            </button>
+          ))}
           <button
-            key={item}
             type="button"
-            onClick={() => setCategoria(item)}
-            aria-pressed={categoria === item}
-            className={`min-h-[48px] shrink-0 rounded-full border px-4 text-xs font-extrabold transition ${
-              categoria === item
-                ? 'border-transparent bg-[var(--accent-color)] text-black shadow-[0_8px_20px_var(--accent-shadow)]'
-                : 'border-[var(--border-color)] bg-white/5 text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
+            onClick={() => setSolo24h((valor) => !valor)}
+            aria-pressed={solo24h}
+            className={`tiendas-pill tiendas-pill-24h ${solo24h ? 'is-active' : ''}`}
           >
-            {item}
+            <Clock size={14} strokeWidth={1.9} />
+            24/7
           </button>
-        ))}
-      </div>
+        </div>
+      </section>
 
-      {error && (
-        <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm font-medium text-red-700 dark:text-red-300">{error}</p>
-          <button
-            type="button"
-            onClick={recargar}
-            className="min-h-[48px] rounded-xl border border-red-500/30 px-4 text-sm font-extrabold text-red-700 dark:text-red-300"
-          >
+      {aviso && (
+        <div className="tiendas-notice gpane">
+          <span className="tiendas-notice-dot" />
+          <span>{aviso}</span>
+          <button type="button" onClick={recargar}>
             Reintentar
           </button>
         </div>
       )}
 
-      <div className="mt-5 flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+      <div className="tiendas-results-bar">
+        <span>
           {comerciosFiltrados.length} {comerciosFiltrados.length === 1 ? 'resultado' : 'resultados'}
-        </p>
+        </span>
         {(busqueda || categoria !== 'Todas' || solo24h) && (
-          <button
-            type="button"
-            onClick={limpiarFiltros}
-            className="min-h-[44px] px-2 text-xs font-bold text-[var(--text-muted)] underline decoration-dotted hover:text-[var(--text-main)]"
-          >
+          <button type="button" onClick={limpiarFiltros}>
             Limpiar filtros
           </button>
         )}
       </div>
 
       {comerciosFiltrados.length > 0 ? (
-        <section className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <section className="tiendas-grid">
           {comerciosFiltrados.map((comercio) => {
+            const categoriaVisible = etiquetaCategoria(comercio);
             const enlace = enlaceWhatsApp(comercio);
+            const mapa = enlaceMapa(comercio);
 
             return (
-              <article
-                key={comercio.id}
-                className="flex flex-col gap-4 rounded-2xl border border-[var(--border-color)] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.2)] backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(0,0,0,0.3)]"
-                style={{ background: 'var(--bg-card)' }}
-              >
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <h2 className="min-w-0 flex-1 text-lg font-black leading-tight">{comercio.nombre}</h2>
-                  <span
-                    className={`shrink-0 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${
-                      ESTILOS_CATEGORIA[comercio.categoria] ||
-                      'bg-neutral-200 text-neutral-700 dark:bg-white/10 dark:text-neutral-200'
-                    }`}
-                  >
-                    {comercio.categoria}
+              <article key={comercio.id} className="tiendas-card gpane">
+                <div className="tiendas-card-top">
+                  <span className={`tiendas-category ${tonoCategoria(categoriaVisible)}`}>
+                    {categoriaVisible}
                   </span>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  {comercio.verificado === true && (
-                    <span className="flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-extrabold text-emerald-700 dark:text-emerald-400">
-                      <ShieldCheck size={12} />
-                      ✓ Verificado
-                    </span>
-                  )}
-                  {comercio.abierto_24h === true && (
-                    <span className="relative flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                      <span className="relative flex h-2 w-2">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-                        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                      </span>
-                      24 Horas
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-2 text-sm text-[var(--text-muted)]">
-                  <p className="flex items-start gap-2">
-                    <MapPin className="mt-0.5 shrink-0" size={15} />
+                  <div className="tiendas-card-meta">
                     <span>
-                      {comercio.direccion || 'Dirección no disponible'}
-                      {comercio.ciudad ? `, ${comercio.ciudad}` : ''}
+                      <MapPin size={13} strokeWidth={1.9} />
+                      {comercio.ciudad || 'Zona no disponible'}
                     </span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <Clock className="mt-0.5 shrink-0" size={15} />
-                    <span>{comercio.horario || 'Horario no disponible'}</span>
-                  </p>
+                    {comercio.verificado === true && (
+                      <span className="tiendas-verified">
+                        <BadgeCheck size={13} strokeWidth={1.9} />
+                        Verificado
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="mt-auto pt-1">
-                  {enlace ? (
+                <div className="tiendas-card-body">
+                  <h2>{comercio.nombre}</h2>
+                  <p className="tiendas-description">{descripcionComercio(comercio)}</p>
+                  <p className="tiendas-schedule">
+                    <Clock size={14} strokeWidth={1.8} />
+                    {comercio.horario || (comercio.abierto_24h ? 'Abierto 24 horas' : 'Horario no disponible')}
+                  </p>
+                  {comercio.abierto_24h === true && <span className="tiendas-open-24h">Disponible 24/7</span>}
+                </div>
+
+                <div className="tiendas-card-actions">
+                  <a href={enlace} target="_blank" rel="noopener noreferrer" className="tiendas-primary-action">
+                    <MessageCircle size={16} strokeWidth={1.9} />
+                    <span>Cotizar por WhatsApp</span>
+                    <ArrowUpRight size={14} strokeWidth={1.9} />
+                  </a>
+                  {mapa && (
                     <a
-                      href={enlace}
+                      href={mapa}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-extrabold text-black transition hover:brightness-105"
-                      style={{ background: 'var(--accent-color)', boxShadow: '0 10px 24px var(--accent-shadow)' }}
+                      aria-label={`Ver ${comercio.nombre} en el mapa`}
+                      className="tiendas-secondary-action"
                     >
-                      <MessageCircle size={17} strokeWidth={2.5} />
-                      Contactar por WhatsApp
+                      <MapPin size={17} strokeWidth={1.9} />
                     </a>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled
-                      className="flex min-h-[48px] w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-[var(--border-color)] px-4 text-sm font-bold text-[var(--text-muted)] opacity-60"
-                    >
-                      <MessageCircle size={17} />
-                      Sin WhatsApp registrado
-                    </button>
                   )}
                 </div>
               </article>
@@ -299,129 +394,106 @@ export default function Tiendas() {
           })}
         </section>
       ) : (
-        <section className="mt-4 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-surface)] px-6 py-14 text-center">
-          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black/5 dark:bg-white/10">
-            <Wrench size={22} className="text-[var(--text-muted)]" />
+        <section className="tiendas-empty gpane">
+          <span className="tiendas-empty-icon">
+            <Wrench size={22} strokeWidth={1.7} />
           </span>
-          <h2 className="text-base font-black">No encontramos comercios con esos filtros</h2>
-          <p className="max-w-sm text-sm text-[var(--text-muted)]">
-            Prueba con otro nombre, quita el filtro 24/7 o revisa todas las categorías.
-          </p>
-          <button
-            type="button"
-            onClick={limpiarFiltros}
-            className="min-h-[48px] rounded-xl bg-[var(--accent-color)] px-5 text-sm font-extrabold text-black"
-            style={{ boxShadow: '0 10px 24px var(--accent-shadow)' }}
-          >
+          <h2>No encontramos comercios con esos filtros</h2>
+          <p>Prueba con otro término, revisa todas las categorías o desactiva el filtro 24/7.</p>
+          <button type="button" onClick={limpiarFiltros}>
             Ver todos
           </button>
         </section>
       )}
 
-      <section className="mt-8 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
-        <div>
-          <h2 className="text-sm font-black sm:text-base">
-            ¿Tienes un taller, cauchera o venta de repuestos? Únete a la red Biela
-          </h2>
-          <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">
-            Suma tu negocio al directorio y recibe consultas de motorizados cerca de ti.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setSolicitudAbierta(true)}
-          className="mt-4 min-h-[48px] shrink-0 rounded-xl border border-[var(--accent-color)] px-5 text-sm font-extrabold text-[var(--accent-color)] transition hover:bg-[var(--accent-color)] hover:text-black sm:mt-0"
-        >
-          Quiero ser aliado
-        </button>
-      </section>
-
       {solicitudAbierta && (
-        <div
-          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
-          onClick={() => setSolicitudAbierta(false)}
-        >
+        <div className="tiendas-modal-overlay" onMouseDown={cerrarSolicitud}>
           <form
-            onSubmit={abrirSolicitudAliado}
-            onClick={(evento) => evento.stopPropagation()}
-            className="w-full max-w-md rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 shadow-2xl"
+            onSubmit={enviarSolicitud}
+            onMouseDown={(evento) => evento.stopPropagation()}
+            className="tiendas-modal gpane"
           >
-            <div className="flex items-start justify-between gap-3">
+            <div className="tiendas-modal-head">
+              <span className="tiendas-modal-icon">
+                <Store size={18} strokeWidth={1.8} />
+              </span>
               <div>
-                <h2 className="text-lg font-black">Solicitar ingreso a la red</h2>
-                <p className="mt-1 text-xs text-[var(--text-muted)]">Te abriremos WhatsApp con tu mensaje listo.</p>
+                <h2>Registrar comercio</h2>
+                <p>Cuéntanos qué ofreces y te contactamos por WhatsApp.</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setSolicitudAbierta(false)}
-                aria-label="Cerrar solicitud"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[var(--text-muted)] transition hover:bg-black/5 dark:hover:bg-white/10"
-              >
+              <button type="button" onClick={cerrarSolicitud} aria-label="Cerrar registro">
                 <X size={18} />
               </button>
             </div>
 
-            <div className="mt-5 flex flex-col gap-4">
-              <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-[var(--text-muted)]">Nombre del negocio</span>
-                <input
-                  required
-                  type="text"
-                  value={solicitud.nombre}
-                  onChange={(evento) => setSolicitud({ ...solicitud, nombre: evento.target.value })}
-                  placeholder="Ej. Caucheras El Centro"
-                  className="min-h-[48px] w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 text-base text-[var(--text-main)] outline-none focus:border-[var(--accent-color)]"
-                />
-              </label>
+            {solicitudEnviada ? (
+              <div className="tiendas-success">
+                <BadgeCheck size={28} strokeWidth={1.6} />
+                <h3>Solicitud lista</h3>
+                <p>Abrimos WhatsApp con tu mensaje preparado para el equipo Biela.</p>
+                <button type="button" onClick={cerrarSolicitud}>
+                  Listo
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="tiendas-form">
+                  <label>
+                    <span>Nombre del negocio</span>
+                    <input
+                      required
+                      type="text"
+                      value={solicitud.nombre}
+                      onChange={(evento) => setSolicitud({ ...solicitud, nombre: evento.target.value })}
+                      placeholder="Ej. Lubricantes El Central"
+                    />
+                  </label>
 
-              <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-[var(--text-muted)]">Tipo de aliado</span>
-                <select
-                  value={solicitud.tipo}
-                  onChange={(evento) => setSolicitud({ ...solicitud, tipo: evento.target.value })}
-                  className="min-h-[48px] w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 text-base text-[var(--text-main)] outline-none focus:border-[var(--accent-color)]"
-                >
-                  {CATEGORIAS.filter((item) => item !== 'Todas').map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  <label>
+                    <span>Categoría</span>
+                    <select
+                      value={solicitud.categoria}
+                      onChange={(evento) => setSolicitud({ ...solicitud, categoria: evento.target.value })}
+                    >
+                      {CATEGORIAS.filter((item) => item !== 'Todas').map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
 
-              <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-[var(--text-muted)]">Ciudad</span>
-                <input
-                  required
-                  type="text"
-                  value={solicitud.ciudad}
-                  onChange={(evento) => setSolicitud({ ...solicitud, ciudad: evento.target.value })}
-                  placeholder="Ej. Caracas"
-                  className="min-h-[48px] w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 text-base text-[var(--text-main)] outline-none focus:border-[var(--accent-color)]"
-                />
-              </label>
+                  <div className="tiendas-form-row">
+                    <label>
+                      <span>Ciudad</span>
+                      <input
+                        required
+                        type="text"
+                        value={solicitud.ciudad}
+                        onChange={(evento) => setSolicitud({ ...solicitud, ciudad: evento.target.value })}
+                        placeholder="Ej. Caracas"
+                      />
+                    </label>
+                    <label>
+                      <span>WhatsApp (opcional)</span>
+                      <input
+                        type="tel"
+                        inputMode="tel"
+                        value={solicitud.telefono}
+                        onChange={(evento) => setSolicitud({ ...solicitud, telefono: evento.target.value })}
+                        placeholder="0424 123 4567"
+                      />
+                    </label>
+                  </div>
+                </div>
 
-              <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-[var(--text-muted)]">WhatsApp del negocio (opcional)</span>
-                <input
-                  type="tel"
-                  inputMode="tel"
-                  value={solicitud.telefono}
-                  onChange={(evento) => setSolicitud({ ...solicitud, telefono: evento.target.value })}
-                  placeholder="0424 123 4567"
-                  className="min-h-[48px] w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 text-base text-[var(--text-main)] outline-none focus:border-[var(--accent-color)]"
-                />
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              className="mt-5 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-extrabold text-black"
-              style={{ background: 'var(--accent-color)', boxShadow: '0 10px 24px var(--accent-shadow)' }}
-            >
-              <MessageCircle size={17} />
-              Abrir WhatsApp
-            </button>
+                <button type="submit" className="tiendas-submit">
+                  <MessageCircle size={16} strokeWidth={1.9} />
+                  Enviar solicitud
+                  <ArrowUpRight size={14} strokeWidth={1.9} />
+                </button>
+              </>
+            )}
           </form>
         </div>
       )}

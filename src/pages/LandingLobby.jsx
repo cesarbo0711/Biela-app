@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity,
+  ArrowLeft,
   ArrowRight,
   Bot,
   Check,
@@ -20,14 +21,18 @@ import {
   MapPin,
   Menu,
   MessageCircle,
+  Phone,
+  RefreshCw,
   ShieldCheck,
   Sparkles,
   Star,
+  User,
   Wallet,
   Wrench,
   X,
 } from 'lucide-react';
 import { supabase } from '../supabase';
+import { AVATAR_STYLE_DEFAULT, AVATAR_STYLES_SELECTABLE, buildAvatarUrl } from '../utils/avatarStyles';
 import './LandingLobby.css';
 
 const NAV_LINKS = [
@@ -42,6 +47,12 @@ const AVATARS = [
   'https://api.dicebear.com/9.x/micah/svg?seed=Maria',
   'https://api.dicebear.com/9.x/glass/svg?seed=Carlos',
 ];
+
+const CIUDADES_RAPIDAS = ['San Juan', 'Caracas', 'Valencia', 'Maracay'];
+
+function crearSemilla() {
+  return Math.random().toString(36).substring(2, 10);
+}
 
 const TESTIMONIALS = [
   {
@@ -282,6 +293,13 @@ function AuthModal({ initialMode, onClose }) {
   const [recoverLoading, setRecoverLoading] = useState(false);
   const [recoverError, setRecoverError] = useState('');
   const [recoverInfo, setRecoverInfo] = useState('');
+  const [wizardStep, setWizardStep] = useState(1);
+  const [nombre, setNombre] = useState('');
+  const [residencia, setResidencia] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [avatarSeed, setAvatarSeed] = useState(crearSemilla);
+  const [avatarStyle, setAvatarStyle] = useState(AVATAR_STYLE_DEFAULT);
+  const [confirmacion, setConfirmacion] = useState(null);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -296,7 +314,20 @@ function AuthModal({ initialMode, onClose }) {
     };
   }, [onClose]);
 
-  const handleSubmit = async (event) => {
+  const cambiarTab = (nuevoTab) => {
+    setTab(nuevoTab);
+    setError('');
+    setInfo('');
+    if (nuevoTab === 'register') {
+      setWizardStep(1);
+      setConfirmacion(null);
+    }
+  };
+
+  const avatarUrl = buildAvatarUrl(avatarStyle, avatarSeed || nombre || 'piloto');
+  const fortaleza = password.length >= 10 ? 3 : password.length >= 6 ? 2 : password.length > 0 ? 1 : 0;
+
+  const handleLogin = async (event) => {
     event.preventDefault();
     setError('');
     setInfo('');
@@ -313,19 +344,83 @@ function AuthModal({ initialMode, onClose }) {
 
     setLoading(true);
     try {
-      if (tab === 'login') {
-        const { error: authError } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
-        if (authError) throw authError;
+      const { error: authError } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+      if (authError) throw authError;
+      onClose();
+    } catch (authError) {
+      setError(mapAuthError(authError?.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const avanzarPaso = (event) => {
+    event.preventDefault();
+    setError('');
+    if (!nombre.trim()) {
+      setError('Escribe tu nombre o apodo para continuar.');
+      return;
+    }
+    setWizardStep(2);
+  };
+
+  const handleRegister = async (event) => {
+    event.preventDefault();
+    setError('');
+    setInfo('');
+
+    const cleanNombre = nombre.trim();
+    const cleanResidencia = residencia.trim();
+    const cleanTelefono = telefono.trim();
+    const cleanEmail = email.trim();
+
+    if (!cleanNombre) {
+      setWizardStep(1);
+      setError('Escribe tu nombre o apodo para continuar.');
+      return;
+    }
+    if (!cleanEmail || !password) {
+      setError('Completa tu correo y contraseña.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password,
+        options: {
+          data: {
+            nombre: cleanNombre,
+            residencia: cleanResidencia,
+            telefono: cleanTelefono,
+            avatar_seed: avatarSeed || cleanNombre,
+            avatar_url: avatarUrl,
+            onboarding_completado: false,
+          },
+        },
+      });
+
+      if (authError) throw authError;
+
+      if (data?.user && data.session) {
+        const { error: perfilError } = await supabase.from('perfiles').upsert({
+          id: data.user.id,
+          nombre: cleanNombre,
+          residencia: cleanResidencia,
+          telefono: cleanTelefono,
+          avatar_seed: avatarSeed || cleanNombre,
+          avatar_url: avatarUrl,
+          onboarding_completado: false,
+        });
+        if (perfilError) console.error('No se pudo prellenar el perfil:', perfilError.message);
         onClose();
       } else {
-        const { data, error: authError } = await supabase.auth.signUp({ email: cleanEmail, password });
-        if (authError) throw authError;
-        if (data?.session) {
-          onClose();
-        } else {
-          setInfo('Cuenta creada. Revisa tu correo para confirmarla y luego inicia sesión.');
-          setTab('login');
-        }
+        setConfirmacion({ nombre: cleanNombre, email: cleanEmail });
       }
     } catch (authError) {
       setError(mapAuthError(authError?.message));
@@ -394,10 +489,10 @@ function AuthModal({ initialMode, onClose }) {
         </div>
 
         <div className="auth-tabs" role="tablist" aria-label="Modo de acceso">
-          <button type="button" role="tab" aria-selected={tab === 'login'} className={tab === 'login' ? 'active' : ''} onClick={() => { setTab('login'); setError(''); setInfo(''); }}>
+          <button type="button" role="tab" aria-selected={tab === 'login'} className={tab === 'login' ? 'active' : ''} onClick={() => cambiarTab('login')}>
             Iniciar Sesión
           </button>
-          <button type="button" role="tab" aria-selected={tab === 'register'} className={tab === 'register' ? 'active' : ''} onClick={() => { setTab('register'); setError(''); setInfo(''); }}>
+          <button type="button" role="tab" aria-selected={tab === 'register'} className={tab === 'register' ? 'active' : ''} onClick={() => cambiarTab('register')}>
             Crear Cuenta
           </button>
         </div>
@@ -405,96 +500,304 @@ function AuthModal({ initialMode, onClose }) {
         {error && <div className="auth-alert auth-alert-error">{error}</div>}
         {info && <div className="auth-alert auth-alert-info">{info}</div>}
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <label className="auth-label" htmlFor="auth-email">Correo electrónico</label>
-          <div className="auth-input-wrap">
-            <Mail size={18} className="auth-input-icon" />
-            <input
-              id="auth-email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              placeholder="piloto@correo.com"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="auth-input"
-            />
-          </div>
-
-          <label className="auth-label" htmlFor="auth-password">Contraseña</label>
-          <div className="auth-input-wrap">
-            <Lock size={18} className="auth-input-icon" />
-            <input
-              id="auth-password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete={tab === 'login' ? 'current-password' : 'new-password'}
-              placeholder="Mínimo 6 caracteres"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="auth-input auth-input-password"
-            />
-            <button
-              type="button"
-              className="auth-eye"
-              onClick={() => setShowPassword((value) => !value)}
-              aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-
-          <button type="submit" className="auth-submit" disabled={loading}>
-            {loading ? <Loader2 size={18} className="auth-spin" /> : <ArrowRight size={18} />}
-            {loading ? 'Procesando...' : tab === 'login' ? 'Entrar al Garaje' : 'Crear mi cuenta'}
-          </button>
-        </form>
-
-        <button
-          type="button"
-          className="auth-recover-toggle"
-          onClick={() => {
-            setRecoverMode((value) => !value);
-            setRecoverEmail(email);
-            setRecoverError('');
-            setRecoverInfo('');
-          }}
-        >
-          <KeyRound size={15} />
-          ¿Olvidaste tu contraseña?
-        </button>
-
-        <AnimatePresence initial={false}>
-          {recoverMode && (
-            <motion.form
-              className="auth-recover"
-              onSubmit={handleRecover}
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-            >
-              <label className="auth-label" htmlFor="auth-recover-email">Recuperar acceso</label>
+        {tab === 'login' ? (
+          <>
+            <form className="auth-form" onSubmit={handleLogin}>
+              <label className="auth-label" htmlFor="auth-email">Correo electrónico</label>
               <div className="auth-input-wrap">
                 <Mail size={18} className="auth-input-icon" />
                 <input
-                  id="auth-recover-email"
+                  id="auth-email"
                   type="email"
                   inputMode="email"
                   autoComplete="email"
-                  placeholder="Tu correo registrado"
-                  value={recoverEmail}
-                  onChange={(event) => setRecoverEmail(event.target.value)}
+                  placeholder="piloto@correo.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
                   className="auth-input"
                 />
               </div>
-              {recoverError && <div className="auth-alert auth-alert-error">{recoverError}</div>}
-              {recoverInfo && <div className="auth-alert auth-alert-info">{recoverInfo}</div>}
-              <button type="submit" className="auth-submit auth-submit-secondary" disabled={recoverLoading}>
-                {recoverLoading ? <Loader2 size={18} className="auth-spin" /> : <Mail size={18} />}
-                {recoverLoading ? 'Enviando...' : 'Enviar enlace'}
+
+              <label className="auth-label" htmlFor="auth-password">Contraseña</label>
+              <div className="auth-input-wrap">
+                <Lock size={18} className="auth-input-icon" />
+                <input
+                  id="auth-password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  placeholder="Mínimo 6 caracteres"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="auth-input auth-input-password"
+                />
+                <button
+                  type="button"
+                  className="auth-eye"
+                  onClick={() => setShowPassword((value) => !value)}
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
+              <button type="submit" className="auth-submit" disabled={loading}>
+                {loading ? <Loader2 size={18} className="auth-spin" /> : <ArrowRight size={18} />}
+                {loading ? 'Procesando...' : 'Entrar al Garaje'}
               </button>
-            </motion.form>
-          )}
-        </AnimatePresence>
+            </form>
+
+            <button
+              type="button"
+              className="auth-recover-toggle"
+              onClick={() => {
+                setRecoverMode((value) => !value);
+                setRecoverEmail(email);
+                setRecoverError('');
+                setRecoverInfo('');
+              }}
+            >
+              <KeyRound size={15} />
+              ¿Olvidaste tu contraseña?
+            </button>
+
+            <AnimatePresence initial={false}>
+              {recoverMode && (
+                <motion.form
+                  className="auth-recover"
+                  onSubmit={handleRecover}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                >
+                  <label className="auth-label" htmlFor="auth-recover-email">Recuperar acceso</label>
+                  <div className="auth-input-wrap">
+                    <Mail size={18} className="auth-input-icon" />
+                    <input
+                      id="auth-recover-email"
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      placeholder="Tu correo registrado"
+                      value={recoverEmail}
+                      onChange={(event) => setRecoverEmail(event.target.value)}
+                      className="auth-input"
+                    />
+                  </div>
+                  {recoverError && <div className="auth-alert auth-alert-error">{recoverError}</div>}
+                  {recoverInfo && <div className="auth-alert auth-alert-info">{recoverInfo}</div>}
+                  <button type="submit" className="auth-submit auth-submit-secondary" disabled={recoverLoading}>
+                    {recoverLoading ? <Loader2 size={18} className="auth-spin" /> : <Mail size={18} />}
+                    {recoverLoading ? 'Enviando...' : 'Enviar enlace'}
+                  </button>
+                </motion.form>
+              )}
+            </AnimatePresence>
+          </>
+        ) : confirmacion ? (
+          <div className="auth-confirm">
+            <span className="auth-confirm-icon"><Mail size={26} /></span>
+            <p>¡Listo, {confirmacion.nombre}! Te enviamos un enlace de confirmación a {confirmacion.email}.</p>
+            <button type="button" className="auth-submit" onClick={onClose}>
+              Entendido <Check size={18} />
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="auth-wizard-progress">
+              <span className="auth-wizard-label">
+                {wizardStep === 1 ? 'Paso 1 de 2: Tu Perfil de Piloto' : 'Paso 2 de 2: Credenciales de Acceso'}
+              </span>
+              <div className="auth-wizard-track">
+                <span className="auth-wizard-fill" style={{ width: wizardStep === 1 ? '50%' : '100%' }} />
+              </div>
+            </div>
+
+            <AnimatePresence mode="wait" initial={false}>
+              {wizardStep === 1 ? (
+                <motion.form
+                  key="wizard-piloto"
+                  className="auth-form auth-wizard-step"
+                  onSubmit={avanzarPaso}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 12 }}
+                  transition={{ duration: 0.22 }}
+                >
+                  <div className="auth-avatar-selector">
+                    <div className="auth-avatar-preview w-20 h-20 rounded-full">
+                      <img src={avatarUrl} alt="Vista previa del piloto" />
+                    </div>
+                    <div className="auth-avatar-options">
+                      <span className="auth-avatar-caption">Elige tu estilo</span>
+                      <div className="auth-style-tabs" aria-label="Estilos de avatar">
+                        {AVATAR_STYLES_SELECTABLE.map(({ key, label }) => (
+                          <button
+                            key={key}
+                            type="button"
+                            className={`auth-style-tab${avatarStyle === key ? ' is-active' : ''}`}
+                            onClick={() => setAvatarStyle(key)}
+                            aria-pressed={avatarStyle === key}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        className="auth-avatar-refresh"
+                        onClick={() => setAvatarSeed(crearSemilla())}
+                      >
+                        <RefreshCw size={15} /> Cambiar avatar
+                      </button>
+                    </div>
+                  </div>
+
+                  <label className="auth-label" htmlFor="auth-nombre">¿Cómo te llamas? (Nombre o Apodo)</label>
+                  <div className="auth-input-wrap">
+                    <User size={18} className="auth-input-icon" />
+                    <input
+                      id="auth-nombre"
+                      type="text"
+                      autoComplete="nickname"
+                      placeholder="Ej. César Borrego"
+                      value={nombre}
+                      onChange={(event) => setNombre(event.target.value)}
+                      className="auth-input"
+                      required
+                    />
+                  </div>
+
+                  <label className="auth-label" htmlFor="auth-residencia">Ciudad / Zona (Opcional)</label>
+                  <div className="auth-input-wrap">
+                    <MapPin size={18} className="auth-input-icon" />
+                    <input
+                      id="auth-residencia"
+                      type="text"
+                      autoComplete="address-level2"
+                      placeholder="Ej. San Juan de Los Morros"
+                      value={residencia}
+                      onChange={(event) => setResidencia(event.target.value)}
+                      className="auth-input"
+                    />
+                  </div>
+                  <div className="auth-chips" aria-label="Ciudades rápidas">
+                    {CIUDADES_RAPIDAS.map((ciudad) => (
+                      <button
+                        key={ciudad}
+                        type="button"
+                        className={`auth-chip${residencia === ciudad ? ' is-active' : ''}`}
+                        onClick={() => setResidencia(ciudad)}
+                        aria-pressed={residencia === ciudad}
+                      >
+                        {ciudad}
+                      </button>
+                    ))}
+                  </div>
+
+                  <label className="auth-label" htmlFor="auth-telefono">WhatsApp / Teléfono (Opcional)</label>
+                  <div className="auth-input-wrap">
+                    <Phone size={18} className="auth-input-icon" />
+                    <input
+                      id="auth-telefono"
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      placeholder="Ej. 0414-1234567"
+                      value={telefono}
+                      onChange={(event) => setTelefono(event.target.value)}
+                      className="auth-input"
+                    />
+                  </div>
+
+                  <button type="submit" className="auth-submit">
+                    Siguiente paso <ArrowRight size={18} />
+                  </button>
+                </motion.form>
+              ) : (
+                <motion.form
+                  key="wizard-credenciales"
+                  className="auth-form auth-wizard-step"
+                  onSubmit={handleRegister}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -12 }}
+                  transition={{ duration: 0.22 }}
+                >
+                  <div className="auth-pilot-summary">
+                    <img src={avatarUrl} alt="Avatar del piloto" />
+                    <div className="auth-summary-copy">
+                      <span>Piloto</span>
+                      <strong>{nombre.trim()}</strong>
+                      {residencia.trim() && <small>{residencia.trim()}</small>}
+                    </div>
+                    <button type="button" className="auth-summary-edit" onClick={() => setWizardStep(1)}>
+                      <ArrowLeft size={14} /> Editar
+                    </button>
+                  </div>
+
+                  <label className="auth-label" htmlFor="auth-register-email">Correo electrónico</label>
+                  <div className="auth-input-wrap">
+                    <Mail size={18} className="auth-input-icon" />
+                    <input
+                      id="auth-register-email"
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      placeholder="piloto@correo.com"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      className="auth-input"
+                      required
+                    />
+                  </div>
+
+                  <label className="auth-label" htmlFor="auth-register-password">Contraseña</label>
+                  <div className="auth-input-wrap">
+                    <Lock size={18} className="auth-input-icon" />
+                    <input
+                      id="auth-register-password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
+                      placeholder="Mínimo 6 caracteres"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      className="auth-input auth-input-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="auth-eye"
+                      onClick={() => setShowPassword((value) => !value)}
+                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+
+                  <div className="auth-strength" aria-live="polite">
+                    <div className="auth-strength-bars">
+                      {[1, 2, 3].map((nivel) => (
+                        <span
+                          key={nivel}
+                          className={`auth-strength-bar${fortaleza >= nivel ? ' is-on' : ''}`}
+                          data-level={fortaleza}
+                        />
+                      ))}
+                    </div>
+                    <span className="auth-strength-text">
+                      {fortaleza >= 2 ? 'Contraseña lista' : 'Mínimo 6 caracteres'}
+                    </span>
+                  </div>
+
+                  <button type="submit" className="auth-submit" disabled={loading}>
+                    {loading ? <Loader2 size={18} className="auth-spin" /> : <ShieldCheck size={18} />}
+                    {loading ? 'Creando cuenta...' : 'Crear mi cuenta en Biela'}
+                  </button>
+                </motion.form>
+              )}
+            </AnimatePresence>
+          </>
+        )}
       </motion.div>
     </motion.div>
   );

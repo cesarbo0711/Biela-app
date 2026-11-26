@@ -1,0 +1,667 @@
+.tiendas-page {
+  min-height: 100dvh;
+  background-color: var(--bg-base);
+}
+
+.tiendas-page .gpane {
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-surface) 78%, transparent);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+}
+
+.tiendas-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tiendas-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--accent-color);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tiendas-header h1 {
+  margin: 0.55rem 0 0.35rem;
+  font-size: clamp(1.7rem, 5vw, 2.15rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+}
+
+.tiendas-header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.tiendas-register {
+  min-height: 48px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--bg-surface) 70%, transparent);
+  font-size: 0.8rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.tiendas-register:hover {
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.tiendas-register:active {
+  transform: scale(0.97);
+}
+
+.tiendas-controls {
+  display: flex;
+  flex-direction: column;
+}
+
+.tiendas-search {
+  position: relative;
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0 0.85rem;
+  border-radius: 18px;
+}
+
+.tiendas-search-icon {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+}
+
+.tiendas-search-input {
+  width: 100%;
+  min-height: 48px;
+  flex: 1;
+  border: 0;
+  outline: none;
+  color: var(--text-main);
+  background: transparent;
+  font-size: 16px;
+}
+
+.tiendas-search-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.tiendas-search-clear {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.tiendas-search-clear:hover {
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--text-main) 8%, transparent);
+}
+
+.tiendas-filters {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.75rem 0 0.5rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tiendas-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.tiendas-pill {
+  min-height: 48px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0 0.95rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-surface) 45%, transparent);
+  font-size: 0.78rem;
+  font-weight: 750;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.tiendas-pill:hover {
+  color: var(--text-main);
+}
+
+.tiendas-pill.is-active {
+  border-color: transparent;
+  color: #050505;
+  background: var(--accent-color);
+  box-shadow: 0 8px 20px var(--accent-shadow);
+}
+
+.tiendas-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 16px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.tiendas-notice-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--accent-color);
+}
+
+.tiendas-notice button {
+  min-height: 36px;
+  margin-left: auto;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  color: var(--accent-color);
+  background: transparent;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tiendas-results-bar {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.tiendas-results-bar button {
+  min-height: 36px;
+  padding: 0 0.25rem;
+  color: var(--text-muted);
+  background: transparent;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-decoration: underline dotted;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.tiendas-results-bar button:hover {
+  color: var(--text-main);
+}
+
+.tiendas-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.tiendas-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 1.25rem;
+  border-radius: 24px;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.tiendas-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent-color) 45%, var(--border-color));
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.16);
+}
+
+.tiendas-card:active {
+  transform: translateY(-1px);
+}
+
+.tiendas-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.tiendas-category {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.tiendas-tone-lubricantes {
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.tiendas-tone-repuestos {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.tiendas-tone-talleres {
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 12%, transparent);
+}
+
+.tiendas-tone-cauchos {
+  color: #c4b5fd;
+  background: rgba(139, 92, 246, 0.12);
+}
+
+.tiendas-card-meta {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.tiendas-card-meta span {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.tiendas-verified {
+  color: var(--accent-color) !important;
+  font-weight: 750;
+}
+
+.tiendas-card-body {
+  margin-top: 1.1rem;
+}
+
+.tiendas-card-body h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+}
+
+.tiendas-description {
+  display: -webkit-box;
+  min-height: 2.5em;
+  overflow: hidden;
+  margin: 0.45rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.tiendas-schedule {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.8rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+}
+
+.tiendas-schedule svg {
+  flex: 0 0 auto;
+}
+
+.tiendas-open-24h {
+  display: inline-flex;
+  margin-top: 0.6rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tiendas-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1.1rem;
+}
+
+.tiendas-primary-action {
+  min-height: 48px;
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 0.8rem;
+  border-radius: 14px;
+  color: #050505;
+  background: var(--accent-color);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: filter 0.2s ease, transform 0.15s ease;
+}
+
+.tiendas-primary-action:hover {
+  filter: brightness(1.06);
+}
+
+.tiendas-primary-action:active {
+  transform: scale(0.98);
+}
+
+.tiendas-secondary-action {
+  width: 48px;
+  min-height: 48px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-surface) 55%, transparent);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.tiendas-secondary-action:hover {
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.tiendas-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 3rem 1.5rem;
+  border-style: dashed;
+  border-radius: 24px;
+  text-align: center;
+}
+
+.tiendas-empty-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-main) 7%, transparent);
+}
+
+.tiendas-empty h2 {
+  margin: 0.9rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.tiendas-empty p {
+  max-width: 22rem;
+  margin: 0.4rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.tiendas-empty button {
+  min-height: 48px;
+  margin-top: 1.1rem;
+  padding: 0 1.25rem;
+  border-radius: 14px;
+  color: #050505;
+  background: var(--accent-color);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tiendas-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.tiendas-modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: 85dvh;
+  overflow-y: auto;
+  padding: 1.25rem;
+  border-radius: 24px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+.tiendas-modal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.tiendas-modal-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 12%, transparent);
+}
+
+.tiendas-modal-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.tiendas-modal-head p {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.tiendas-modal-head button {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  border-radius: 50%;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.tiendas-modal-head button:hover {
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--text-main) 8%, transparent);
+}
+
+.tiendas-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+}
+
+.tiendas-form label {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.tiendas-form label > span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.tiendas-form input,
+.tiendas-form select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  outline: none;
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--bg-surface) 70%, transparent);
+  font-size: 16px;
+}
+
+.tiendas-form input:focus,
+.tiendas-form select:focus {
+  border-color: var(--accent-color);
+}
+
+.tiendas-form-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.tiendas-submit {
+  min-height: 48px;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.1rem;
+  border-radius: 14px;
+  color: #050505;
+  background: var(--accent-color);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tiendas-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.6rem 0 0.4rem;
+  color: var(--accent-color);
+  text-align: center;
+}
+
+.tiendas-success h3 {
+  margin: 0;
+  color: var(--text-main);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.tiendas-success p {
+  max-width: 18rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.tiendas-success button {
+  min-height: 48px;
+  margin-top: 0.8rem;
+  padding: 0 1.5rem;
+  border-radius: 14px;
+  color: #050505;
+  background: var(--accent-color);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+:root.light-mode .tiendas-page .gpane {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+:root.light-mode .tiendas-tone-lubricantes,
+:root.light-mode .tiendas-tone-repuestos,
+:root.light-mode .tiendas-tone-talleres,
+:root.light-mode .tiendas-tone-cauchos {
+  filter: saturate(0.85) brightness(0.85);
+}
+
+@media (min-width: 640px) {
+  .tiendas-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .tiendas-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .tiendas-register {
+    width: 100%;
+  }
+
+  .tiendas-form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

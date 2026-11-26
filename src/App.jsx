@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { supabase } from './supabase';
 
 import Navbar from './components/Navbar';
@@ -10,6 +10,52 @@ import ChatBot from './pages/ChatBot';
 import Tiendas from './pages/Tiendas';
 import Profile from './pages/Profile';
 import LandingLobby from './pages/LandingLobby';
+import PublicVehicleHistory from './pages/PublicVehicleHistory';
+
+function AppContent({ session, isLightMode, toggleTheme }) {
+  const location = useLocation();
+  const esHistorialPublico = location.pathname.startsWith('/historial/');
+  const mostrarNavbar = Boolean(session) && !esHistorialPublico;
+
+  return (
+    <div className="min-h-screen transition-colors duration-300">
+      <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-main)]">
+        <div className={mostrarNavbar ? 'pb-24' : undefined}>
+          <Routes>
+            <Route path="/historial/:id" element={<PublicVehicleHistory />} />
+            {session ? (
+              <>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<Dashboard usuario={session.user} />} />
+                <Route path="/moto/:id" element={<MotoDetail />} />
+                <Route path="/mapa" element={<MapaGasolina />} />
+                <Route path="/chat" element={<ChatBot usuario={session.user} />} />
+                <Route path="/tiendas" element={<Tiendas />} />
+                <Route
+                  path="/perfil"
+                  element={
+                    <Profile
+                      usuario={session.user}
+                      isLightMode={isLightMode}
+                      toggleTheme={toggleTheme}
+                    />
+                  }
+                />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </>
+            ) : (
+              <>
+                <Route path="/" element={<LandingLobby session={session} />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </>
+            )}
+          </Routes>
+        </div>
+        {mostrarNavbar && <Navbar />}
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -41,33 +87,12 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen transition-colors duration-300">
-      <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-main)]">
-        <Router>
-          {session ? (
-            <>
-              <div className="pb-24">
-                <Routes>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/dashboard" element={<Dashboard usuario={session.user} />} />
-                  <Route path="/moto/:id" element={<MotoDetail />} />
-                  <Route path="/mapa" element={<MapaGasolina />} />
-                  <Route path="/chat" element={<ChatBot usuario={session.user} />} />
-                  <Route path="/tiendas" element={<Tiendas />} />
-                  <Route path="/perfil" element={<Profile usuario={session.user} isLightMode={isLightMode} toggleTheme={() => setIsLightMode(!isLightMode)} />} />
-                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                </Routes>
-              </div>
-              <Navbar />
-            </>
-          ) : (
-            <Routes>
-              <Route path="/" element={<LandingLobby session={session} />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          )}
-        </Router>
-      </div>
-    </div>
+    <Router>
+      <AppContent
+        session={session}
+        isLightMode={isLightMode}
+        toggleTheme={() => setIsLightMode((valor) => !valor)}
+      />
+    </Router>
   );
 }

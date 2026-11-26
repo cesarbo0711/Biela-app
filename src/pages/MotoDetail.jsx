@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Check, Copy, Download, QrCode, Share2, X } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '../supabase';
 import './MotoDetail.css';
 import ModalSurtirGasolina from "./ModalSurtirGasolina.jsx";
@@ -86,6 +88,9 @@ export default function MotoDetail() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [mostrarModalGasolina, setMostrarModalGasolina] = useState(false);
+  const [mostrarModalQr, setMostrarModalQr] = useState(false);
+  const [enlaceCopiado, setEnlaceCopiado] = useState(false);
+  const qrRef = useRef(null);
   const [servicioAEliminar, setServicioAEliminar] = useState(null);
   const [gasolinaAEliminar, setGasolinaAEliminar] = useState(null);
   
@@ -242,6 +247,64 @@ export default function MotoDetail() {
     window.print();
   };
 
+  const enlacePublico = `${window.location.origin}/historial/${moto?.id || id}`;
+
+  const copiarEnlace = async () => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(enlacePublico);
+      } else {
+        const area = document.createElement('textarea');
+        area.value = enlacePublico;
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand('copy');
+        area.remove();
+      }
+      setEnlaceCopiado(true);
+      window.setTimeout(() => setEnlaceCopiado(false), 2200);
+    } catch (error) {
+      console.error('No se pudo copiar el enlace:', error);
+    }
+  };
+
+  const compartirEnlace = async () => {
+    if (!navigator.share) {
+      await copiarEnlace();
+      return;
+    }
+
+    try {
+      await navigator.share({
+        title: `Pasaporte Biela — ${moto.marca} ${moto.modelo}`,
+        text: 'Historial verificado de mantenimiento en Biela',
+        url: enlacePublico,
+      });
+    } catch (error) {
+      if (error?.name !== 'AbortError') await copiarEnlace();
+    }
+  };
+
+  const descargarQr = () => {
+    const nodo = qrRef.current?.querySelector('svg');
+    if (!nodo) return;
+
+    const clon = nodo.cloneNode(true);
+    clon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const contenido = new XMLSerializer().serializeToString(clon);
+    const blob = new Blob([contenido], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = `pasaporte-qr-${id}.svg`;
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   const finanzas = calcularFinanzas(historialGasolina);
   const mantenimientosReporte = [...historial].sort((a, b) => String(a.fecha_servicio).localeCompare(String(b.fecha_servicio)));
   const totalLitrosReporte = historialGasolina.reduce((total, registro) => total + (Number(registro.litros) || 0), 0);
@@ -262,14 +325,27 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
             Garaje
           </button>
           <h1 className="text-lg font-black tracking-tight uppercase text-neutral-900 dark:text-white">{moto.marca} <span className="opacity-50">/</span> {moto.modelo}</h1>
-          <button
-            type="button"
-            onClick={exportarHojaDeVida}
-            title="Descargar hoja de vida en PDF"
-            className="btn-exportar-pdf flex shrink-0 items-center gap-2 rounded-xl border border-neutral-300 dark:border-white/10 bg-white/60 dark:bg-white/5 px-3 py-2 text-[11px] font-extrabold text-neutral-700 dark:text-neutral-200 transition-colors hover:border-lime-500 hover:text-lime-700 dark:hover:text-lime-300 sm:text-xs"
-          >
-            📄 Hoja de Vida (PDF)
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setEnlaceCopiado(false);
+                setMostrarModalQr(true);
+              }}
+              title="Mostrar pasaporte QR"
+              className="flex items-center gap-2 rounded-xl border border-lime-500/60 bg-lime-500/10 px-3 py-2 text-[11px] font-extrabold text-lime-700 transition-colors hover:bg-lime-500/20 dark:text-lime-300 sm:text-xs"
+            >
+              <QrCode size={15} strokeWidth={2.2} /> Pasaporte QR
+            </button>
+            <button
+              type="button"
+              onClick={exportarHojaDeVida}
+              title="Descargar hoja de vida en PDF"
+              className="btn-exportar-pdf flex items-center gap-2 rounded-xl border border-neutral-300 dark:border-white/10 bg-white/60 dark:bg-white/5 px-3 py-2 text-[11px] font-extrabold text-neutral-700 dark:text-neutral-200 transition-colors hover:border-lime-500 hover:text-lime-700 dark:hover:text-lime-300 sm:text-xs"
+            >
+              📄 Hoja de Vida (PDF)
+            </button>
+          </div>
         </header>
 
         <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 text-neutral-900 dark:text-white">
@@ -563,6 +639,87 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
                 {cargando ? '...' : 'Sí, borrar'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {mostrarModalQr && (
+        <div
+          className="no-print fixed inset-0 z-[99999] bg-black/65 backdrop-blur-md flex items-center justify-center p-4"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setMostrarModalQr(false);
+          }}
+        >
+          <div className="relative w-full max-w-sm rounded-[2rem] border border-neutral-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#121212]">
+            <button
+              type="button"
+              onClick={() => setMostrarModalQr(false)}
+              className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-neutral-200 text-neutral-500 transition-colors hover:border-lime-500 hover:text-lime-600 dark:border-white/10 dark:text-neutral-400 dark:hover:text-lime-300"
+              aria-label="Cerrar pasaporte QR"
+            >
+              <X size={17} />
+            </button>
+
+            <div className="text-center">
+              <span className="inline-flex min-h-7 items-center rounded-full border border-lime-500/40 bg-lime-500/10 px-3 text-[10px] font-extrabold uppercase tracking-widest text-lime-700 dark:text-lime-300">
+                Pasaporte QR
+              </span>
+              <h2 className="mt-3 text-xl font-black text-neutral-900 dark:text-white">Historial verificable</h2>
+              <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+                Muéstrale este QR a un comprador para demostrar el historial real de mantenimiento de tu moto.
+              </p>
+            </div>
+
+            <div className="mt-5 flex justify-center">
+              <div
+                ref={qrRef}
+                className="rounded-2xl border border-neutral-200 bg-white p-3 dark:border-white/10"
+              >
+                <QRCodeSVG
+                  value={enlacePublico}
+                  size={176}
+                  level="M"
+                  includeMargin
+                  bgColor="#ffffff"
+                  fgColor="#050505"
+                />
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-xl border border-neutral-200 bg-neutral-100/70 p-3 dark:border-white/10 dark:bg-white/5">
+              <span className="block text-[9px] font-extrabold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
+                Enlace público
+              </span>
+              <p className="mt-1 break-all font-mono text-[11px] text-neutral-700 dark:text-neutral-200">
+                {enlacePublico}
+              </p>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={copiarEnlace}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-neutral-300 text-xs font-bold text-neutral-700 transition-colors hover:border-lime-500 hover:text-lime-700 dark:border-white/10 dark:text-neutral-200 dark:hover:text-lime-300"
+              >
+                {enlaceCopiado ? <Check size={15} /> : <Copy size={15} />}
+                {enlaceCopiado ? 'Enlace copiado' : 'Copiar enlace'}
+              </button>
+              <button
+                type="button"
+                onClick={compartirEnlace}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-lime-500 bg-lime-500 text-xs font-extrabold text-black transition-colors hover:bg-lime-400"
+              >
+                <Share2 size={15} /> Compartir
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={descargarQr}
+              className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-neutral-200 text-xs font-bold text-neutral-500 transition-colors hover:border-lime-500 hover:text-lime-700 dark:border-white/10 dark:text-neutral-400 dark:hover:text-lime-300"
+            >
+              <Download size={15} /> Descargar QR
+            </button>
           </div>
         </div>
       )}

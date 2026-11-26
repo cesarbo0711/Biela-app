@@ -1,0 +1,222 @@
+.aw-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.aw-spotlight {
+  position: fixed;
+  pointer-events: none;
+  border: 1px solid var(--accent-color);
+  border-radius: 1.6rem;
+  box-shadow: 0 0 0 4px rgba(132, 204, 22, 0.18), 0 0 38px rgba(132, 204, 22, 0.28);
+  transition: top 0.35s cubic-bezier(0.22, 1, 0.36, 1), left 0.35s cubic-bezier(0.22, 1, 0.36, 1), width 0.35s cubic-bezier(0.22, 1, 0.36, 1), height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.aw-card {
+  position: fixed;
+  width: min(340px, calc(100vw - 24px));
+  min-height: 224px;
+  padding: 1rem 1rem 0.85rem;
+  border: 1px solid var(--accent-color);
+  border-radius: 1.35rem;
+  color: var(--text-main);
+  background: rgba(18, 18, 18, 0.94);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55), 0 0 28px rgba(132, 204, 22, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: aw-appear 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.aw-arrow {
+  position: absolute;
+  left: var(--aw-arrow-x);
+  width: 14px;
+  height: 14px;
+  border-left: 1px solid var(--accent-color);
+  border-top: 1px solid var(--accent-color);
+  background: rgba(18, 18, 18, 0.94);
+}
+
+.aw-card.is-below .aw-arrow {
+  top: -8px;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.aw-card.is-above .aw-arrow {
+  bottom: -8px;
+  transform: translateX(-50%) rotate(225deg);
+}
+
+.aw-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.aw-step {
+  color: var(--accent-color);
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.aw-topic {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.aw-text {
+  margin: 0.75rem 0 0.85rem;
+  color: var(--text-main);
+  font-size: 0.92rem;
+  font-weight: 550;
+  line-height: 1.5;
+}
+
+.aw-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+}
+
+.aw-tab {
+  min-height: 38px;
+  flex: 1;
+  padding: 0 0.4rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-muted);
+  background: transparent;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.aw-tab:hover,
+.aw-tab.is-active {
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+  background: rgba(132, 204, 22, 0.1);
+}
+
+.aw-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.aw-skip {
+  min-height: 44px;
+  padding: 0 0.4rem;
+  border: 0;
+  color: var(--text-muted);
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.aw-skip:hover {
+  color: var(--text-main);
+}
+
+.aw-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.aw-previous,
+.aw-next {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0 0.7rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.aw-previous {
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.aw-previous:hover:not(:disabled) {
+  color: var(--text-main);
+  border-color: var(--text-muted);
+}
+
+.aw-previous:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.aw-next {
+  border: 1px solid var(--accent-color);
+  color: #050505;
+  background: var(--accent-color);
+}
+
+:root.light-mode .aw-spotlight {
+  box-shadow: 0 0 0 4px rgba(255, 155, 113, 0.2), 0 0 38px rgba(255, 155, 113, 0.28);
+}
+
+:root.light-mode .aw-card {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.14), 0 0 28px rgba(255, 155, 113, 0.16);
+}
+
+:root.light-mode .aw-arrow {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+:root.light-mode .aw-tab:hover,
+:root.light-mode .aw-tab.is-active {
+  background: rgba(255, 155, 113, 0.12);
+}
+
+:root.light-mode .aw-next {
+  color: #fff;
+}
+
+@keyframes aw-appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .aw-text {
+    font-size: 0.86rem;
+  }
+
+  .aw-tab {
+    font-size: 0.65rem;
+  }
+}
