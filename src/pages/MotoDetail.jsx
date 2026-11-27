@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AlertTriangle, Check, Copy, Download, Navigation, Route, Share2, X } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -9,6 +9,11 @@ import MotoHealthDiagram from '../components/MotoHealthDiagram.jsx';
 import { MotoDetailSkeleton } from '../components/BielaSkeletons.jsx';
 import TarjetaRodadaShare from '../components/TarjetaRodadaShare';
 import ModalEmergenciaRuta from '../components/ModalEmergenciaRuta';
+import {
+  RODADAS_SYNC_EVENT,
+  obtenerRodadasPendientes,
+  sincronizarRodadasPendientes,
+} from '../utils/offlineRodadasQueue';
 
 const TASA_BCV_URL = 'https://ve.dolarapi.com/v1/dolares/oficial';
 const TASA_BCV_FALLBACK = 36;
@@ -33,6 +38,23 @@ function formatearDuracionRodada(segundos) {
   return [Math.floor(total / 3600), Math.floor((total % 3600) / 60), total % 60]
     .map((valor) => String(valor).padStart(2, '0'))
     .join(':');
+}
+
+function rodadasPendientesVisibles(motoId) {
+  return obtenerRodadasPendientes()
+    .filter((pendiente) => {
+      if (pendiente.motoId && pendiente.motoId !== motoId) return false;
+      if (pendiente.rodadaData?.moto_id && pendiente.rodadaData.moto_id !== motoId) return false;
+      return pendiente.sumarOdometro !== false && pendiente.rodadaData?.sumado_al_odometro !== false;
+    })
+    .map((pendiente) => ({
+      ...(pendiente.rodadaData || {}),
+      id: `pendiente-${pendiente.localId}`,
+      localId: pendiente.localId,
+      pendiente: true,
+      fecha_inicio: pendiente.createdAt,
+      sumado_al_odometro: pendiente.sumarOdometro !== false,
+    }));
 }
 
 function calcularFinanzas(registros) {
@@ -143,16 +165,7 @@ export default function MotoDetail() {
     };
   }, []);
 
-  useEffect(() => {
-    const obtenerUsuario = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUsuarioActual(user);
-    };
-    obtenerUsuario();
-    cargarDatos();
-  }, [id]);
-
-  const cargarDatos = async () => {
+  const cargarDatos = useCallback(async () => {
     try {
       const { data: motoData } = await supabase.from('motos').select('*').eq('id', id).single();
       if (motoData) {
@@ -189,13 +202,39 @@ export default function MotoDetail() {
         .select('*')
         .eq('moto_id', id);
 
-      if (rodadasData) setRodadas(rodadasData);
+      const visibles = (rodadasData || [])
+        .filter((rodada) => rodada.sumado_al_odometro !== false)
+        .concat(rodadasPendientesVisibles(id));
+
+      setRodadas(visibles);
     } catch (error) {
       console.error("Error al cargar la bitácora:", error);
     } finally {
       setCargandoInicial(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    const obtenerUsuario = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUsuarioActual(user);
+    };
+    const sincronizar = async () => {
+      await sincronizarRodadasPendientes(supabase);
+      cargarDatos();
+    };
+    const recargar = () => cargarDatos();
+
+    obtenerUsuario();
+    sincronizar();
+    window.addEventListener(RODADAS_SYNC_EVENT, recargar);
+    window.addEventListener('online', sincronizar);
+
+    return () => {
+      window.removeEventListener(RODADAS_SYNC_EVENT, recargar);
+      window.removeEventListener('online', sincronizar);
+    };
+  }, [id, cargarDatos]);
 
   const registrarMantenimiento = async (e) => {
     e.preventDefault();
@@ -554,8 +593,12 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
                       <span className="font-mono text-2xl font-black text-neutral-900 dark:text-white">
                         {Number(rodada.distancia_km || 0).toFixed(1)} <span className="text-[10px] font-bold text-neutral-500">km</span>
                       </span>
-                      <span className="rounded-full border border-lime-500/40 bg-lime-500/10 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-lime-700 dark:text-lime-300">
-                        {rodada.sumado_al_odometro ? 'Odómetro +' : 'Sin sumar'}
+                      <span className={`rounded-full border px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-widest ${
+                        rodada.pendiente
+                          ? 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300'
+                          : 'border-lime-500/40 bg-lime-500/10 text-lime-700 dark:text-lime-300'
+                      }`}>
+                        {rodada.pendiente ? 'Por sincronizar' : 'Odómetro +'}
                       </span>
                     </span>
                     <span className="mt-2 grid grid-cols-3 gap-2 text-[10px] font-bold text-neutral-500 dark:text-neutral-400">

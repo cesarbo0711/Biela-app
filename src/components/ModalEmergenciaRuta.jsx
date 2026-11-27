@@ -12,6 +12,7 @@ import {
   ZapOff,
 } from 'lucide-react';
 import { supabase } from '../supabase';
+import VoiceNote from './VoiceNote';
 
 const OPCIONES = [
   { clave: 'no-prende', etiqueta: 'No prende', Icono: ZapOff },
@@ -21,6 +22,11 @@ const OPCIONES = [
 ];
 
 const DIAGNOSTICO = 'Consultar diagnóstico rápido con BujIA';
+
+function promptDesdeAnalisis(moto, analisis) {
+  const detalle = [moto?.marca, moto?.modelo].filter(Boolean).join(' ') || 'mi moto';
+  return `Mi ${detalle} hace un ruido extraño. Escuché el motor durante ${(Number(analisis?.duracionMs || 0) / 1000).toFixed(1)} s: frecuencia dominante ${Number(analisis?.frecuenciaDominanteHz || 0).toFixed(0)} Hz, nivel ${Number(analisis?.nivelDb || 0).toFixed(1)} dB, cadencia ${Number(analisis?.cadenciaRalentiHz || 0).toFixed(1)} Hz. Diagnostica posibles fallas de válvulas, carburación, cadena o biela.`;
+}
 
 function haversine(origen, destino) {
   const radio = 6371;
@@ -102,6 +108,7 @@ export default function ModalEmergenciaRuta({ moto, onCerrar }) {
   const [resultados, setResultados] = useState([]);
   const [cargando, setCargando] = useState(false);
   const [aviso, setAviso] = useState('');
+  const [analisisMotor, setAnalisisMotor] = useState(null);
 
   const cargarCercanos = async (clave, origen) => {
     setCargando(true);
@@ -161,6 +168,25 @@ export default function ModalEmergenciaRuta({ moto, onCerrar }) {
       state: {
         sintoma: opcion?.etiqueta || 'Emergencia en ruta',
         moto,
+        analisisMotor,
+        promptAnalisis: analisisMotor ? promptDesdeAnalisis(moto, analisisMotor) : undefined,
+      },
+    });
+    onCerrar();
+  };
+
+  const enviarSonidoABujia = ({ analisisMotor: resultado }) => {
+    if (!resultado) {
+      setAviso('No pudimos capturar el sonido del motor. Intenta grabar de nuevo.');
+      return;
+    }
+    setAnalisisMotor(resultado);
+    navigate('/chat', {
+      state: {
+        sintoma: 'Falla mecánica / Ruido',
+        moto,
+        analisisMotor: resultado,
+        promptAnalisis: promptDesdeAnalisis(moto, resultado),
       },
     });
     onCerrar();
@@ -244,6 +270,15 @@ export default function ModalEmergenciaRuta({ moto, onCerrar }) {
                   </p>
                 </div>
               </div>
+
+              {opcion?.clave === 'mecanica' && (
+                <div className="mt-4 rounded-2xl border border-black/5 bg-[var(--bg-surface)] p-4 dark:border-white/10">
+                  <p className="mb-2 text-xs font-bold leading-relaxed text-[var(--text-main)]">
+                    Graba 5 a 8 segundos del motor y BujIA analizará el sonido.
+                  </p>
+                  <VoiceNote modoMotor onTranscriptReady={enviarSonidoABujia} />
+                </div>
+              )}
 
               {opcion?.clave === 'no-prende' && (
                 <div className="mt-4 rounded-2xl border border-black/5 bg-[var(--bg-surface)] p-4 text-xs leading-relaxed text-[var(--text-muted)] dark:border-white/10">

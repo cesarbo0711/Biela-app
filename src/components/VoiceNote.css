@@ -1,0 +1,239 @@
+/* ══ Voice note ═══════════════════════════════════════════ */
+/* a fixed frame, so opening the pill never rescales the block */
+.vn-frame {
+  --card: #141414;
+  --fill-slab: #1c1c20;
+  --fill-on: #f5f5f5;
+  --ink: #f5f5f5;
+  --ink-3: #a1a1aa;
+  --pane-edge: rgba(255, 255, 255, 0.1);
+  --signal: #84cc16;
+  --font-ui: inherit;
+  position: relative;
+  width: 100%;
+  height: auto;
+  min-height: 84px;
+  padding-bottom: 18px;
+  display: grid;
+  place-items: center;}
+
+body.light-mode .vn-frame {
+  --card: #FFFFFF;
+  --fill-slab: #efece6;
+  --fill-on: #17181a;
+  --ink: #17181a;
+  --ink-3: #71717a;
+  --pane-edge: rgba(0, 0, 0, 0.08);
+  --signal: #FF9B71;}
+
+.vn {
+  --red: #e5484d;
+  position: relative;
+  width: min(var(--w), 100%);
+  height: 56px;
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--fill-slab, var(--card));
+  color: var(--fill-on, var(--ink));
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 500;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* y1 past 1 is the overshoot; Bounce sets it */
+  transition:
+    width 420ms cubic-bezier(0.3, var(--ov), 0.4, 1),
+    scale 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  letter-spacing: -0.01em;}
+
+[data-stroke="on"] .vn { box-shadow: inset 0 0 0 1px var(--pane-edge); }
+
+.vn[data-phase="clip"] { cursor: default; }
+
+.vn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--fill-slab, #fff), 0 0 0 4px var(--signal, #2231dd);}
+
+.vn-in {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  animation: vn-in 240ms ease 80ms both;}
+
+.vn-idle { justify-content: center; gap: 12px; }
+
+.vn-rec { gap: 12px; padding: 0 24px; }
+
+.vn-clip { gap: 12px; padding: 0 12px 0 8px; }
+
+.vn-time {
+  font-variant-numeric: tabular-nums;
+  min-width: 38px;
+  opacity: 0.6;}
+
+.vn-rec .vn-time { opacity: 1; }
+
+.vn-dot {
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--red);
+  animation: vn-blink 1s ease-in-out infinite;}
+
+.vn-wave {
+  flex: 1;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* the wave goes quiet as you drag toward throwing it away */
+  opacity: calc(1 - var(--pull) * 0.7);}
+
+.vn-bar {
+  width: 3px;
+  flex: none;
+  height: calc(4px + var(--l) * 28px);
+  border-radius: 2px;
+  background: currentColor;
+  transition: height 160ms linear;}
+
+/* each new sample grows in from the middle */
+.vn-rec .vn-bar { animation: vn-grow 200ms cubic-bezier(0.3, 1.5, 0.4, 1) both; }
+
+/* the playhead: a bar is lit once progress has passed it */
+.vn-scrub { cursor: ew-resize; }
+
+.vn-scrub .vn-bar {
+  transition: none;
+  opacity: clamp(0.3, calc((var(--prog) * var(--n) - var(--i)) * 99), 1);}
+
+/* thrown away: the bars fold to nothing before the pill closes */
+.vn[data-phase="cancel"] .vn-in { animation: none; }
+
+.vn[data-phase="cancel"] .vn-bar {
+  scale: 1 0;
+  opacity: 0;
+  transition: scale 220ms ease, opacity 220ms ease;}
+
+.vn[data-phase="cancel"] .vn-dot,
+.vn[data-phase="cancel"] .vn-time,
+.vn[data-phase="cancel"] button { opacity: 0; transition: opacity 160ms ease; }
+
+.vn-play, .vn-x {
+  display: grid;
+  place-items: center;
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: scale 160ms cubic-bezier(0.22, 1, 0.36, 1), color 160ms ease;}
+
+.vn-play {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--inner);
+  background: var(--fill-on, var(--ink));
+  color: var(--fill-slab, var(--card));}
+
+.vn-x {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: none;
+  color: color-mix(in srgb, var(--fill-on, var(--ink)) 50%, var(--fill-slab, var(--card)));}
+
+.vn-x:hover { color: var(--fill-on, var(--ink)); }
+
+.vn-play:active, .vn-x:active { scale: 0.96; }
+
+.vn-play:focus-visible, .vn-x:focus-visible {
+  outline: 2px solid var(--signal, #2231dd);
+  outline-offset: 2px;}
+
+.vn-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% + 32px);
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--ink-3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+  letter-spacing: 0em;}
+
+.vn-hint[data-on] { opacity: calc(1 - var(--pull, 0)); }
+
+.vn-hint[data-armed] { opacity: 1; color: var(--red, #e5484d); }
+
+/* the row fades as it slides, so the cancel mark has the left
+   end of the pill to itself when it arrives */
+.vn-rec { opacity: calc(1 - var(--pull) * 0.55); }
+
+/* the dot and the clock are gone before the mark lands on them */
+.vn-rec .vn-dot, .vn-rec .vn-time { opacity: max(0, 1 - var(--pull) * 1.6); }
+
+.vn-cancel {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  margin-top: -14px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e5484d;
+  color: #fff;
+  opacity: 0;
+  scale: 0.4;
+  pointer-events: none;
+  transition: opacity 160ms ease, scale 160ms ease;}
+
+.vn-cancel[data-on] {
+  opacity: 1;
+  scale: 1;
+  transition: opacity 160ms ease, scale 420ms cubic-bezier(0.24, 1.34, 0.38, 1);}
+
+.vn[data-phase="cancel"] .vn-cancel { opacity: 0; scale: 0.6; transition: opacity 220ms ease, scale 220ms ease; }
+
+.vn-motor-tag {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-radius: 999px;
+  border: 1px solid var(--signal);
+  color: var(--signal);
+  padding: 1px 7px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;}
+
+.vn-transcript {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 10px;
+  font-weight: 600;}
+
+@keyframes vn-in { from { opacity: 0; } }
+
+@keyframes vn-blink { 50% { opacity: 0.25; } }
+
+@keyframes vn-grow { from { scale: 1 0.2; } }

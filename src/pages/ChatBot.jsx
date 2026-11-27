@@ -7,12 +7,14 @@ import {
   Camera,
   ClipboardCheck,
   Gauge,
+  Mic,
   PhoneCall,
   RotateCcw,
   Sparkles,
   X,
 } from 'lucide-react';
 import { supabase } from '../supabase';
+import VoiceNote from '../components/VoiceNote';
 import './ChatBot.css';
 
 const EMERGENCIAS = [
@@ -53,6 +55,11 @@ function textoDesdeEmergencia(estado) {
   const moto = estado.moto;
   const detalle = moto ? [moto.marca, moto.modelo].filter(Boolean).join(' ') : 'mi moto';
   return `Mi ${detalle} presenta: ${estado.sintoma}. ¿Qué reviso primero?`;
+}
+
+function contextoDesdeAnalisis(analisis) {
+  if (!analisis) return '';
+  return `Análisis acústico del motor: frecuencia dominante ${Number(analisis.frecuenciaDominanteHz || 0).toFixed(0)} Hz, nivel ${Number(analisis.nivelDb || 0).toFixed(1)} dB, cadencia de ralentí ${Number(analisis.cadenciaRalentiHz || 0).toFixed(1)} Hz, duración ${(Number(analisis.duracionMs || 0) / 1000).toFixed(1)} s.`;
 }
 
 export default function ChatBot({ usuario }) {
@@ -101,13 +108,22 @@ export default function ChatBot({ usuario }) {
     obtenerNombre();
   }, [usuario]);
 
-  const [inputTexto, setInputTexto] = useState(() => textoDesdeEmergencia(estadoEmergencia));
+  const [inputTexto, setInputTexto] = useState(
+    () => estadoEmergencia?.promptAnalisis || textoDesdeEmergencia(estadoEmergencia),
+  );
   const [imagenArchivo, setImagenArchivo] = useState(null);
   const [imagenPreview, setImagenPreview] = useState(null);
   const [cargando, setCargando] = useState(false);
-  const [contextoVehiculo, setContextoVehiculo] = useState(() => contextoDesdeEmergencia(estadoEmergencia));
+  const [contextoVehiculo, setContextoVehiculo] = useState(() => {
+    const base = contextoDesdeEmergencia(estadoEmergencia);
+    const analisis = contextoDesdeAnalisis(estadoEmergencia?.analisisMotor);
+    return analisis ? `${base} | ${analisis}` : base;
+  });
   const [errorChat, setErrorChat] = useState('');
   const [modoEmergencia, setModoEmergencia] = useState(Boolean(estadoEmergencia?.sintoma));
+  const [mostrarVoz, setMostrarVoz] = useState(Boolean(estadoEmergencia?.analisisMotor));
+  const [modoMotor, setModoMotor] = useState(Boolean(estadoEmergencia?.analisisMotor));
+  const [audioUrl, setAudioUrl] = useState(null);
 
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -163,7 +179,7 @@ export default function ChatBot({ usuario }) {
     quitarImagen();
   };
 
-  const enviarTexto = async (texto, imagenB64 = null, preview = null, esEmergencia = false) => {
+  const enviarTexto = async (texto, imagenB64 = null, preview = null, esEmergencia = false, analisisMotor = null) => {
     const textoLimpio = (texto || '').trim();
     if ((!textoLimpio && !imagenB64) || cargando) return;
 
@@ -193,6 +209,7 @@ export default function ChatBot({ usuario }) {
           nombreUsuario,
           motoId,
           esEmergencia,
+          analisisMotor,
         }),
       });
 
@@ -226,6 +243,22 @@ export default function ChatBot({ usuario }) {
     if (cargando) return;
     setModoEmergencia(true);
     enviarTexto(texto, null, null, true);
+  };
+
+  const manejarNotaDeVoz = ({ texto, audioUrl: urlAudio, analisisMotor }) => {
+    if (urlAudio) setAudioUrl(urlAudio);
+
+    if (analisisMotor) {
+      const detalle = `${texto || 'Analiza el sonido del motor.'} ${contextoDesdeAnalisis(analisisMotor)}`;
+      setInputTexto(detalle);
+      setContextoVehiculo((prev) => `${prev} | ${contextoDesdeAnalisis(analisisMotor)}`);
+      enviarTexto(detalle, null, null, modoEmergencia, analisisMotor);
+      return;
+    }
+
+    if (!texto) return;
+    setInputTexto((prev) => (prev.trim() ? `${prev.trim()} ${texto}`.trim() : texto));
+    inputRef.current?.focus();
   };
 
   const enviarMensaje = async (e) => {
@@ -396,6 +429,24 @@ export default function ChatBot({ usuario }) {
             </div>
           )}
 
+          {mostrarVoz && (
+            <div className="chat-voice-panel gpane">
+              <div className="chat-voice-head">
+                <span>{modoMotor ? 'Sonido del motor' : 'Dictar consulta'}</span>
+                <button
+                  type="button"
+                  className={`chat-motor-toggle${modoMotor ? ' is-active' : ''}`}
+                  onClick={() => setModoMotor((valor) => !valor)}
+                  aria-pressed={modoMotor}
+                >
+                  <Gauge size={13} strokeWidth={2} /> Modo Sonido Motor
+                </button>
+              </div>
+              <VoiceNote modoMotor={modoMotor} onTranscriptReady={manejarNotaDeVoz} />
+              {audioUrl && <audio controls src={audioUrl} className="chat-audio-preview" />}
+            </div>
+          )}
+
           <form onSubmit={enviarMensaje} className="chat-compose-form gpane rounded-full backdrop-blur-md">
             <input
               ref={archivoRef}
@@ -404,6 +455,16 @@ export default function ChatBot({ usuario }) {
               onChange={handleImagenChange}
               className="chat-file-input"
             />
+            <button
+              type="button"
+              className={`chat-attach-button${mostrarVoz ? ' is-active' : ''}`}
+              onClick={() => setMostrarVoz((valor) => !valor)}
+              aria-pressed={mostrarVoz}
+              aria-label="Abrir nota de voz"
+              title="Nota de voz"
+            >
+              <Mic size={18} strokeWidth={1.9} />
+            </button>
             <button
               type="button"
               className="chat-attach-button"

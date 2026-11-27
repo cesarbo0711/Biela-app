@@ -14,6 +14,7 @@ import { supabase } from '../supabase';
 import SlideToConfirm from '../components/SlideToConfirm';
 import TarjetaRodadaShare from '../components/TarjetaRodadaShare';
 import ModalEmergenciaRuta from '../components/ModalEmergenciaRuta';
+import LiquidToggle from '../components/LiquidToggle';
 
 const VELOCIDAD_MAX_REALISTA = 180;
 
@@ -91,6 +92,7 @@ export default function TelemetriaRodada() {
   const [inicioTs, setInicioTs] = useState(0);
   const [medicion, setMedicion] = useState({ velocidad: 0, distancia: 0, velocidadMax: 0, ruta: [] });
   const [resumen, setResumen] = useState(null);
+  const [sumarOdometro, setSumarOdometro] = useState(true);
   const [mostrarEmergencia, setMostrarEmergencia] = useState(false);
 
   const datosRef = useRef({
@@ -345,11 +347,31 @@ export default function TelemetriaRodada() {
 
       <main className="mx-auto max-w-3xl px-4 pt-6">
         {fase === 'resumen' && resumen ? (
-          <TarjetaRodadaShare
-            rodada={resumen}
-            moto={moto}
-            onGuardada={handleGuardada}
-          />
+          <>
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-black/5 bg-[var(--bg-surface)] p-3 dark:border-white/10">
+              <div className="min-w-0">
+                <p className="text-xs font-bold leading-snug text-[var(--text-main)]">
+                  Sumar {Number(resumen.distancia_km || 0).toFixed(1)} km al odómetro
+                </p>
+                <span className="text-[10px] text-[var(--text-muted)]">Desactívalo si la rodada no fue en tu moto.</span>
+              </div>
+              <LiquidToggle
+                checked={sumarOdometro}
+                onChange={setSumarOdometro}
+                ariaLabel="Sumar kilómetros al odómetro"
+              />
+            </div>
+            <div className="mt-3">
+              <TarjetaRodadaShare
+                rodada={resumen}
+                moto={moto}
+                onGuardada={handleGuardada}
+                sumarOdometro={sumarOdometro}
+                onCambiarSumarOdometro={setSumarOdometro}
+                mostrarControlOdometro={false}
+              />
+            </div>
+          </>
         ) : (
           <>
             <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-widest">

@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { supabase } from '../supabase';
 import SlideToConfirm from './SlideToConfirm';
+import LiquidToggle from './LiquidToggle';
+import { encolarRodadaPendiente, esErrorDeRed } from '../utils/offlineRodadasQueue';
 
 function formatearDuracion(segundos) {
   const total = Math.max(0, Math.round(Number(segundos) || 0));
@@ -88,9 +90,17 @@ export default function TarjetaRodadaShare({
   modoHistorial = false,
   onClose,
   onGuardada,
+  sumarOdometro: sumarOdometroControlado,
+  onCambiarSumarOdometro,
+  mostrarControlOdometro = true,
 }) {
   const gradientId = useId().replace(/:/g, '');
-  const [sumarOdometro, setSumarOdometro] = useState(true);
+  const [sumarOdometroInterno, setSumarOdometroInterno] = useState(true);
+  const sumarOdometro = sumarOdometroControlado === undefined ? sumarOdometroInterno : Boolean(sumarOdometroControlado);
+  const setSumarOdometro = (valor) => {
+    if (sumarOdometroControlado === undefined) setSumarOdometroInterno(Boolean(valor));
+    onCambiarSumarOdometro?.(Boolean(valor));
+  };
   const [guardando, setGuardando] = useState(false);
   const [guardada, setGuardada] = useState(modoHistorial);
   const [error, setError] = useState('');
@@ -109,11 +119,23 @@ export default function TarjetaRodadaShare({
     setGuardando(true);
     setError('');
 
+    let kilometrajeActualizado = null;
+    let odometroAplicado = false;
+    const datosRodada = {
+      moto_id: moto?.id,
+      distancia_km: Number(distancia.toFixed(2)),
+      duracion_segundos: Math.round(duracion),
+      velocidad_max_kmh: Number(velocidadMax.toFixed(1)),
+      velocidad_promedio_kmh: Number(velocidadPromedio.toFixed(1)),
+      ruta_coordenadas: normalizarCoordenadas(rodada?.ruta_coordenadas),
+      fecha_inicio: rodada?.fecha_inicio || new Date().toISOString(),
+      sumado_al_odometro: sumarOdometro,
+    };
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Necesitas iniciar sesión para guardar la rodada.');
 
-      let kilometrajeActualizado = null;
       if (sumarOdometro) {
         const { data: motoActual, error: errorMoto } = await supabase
           .from('motos')
@@ -128,26 +150,32 @@ export default function TarjetaRodadaShare({
           .update({ kilometraje: kilometrajeActualizado })
           .eq('id', moto?.id);
         if (errorUpdate) throw errorUpdate;
+        odometroAplicado = true;
       }
 
       const { error: errorInsert } = await supabase
         .from('rodadas_telemetria')
-        .insert({
-          moto_id: moto?.id,
-          user_id: user.id,
-          distancia_km: Number(distancia.toFixed(2)),
-          duracion_segundos: Math.round(duracion),
-          velocidad_max_kmh: Number(velocidadMax.toFixed(1)),
-          velocidad_promedio_kmh: Number(velocidadPromedio.toFixed(1)),
-          ruta_coordenadas: normalizarCoordenadas(rodada?.ruta_coordenadas),
-          sumado_al_odometro: sumarOdometro,
-        });
+        .insert({ ...datosRodada, user_id: user.id });
       if (errorInsert) throw errorInsert;
 
       setGuardada(true);
       onGuardada?.({ kilometrajeActualizado, sumarOdometro });
     } catch (guardadoError) {
-      setError(guardadoError?.message || 'No se pudo guardar la rodada. Intenta de nuevo.');
+      if (esErrorDeRed(guardadoError)) {
+        encolarRodadaPendiente({
+          rodadaData: datosRodada,
+          sumarOdometro,
+          kmASumar: Math.round(distancia),
+          motoId: moto?.id,
+          insertConfirmado: false,
+          odometroAplicado,
+        });
+        setGuardada(true);
+        setError('Sin conexión: la rodada quedó guardada en este teléfono y se sincronizará al volver la señal.');
+        onGuardada?.({ kilometrajeActualizado: null, sumarOdometro, pendiente: true });
+      } else {
+        setError(guardadoError?.message || 'No se pudo guardar la rodada. Intenta de nuevo.');
+      }
     } finally {
       setGuardando(false);
     }
@@ -241,26 +269,21 @@ export default function TarjetaRodadaShare({
             {rodada?.sumado_al_odometro ? `Sumado ${distancia.toFixed(1)} km al odómetro` : 'Guardada sin sumar al odómetro'}
           </span>
         </div>
-      ) : (
-        <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-black/5 bg-black/[0.02] p-3 dark:border-white/10 dark:bg-white/5">
-          <div className="min-w-0">
-            <p className="text-xs font-bold leading-snug text-[var(--text-main)]">
-              Iba en mi moto (sumar +{distancia.toFixed(1)} km al odómetro)
-            </p>
-            <span className="text-[10px] text-[var(--text-muted)]">Actívalo solo si la rodada fue en tu moto.</span>
+        ) : mostrarControlOdometro ? (
+          <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-black/5 bg-black/[0.02] p-3 dark:border-white/10 dark:bg-white/5">
+            <div className="min-w-0">
+              <p className="text-xs font-bold leading-snug text-[var(--text-main)]">
+                Iba en mi moto (sumar +{distancia.toFixed(1)} km al odómetro)
+              </p>
+              <span className="text-[10px] text-[var(--text-muted)]">Actívalo solo si la rodada fue en tu moto.</span>
+            </div>
+            <LiquidToggle
+              checked={sumarOdometro}
+              onChange={setSumarOdometro}
+              ariaLabel="Sumar kilómetros al odómetro"
+            />
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={sumarOdometro}
-            aria-label="Sumar kilómetros al odómetro"
-            onClick={() => setSumarOdometro((valor) => !valor)}
-            className={`relative h-7 w-12 shrink-0 rounded-full border transition-colors ${sumarOdometro ? 'border-[#84cc16] bg-[#84cc16]' : 'border-black/10 bg-black/10 dark:border-white/15 dark:bg-white/10'}`}
-          >
-            <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform dark:bg-[#17181a] ${sumarOdometro ? 'translate-x-6' : 'translate-x-0.5'}`} />
-          </button>
-        </div>
-      )}
+        ) : null}
 
       {error && (
         <p className="mt-3 rounded-xl border border-red-500/25 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-300">

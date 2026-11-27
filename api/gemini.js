@@ -26,7 +26,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { promptUsuario, contextoVehiculo, historial, imagenBase64, nombreUsuario, motoId, esEmergencia } = req.body;
+    const { promptUsuario, contextoVehiculo, historial, imagenBase64, nombreUsuario, motoId, esEmergencia, analisisMotor } = req.body;
     const modoEmergencia = esEmergencia === true;
 
     const apiKey = process.env.OPENROUTER_API_KEY;
@@ -39,9 +39,12 @@ export default async function handler(req, res) {
 
     const nombreCliente = nombreUsuario || 'pana';
     const vehiculoActual = contextoVehiculo || 'Motocicleta general';
+    const analisisAcustico = analisisMotor
+      ? `\nEl piloto envió un análisis acústico del motor: frecuencia dominante ${Number(analisisMotor.frecuenciaDominanteHz || 0).toFixed(0)} Hz, nivel ${Number(analisisMotor.nivelDb || 0).toFixed(1)} dB, cadencia ${Number(analisisMotor.cadenciaRalentiHz || 0).toFixed(1)} Hz, duración ${(Number(analisisMotor.duracionMs || 0) / 1000).toFixed(1)} s. Úsalo como evidencia orientativa para evaluar válvulas, carburación, cadena o biela, sin inventar especificaciones exactas.`
+      : '';
 
     const systemPrompt = `Eres "BujIA", el mecánico de confianza de Biela para motociclistas en Venezuela.
-Hablas con ${nombreCliente}. Vehículo en contexto: ${vehiculoActual}.
+Hablas con ${nombreCliente}. Vehículo en contexto: ${vehiculoActual}.${analisisAcustico}
 ${modoEmergencia ? `ALERTA DE EMERGENCIA EN VÍA: El usuario está accidentado en la calle. Responde en formato ultra-corto, en 3 pasos numerados de revisión rápida (qué revisar primero con las manos o herramientas básicas en 2 minutos), advierte seguridad vial (orillarse, luces) y recomiéndale revisar la pestaña Tiendas/Auxilio Vial de Biela si necesita grúa o cauchera. NUNCA intentes registrar en bitácora durante una emergencia.` : ''}
 
 PERSONALIDAD Y ESTILO:
