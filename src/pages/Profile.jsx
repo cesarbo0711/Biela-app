@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '../supabase';
 import { ProfileSkeleton } from '../components/BielaSkeletons.jsx';
 import InstallPWAButton from '../components/InstallPWAButton';
 import { useNavigate } from 'react-router-dom';
-import { Camera, HelpCircle, LogOut, Moon, RefreshCw, Settings, Sun, User, X } from 'lucide-react';
+import { Camera, FileCheck2, HelpCircle, LogOut, Moon, RefreshCw, Settings, Sun, User, X } from 'lucide-react';
 import { ThemeBall } from '../components/ThemeBall';
 import GuanteraDigital from '../components/GuanteraDigital';
+import { obtenerResumenGuantera } from '../utils/guantera';
 import {
   AVATAR_STYLE_DEFAULT,
   AVATAR_STYLES_SELECTABLE,
@@ -33,6 +34,7 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
   const inputFotoRef = useRef(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mostrarGuantera, setMostrarGuantera] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [cargandoInicial, setCargandoInicial] = useState(true);
   const [subiendoAvatar, setSubiendoAvatar] = useState(false);
@@ -202,6 +204,10 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
     setGuardando(false);
   };
 
+  const resumenGuantera = useMemo(
+    () => obtenerResumenGuantera(usuario?.id || 'invitado'),
+    [usuario?.id],
+  );
   const avatarPersonalizado = esAvatarSubido(perfil.avatar_url, perfil.avatar_seed);
   const avatarUrl = perfil.avatar_url
     || buildAvatarUrl(
@@ -235,6 +241,21 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
           <HelpCircle size={18} strokeWidth={1.8} />
           <span>Ver guía rápida de la app</span>
         </button>
+        <button type="button" className="btn-menu-item gpane" onClick={() => setMostrarGuantera(true)}>
+          <FileCheck2 size={18} strokeWidth={1.8} />
+          <span className="min-w-0 flex-1">Guantera Digital</span>
+          <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-extrabold ${
+            resumenGuantera.tono === 'ok'
+              ? 'border-lime-500/40 bg-lime-500/10 text-lime-700 dark:text-lime-300'
+              : resumenGuantera.tono === 'warn'
+                ? 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300'
+                : resumenGuantera.tono === 'danger'
+                  ? 'border-red-500/40 bg-red-500/10 text-red-600 dark:text-red-300'
+                  : 'border-black/10 text-[var(--text-muted)] dark:border-white/10'
+          }`}>
+            {resumenGuantera.etiqueta}
+          </span>
+        </button>
         <InstallPWAButton variant="profile" />
         <button type="button" onClick={toggleTheme} className="btn-theme gpane">
           {isLightMode ? <Moon size={17} strokeWidth={1.8} /> : <Sun size={17} strokeWidth={1.8} />}
@@ -245,8 +266,6 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
           <span>Cerrar sesión</span>
         </button>
       </div>
-
-      <GuanteraDigital key={usuario?.id || 'invitado'} usuario={usuario} />
 
       {isModalOpen && (
         <div className="modal-overlay" role="presentation" onMouseDown={(e) => {
@@ -343,6 +362,20 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
                 {guardando ? 'Guardando...' : 'Guardar Cambios'}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {mostrarGuantera && (
+        <div className="modal-overlay" role="presentation" onMouseDown={(evento) => {
+          if (evento.target === evento.currentTarget) setMostrarGuantera(false);
+        }}>
+          <div className="modal-content gpane" role="dialog" aria-modal="true" aria-label="Guantera Digital">
+            <button type="button" className="btn-close-modal" onClick={() => setMostrarGuantera(false)} aria-label="Cerrar">
+              <X size={17} />
+            </button>
+            <h3>Guantera Digital</h3>
+            <GuanteraDigital key={usuario?.id || 'invitado'} usuario={usuario} enModal />
           </div>
         </div>
       )}

@@ -1,53 +1,10 @@
 import { useState } from 'react';
-import { AlertCircle, CalendarDays, ShieldCheck } from 'lucide-react';
+import { CalendarDays, ShieldCheck } from 'lucide-react';
+import { DOCUMENTOS_GUANTERA, leerDocumentosGuantera, obtenerEstadoDocumento } from '../utils/guantera';
 
-const DOCUMENTOS = [
-  { clave: 'rcv', etiqueta: 'RCV / Póliza de Seguro' },
-  { clave: 'licencia', etiqueta: 'Licencia de Conducir' },
-  { clave: 'medico', etiqueta: 'Certificado Médico Vial' },
-];
-
-function crearVacio() {
-  return { rcv: '', licencia: '', medico: '' };
-}
-
-function leerGuardado(userId) {
-  try {
-    const contenido = localStorage.getItem(`biela_guantera_${userId}`);
-    if (!contenido) return crearVacio();
-    const datos = JSON.parse(contenido);
-    return {
-      rcv: String(datos?.rcv || ''),
-      licencia: String(datos?.licencia || ''),
-      medico: String(datos?.medico || ''),
-    };
-  } catch {
-    return crearVacio();
-  }
-}
-
-function obtenerEstado(fecha) {
-  if (!fecha) {
-    return { etiqueta: 'Sin registrar', tono: 'neutral', Icono: CalendarDays };
-  }
-
-  const vencimiento = new Date(`${fecha}T00:00:00`);
-  if (Number.isNaN(vencimiento.getTime())) {
-    return { etiqueta: 'Fecha inválida', tono: 'neutral', Icono: AlertCircle };
-  }
-
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-  const dias = Math.ceil((vencimiento.getTime() - hoy.getTime()) / 86400000);
-
-  if (dias > 15) return { etiqueta: `Vigente (${dias} días)`, tono: 'ok', Icono: ShieldCheck };
-  if (dias >= 1) return { etiqueta: `Vence en ${dias} días`, tono: 'warn', Icono: AlertCircle };
-  return { etiqueta: 'Vencido', tono: 'danger', Icono: AlertCircle };
-}
-
-export default function GuanteraDigital({ usuario }) {
+export default function GuanteraDigital({ usuario, enModal = false }) {
   const userId = usuario?.id || 'invitado';
-  const [documentos, setDocumentos] = useState(() => leerGuardado(userId));
+  const [documentos, setDocumentos] = useState(() => leerDocumentosGuantera(userId));
   const [guardado, setGuardado] = useState(false);
 
   const guardar = () => {
@@ -61,7 +18,7 @@ export default function GuanteraDigital({ usuario }) {
   };
 
   return (
-    <section className="mt-6 rounded-[2rem] border border-black/5 bg-[var(--bg-surface)] p-5 shadow-sm dark:border-white/10">
+    <section className={enModal ? '' : 'mt-6 rounded-[2rem] border border-black/5 bg-[var(--bg-surface)] p-5 shadow-sm dark:border-white/10'}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-lime-700 dark:text-lime-300">Disponible sin conexión</p>
@@ -76,8 +33,8 @@ export default function GuanteraDigital({ usuario }) {
       </div>
 
       <div className="mt-5 space-y-3">
-        {DOCUMENTOS.map((documento) => {
-          const estado = obtenerEstado(documentos[documento.clave]);
+        {DOCUMENTOS_GUANTERA.map((documento) => {
+          const estado = obtenerEstadoDocumento(documentos[documento.clave]);
           const Icono = estado.Icono;
           return (
             <div key={documento.clave} className="rounded-2xl border border-black/5 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/5">
