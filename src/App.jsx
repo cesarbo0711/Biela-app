@@ -11,11 +11,13 @@ import Tiendas from './pages/Tiendas';
 import Profile from './pages/Profile';
 import LandingLobby from './pages/LandingLobby';
 import PublicVehicleHistory from './pages/PublicVehicleHistory';
+import TelemetriaRodada from './pages/TelemetriaRodada';
 
 function AppContent({ session, isLightMode, toggleTheme }) {
   const location = useLocation();
   const esHistorialPublico = location.pathname.startsWith('/historial/');
-  const mostrarNavbar = Boolean(session) && !esHistorialPublico;
+  const esRodada = location.pathname.startsWith('/rodada/');
+  const mostrarNavbar = Boolean(session) && !esHistorialPublico && !esRodada;
 
   return (
     <div className="min-h-screen transition-colors duration-300">
@@ -28,6 +30,7 @@ function AppContent({ session, isLightMode, toggleTheme }) {
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/dashboard" element={<Dashboard usuario={session.user} />} />
                 <Route path="/moto/:id" element={<MotoDetail />} />
+                <Route path="/rodada/:motoId" element={<TelemetriaRodada />} />
                 <Route path="/mapa" element={<MapaGasolina />} />
                 <Route path="/chat" element={<ChatBot usuario={session.user} />} />
                 <Route path="/tiendas" element={<Tiendas />} />

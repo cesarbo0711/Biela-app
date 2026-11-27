@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Check, Copy, Download, QrCode, Share2, X } from 'lucide-react';
+import { Check, Copy, Download, Navigation, QrCode, Route, Share2, X } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '../supabase';
 import './MotoDetail.css';
 import ModalSurtirGasolina from "./ModalSurtirGasolina.jsx";
 import MotoHealthDiagram from '../components/MotoHealthDiagram.jsx';
 import { MotoDetailSkeleton } from '../components/BielaSkeletons.jsx';
+import TarjetaRodadaShare from '../components/TarjetaRodadaShare';
 
 const TASA_BCV_URL = 'https://ve.dolarapi.com/v1/dolares/oficial';
 const TASA_BCV_FALLBACK = 36;
@@ -24,6 +25,13 @@ function formatearUsd(valor) {
 function formatearBs(usd, tasa) {
   const valor = Number(usd || 0) * Number(tasa || 0);
   return new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor);
+}
+
+function formatearDuracionRodada(segundos) {
+  const total = Math.max(0, Math.round(Number(segundos) || 0));
+  return [Math.floor(total / 3600), Math.floor((total % 3600) / 60), total % 60]
+    .map((valor) => String(valor).padStart(2, '0'))
+    .join(':');
 }
 
 function calcularFinanzas(registros) {
@@ -83,6 +91,8 @@ export default function MotoDetail() {
   const [catalogoServicios, setCatalogoServicios] = useState([]);
   const [usuarioActual, setUsuarioActual] = useState(null);
   const [historialGasolina, setHistorialGasolina] = useState([]); 
+  const [rodadas, setRodadas] = useState([]);
+  const [rodadaSeleccionada, setRodadaSeleccionada] = useState(null);
   
   // Modales
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -166,6 +176,13 @@ export default function MotoDetail() {
         .order('fecha', { ascending: true });
 
       if (gasolinaData) setHistorialGasolina(gasolinaData);
+
+      const { data: rodadasData } = await supabase
+        .from('rodadas_telemetria')
+        .select('*')
+        .eq('moto_id', id);
+
+      if (rodadasData) setRodadas(rodadasData);
     } catch (error) {
       console.error("Error al cargar la bitácora:", error);
     } finally {
@@ -328,6 +345,14 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
           <div className="flex shrink-0 items-center gap-2">
             <button
               type="button"
+              onClick={() => navigate(`/rodada/${moto.id}`)}
+              title="Iniciar telemetría de rodada"
+              className="flex items-center gap-2 rounded-xl border border-lime-500 bg-lime-500 px-3 py-2 text-[11px] font-extrabold text-black transition-colors hover:bg-lime-400 sm:text-xs"
+            >
+              <Navigation size={15} strokeWidth={2.2} /> Iniciar Rodada
+            </button>
+            <button
+              type="button"
               onClick={() => {
                 setEnlaceCopiado(false);
                 setMostrarModalQr(true);
@@ -465,6 +490,45 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
                        {gas.notas && <span className="italic mt-2 text-neutral-500 border-t border-black/5 dark:border-white/5 pt-2">"{gas.notas}"</span>}
                     </div>
                   </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-12">
+            <div className="history-header">
+              <h2 className="text-xl font-black flex items-center gap-2">
+                <span className="text-lime-500"><Route size={18} strokeWidth={2.4} /></span> Historial de Rodadas
+              </h2>
+            </div>
+
+            {rodadas.length === 0 ? (
+              <div className="text-center p-8 bg-neutral-100/50 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-3xl text-neutral-500 font-bold text-sm">
+                Aún no hay rodadas guardadas. Inicia una para ver tu tarjeta compartible.
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[...rodadas].reverse().map((rodada) => (
+                  <button
+                    key={rodada.id}
+                    type="button"
+                    onClick={() => setRodadaSeleccionada(rodada)}
+                    className="rounded-2xl border border-neutral-200 bg-white/80 p-4 text-left shadow-sm backdrop-blur-md transition-colors hover:border-lime-500 dark:border-white/10 dark:bg-neutral-900/80"
+                  >
+                    <span className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-2xl font-black text-neutral-900 dark:text-white">
+                        {Number(rodada.distancia_km || 0).toFixed(1)} <span className="text-[10px] font-bold text-neutral-500">km</span>
+                      </span>
+                      <span className="rounded-full border border-lime-500/40 bg-lime-500/10 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-lime-700 dark:text-lime-300">
+                        {rodada.sumado_al_odometro ? 'Odómetro +' : 'Sin sumar'}
+                      </span>
+                    </span>
+                    <span className="mt-2 grid grid-cols-3 gap-2 text-[10px] font-bold text-neutral-500 dark:text-neutral-400">
+                      <span>Tiempo<br /><strong className="font-mono text-xs text-neutral-800 dark:text-white">{formatearDuracionRodada(rodada.duracion_segundos)}</strong></span>
+                      <span>Vel. máx.<br /><strong className="font-mono text-xs text-neutral-800 dark:text-white">{Number(rodada.velocidad_max_kmh || 0).toFixed(0)} km/h</strong></span>
+                      <span>Promedio<br /><strong className="font-mono text-xs text-neutral-800 dark:text-white">{Number(rodada.velocidad_promedio_kmh || 0).toFixed(0)} km/h</strong></span>
+                    </span>
+                  </button>
                 ))}
               </div>
             )}
@@ -720,6 +784,34 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
             >
               <Download size={15} /> Descargar QR
             </button>
+          </div>
+        </div>
+      )}
+
+      {rodadaSeleccionada && (
+        <div
+          className="no-print fixed inset-0 z-[99999] bg-black/65 backdrop-blur-md flex items-center justify-center p-4"
+          onMouseDown={(evento) => {
+            if (evento.target === evento.currentTarget) setRodadaSeleccionada(null);
+          }}
+        >
+          <div className="relative w-full max-w-lg rounded-[2rem] border border-neutral-200 bg-[var(--bg-base)] p-5 shadow-2xl dark:border-white/10">
+            <button
+              type="button"
+              onClick={() => setRodadaSeleccionada(null)}
+              className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full border border-black/10 text-[var(--text-muted)] transition-colors hover:border-lime-500 hover:text-lime-700 dark:border-white/10 dark:hover:text-lime-300"
+              aria-label="Cerrar tarjeta de rodada"
+            >
+              <X size={17} />
+            </button>
+            <div className="max-h-[90dvh] overflow-y-auto pt-8">
+              <TarjetaRodadaShare
+                rodada={rodadaSeleccionada}
+                moto={moto}
+                modoHistorial
+                onClose={() => setRodadaSeleccionada(null)}
+              />
+            </div>
           </div>
         </div>
       )}
