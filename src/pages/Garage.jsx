@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUpRight, Bike, Droplets, Gauge, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { ArrowUpRight, Bike, Droplets, Gauge, Navigation, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { UploadDropzone } from '../components/UploadDropzone.jsx';
 import TiltCard from '../components/TiltCard.jsx';
 import './Garage.css';
@@ -28,7 +28,7 @@ function estadoAceite(moto, servicios) {
   return { label: `Aceite al día · ${km} km restantes`, tone: 'ok' };
 }
 
-function MotoCard({ moto, servicios, onVer, onEditarKm, onEliminar }) {
+function MotoCard({ moto, servicios, onVer, onRodar, onEditarKm, onEliminar }) {
   const estado = estadoAceite(moto, servicios);
 
   return (
@@ -75,9 +75,14 @@ function MotoCard({ moto, servicios, onVer, onEditarKm, onEliminar }) {
           </div>
         </div>
 
-        <button type="button" className="moto-open" onClick={onVer} onPointerDown={(e) => e.stopPropagation()}>
-          Ver bitácora <ArrowUpRight size={16} />
-        </button>
+        <div className="moto-actions">
+          <button type="button" className="moto-rodar" onClick={onRodar} onPointerDown={(e) => e.stopPropagation()} aria-label={`Rodar con ${moto.marca} ${moto.modelo}`}>
+            <Navigation size={15} strokeWidth={2.2} /> Rodar
+          </button>
+          <button type="button" className="moto-open" onClick={onVer} onPointerDown={(e) => e.stopPropagation()}>
+            Ver bitácora <ArrowUpRight size={16} />
+          </button>
+        </div>
       </div>
     </TiltCard>
   );
@@ -213,6 +218,7 @@ export default function Garage({
             moto={motos[0]}
             servicios={servicios}
             onVer={() => navigate(`/moto/${motos[0].id}`)}
+            onRodar={() => navigate(`/rodada/${motos[0].id}`)}
             onEditarKm={() => abrirEdicionKm(motos[0])}
             onEliminar={() => abrirEliminacion(motos[0])}
           />
@@ -225,6 +231,7 @@ export default function Garage({
               moto={moto}
               servicios={servicios}
               onVer={() => navigate(`/moto/${moto.id}`)}
+              onRodar={() => navigate(`/rodada/${moto.id}`)}
               onEditarKm={() => abrirEdicionKm(moto)}
               onEliminar={() => abrirEliminacion(moto)}
             />

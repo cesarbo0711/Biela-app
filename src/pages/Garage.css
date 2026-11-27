@@ -236,6 +236,39 @@
   background: rgba(128, 128, 128, 0.1);
 }
 
+.moto-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.moto-rodar {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid #ff9b71;
+  border-radius: 999px;
+  background: #ff9b71;
+  color: #17181a;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: filter 0.22s ease, transform 0.22s ease;
+}
+
+.moto-rodar:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.dark .moto-rodar {
+  border-color: #84cc16;
+  background: #84cc16;
+  color: #050505;
+}
+
 .moto-open {
   min-height: 48px;
   display: flex;

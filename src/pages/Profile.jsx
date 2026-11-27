@@ -5,6 +5,7 @@ import InstallPWAButton from '../components/InstallPWAButton';
 import { useNavigate } from 'react-router-dom';
 import { Camera, HelpCircle, LogOut, Moon, RefreshCw, Settings, Sun, User, X } from 'lucide-react';
 import { ThemeBall } from '../components/ThemeBall';
+import GuanteraDigital from '../components/GuanteraDigital';
 import {
   AVATAR_STYLE_DEFAULT,
   AVATAR_STYLES_SELECTABLE,
@@ -244,6 +245,8 @@ export default function Profile({ usuario, isLightMode, toggleTheme }) {
           <span>Cerrar sesión</span>
         </button>
       </div>
+
+      <GuanteraDigital key={usuario?.id || 'invitado'} usuario={usuario} />
 
       {isModalOpen && (
         <div className="modal-overlay" role="presentation" onMouseDown={(e) => {

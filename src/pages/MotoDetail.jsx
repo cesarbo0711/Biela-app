@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Check, Copy, Download, Navigation, QrCode, Route, Share2, X } from 'lucide-react';
+import { AlertTriangle, Check, Copy, Download, Navigation, QrCode, Route, Share2, X } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '../supabase';
 import './MotoDetail.css';
@@ -8,6 +8,7 @@ import ModalSurtirGasolina from "./ModalSurtirGasolina.jsx";
 import MotoHealthDiagram from '../components/MotoHealthDiagram.jsx';
 import { MotoDetailSkeleton } from '../components/BielaSkeletons.jsx';
 import TarjetaRodadaShare from '../components/TarjetaRodadaShare';
+import ModalEmergenciaRuta from '../components/ModalEmergenciaRuta';
 
 const TASA_BCV_URL = 'https://ve.dolarapi.com/v1/dolares/oficial';
 const TASA_BCV_FALLBACK = 36;
@@ -99,6 +100,7 @@ export default function MotoDetail() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [mostrarModalGasolina, setMostrarModalGasolina] = useState(false);
   const [mostrarModalQr, setMostrarModalQr] = useState(false);
+  const [mostrarEmergencia, setMostrarEmergencia] = useState(false);
   const [enlaceCopiado, setEnlaceCopiado] = useState(false);
   const qrRef = useRef(null);
   const [servicioAEliminar, setServicioAEliminar] = useState(null);
@@ -159,7 +161,12 @@ export default function MotoDetail() {
       }
 
       const { data: catalogoData } = await supabase.from('catalogo_servicios').select('*');
-      if (catalogoData) setCatalogoServicios(catalogoData);
+      if (catalogoData) {
+        setCatalogoServicios([...catalogoData].sort((a, b) =>
+          (Number(a.intervalo_km) || 0) - (Number(b.intervalo_km) || 0)
+          || (Number(a.id) || 0) - (Number(b.id) || 0)
+        ));
+      }
 
       const { data: historialData } = await supabase
         .from('bitacora_servicios')
@@ -327,6 +334,10 @@ export default function MotoDetail() {
   const totalLitrosReporte = historialGasolina.reduce((total, registro) => total + (Number(registro.litros) || 0), 0);
   const codigoVerificacion = String(moto?.id ?? '').slice(0, 8).toUpperCase();
   const fechaEmision = new Date().toLocaleDateString('es-VE', { day: '2-digit', month: 'long', year: 'numeric' });
+  const servicioSeleccionado = catalogoServicios.find((cat) => String(cat.id) === String(servicioIdSeleccionado));
+  const kmProximoServicio = servicioSeleccionado
+    ? (Number(kmAlMomento || 0) + (Number(servicioSeleccionado.intervalo_km) || 0)).toLocaleString('es-VE')
+    : null;
 
   if (cargandoInicial) return <MotoDetailSkeleton />;
 if (!moto) return <div className="min-h-screen flex items-center justify-center text-[var(--text-main)]">No encontramos esta moto.</div>;
@@ -350,6 +361,15 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
               className="flex items-center gap-2 rounded-xl border border-lime-500 bg-lime-500 px-3 py-2 text-[11px] font-extrabold text-black transition-colors hover:bg-lime-400 sm:text-xs"
             >
               <Navigation size={15} strokeWidth={2.2} /> Iniciar Rodada
+            </button>
+            <button
+              type="button"
+              onClick={() => setMostrarEmergencia(true)}
+              title="Auxilio en ruta"
+              aria-label="Auxilio en ruta"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-700 transition-colors hover:border-amber-500 dark:text-amber-300"
+            >
+              <AlertTriangle size={16} strokeWidth={2.2} />
             </button>
             <button
               type="button"
@@ -641,9 +661,16 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
                 >
                   <option value="" disabled>-- Seleccionar --</option>
                   {catalogoServicios.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+                    <option key={cat.id} value={cat.id}>
+                      {cat.nombre} · cada {(Number(cat.intervalo_km) || 0).toLocaleString('es-VE')} km
+                    </option>
                   ))}
                 </select>
+                {servicioSeleccionado && (
+                  <p className="mt-2 rounded-xl border border-lime-500/30 bg-lime-500/10 px-3 py-2 text-[11px] font-bold text-lime-800 dark:text-lime-300">
+                    Próximo servicio recomendado a los {kmProximoServicio} km
+                  </p>
+                )}
               </div>
 
               <div className="flex gap-4">
@@ -786,6 +813,10 @@ if (!moto) return <div className="min-h-screen flex items-center justify-center 
             </button>
           </div>
         </div>
+      )}
+
+      {mostrarEmergencia && (
+        <ModalEmergenciaRuta moto={moto} onCerrar={() => setMostrarEmergencia(false)} />
       )}
 
       {rodadaSeleccionada && (

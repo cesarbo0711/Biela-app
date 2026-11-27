@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
+  AlertTriangle,
   ArrowLeft,
   Gauge,
   MapPin,
@@ -12,6 +13,7 @@ import {
 import { supabase } from '../supabase';
 import SlideToConfirm from '../components/SlideToConfirm';
 import TarjetaRodadaShare from '../components/TarjetaRodadaShare';
+import ModalEmergenciaRuta from '../components/ModalEmergenciaRuta';
 
 const VELOCIDAD_MAX_REALISTA = 180;
 
@@ -89,6 +91,7 @@ export default function TelemetriaRodada() {
   const [inicioTs, setInicioTs] = useState(0);
   const [medicion, setMedicion] = useState({ velocidad: 0, distancia: 0, velocidadMax: 0, ruta: [] });
   const [resumen, setResumen] = useState(null);
+  const [mostrarEmergencia, setMostrarEmergencia] = useState(false);
 
   const datosRef = useRef({
     velActual: 0,
@@ -323,6 +326,15 @@ export default function TelemetriaRodada() {
           </div>
           <button
             type="button"
+            onClick={() => setMostrarEmergencia(true)}
+            title="Auxilio en ruta"
+            aria-label="Auxilio en ruta"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-700 transition-colors hover:border-amber-500 dark:text-amber-300"
+          >
+            <AlertTriangle size={16} strokeWidth={2.2} />
+          </button>
+          <button
+            type="button"
             onClick={alternarDemo}
             className="min-h-10 shrink-0 rounded-full border border-black/10 px-3 text-[11px] font-bold transition-colors hover:border-[#84cc16] dark:border-white/10"
           >
@@ -412,6 +424,10 @@ export default function TelemetriaRodada() {
             <span className="text-center text-[10px] text-[var(--text-muted)]">Evita paradas accidentales con guantes o vibración.</span>
           </div>
         </div>
+      )}
+
+      {mostrarEmergencia && (
+        <ModalEmergenciaRuta moto={moto} onCerrar={() => setMostrarEmergencia(false)} />
       )}
     </div>
   );

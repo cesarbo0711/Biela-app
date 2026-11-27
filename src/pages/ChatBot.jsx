@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
   ArrowUp,
@@ -41,8 +41,24 @@ const GREETING = {
   texto: '¡Épale! Soy BujIA, tu mecánico de confianza. Cuéntame qué le pasa a la nave o mándame una foto y lo revisamos.',
 };
 
+function contextoDesdeEmergencia(estado) {
+  const moto = estado?.moto;
+  if (!moto) return 'Motocicleta general';
+  const detalle = [moto.marca, moto.modelo, moto.year && `(${moto.year})`].filter(Boolean).join(' ');
+  return `El usuario reporta ${estado.sintoma} en ${detalle}, con ${Number(moto.kilometraje || 0).toLocaleString('es-VE')} km en el odómetro.`;
+}
+
+function textoDesdeEmergencia(estado) {
+  if (!estado?.sintoma) return '';
+  const moto = estado.moto;
+  const detalle = moto ? [moto.marca, moto.modelo].filter(Boolean).join(' ') : 'mi moto';
+  return `Mi ${detalle} presenta: ${estado.sintoma}. ¿Qué reviso primero?`;
+}
+
 export default function ChatBot({ usuario }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const estadoEmergencia = location.state;
   const [nombreUsuario, setNombreUsuario] = useState('');
   const [motoId, setMotoId] = useState(null);
 
@@ -85,13 +101,13 @@ export default function ChatBot({ usuario }) {
     obtenerNombre();
   }, [usuario]);
 
-  const [inputTexto, setInputTexto] = useState('');
+  const [inputTexto, setInputTexto] = useState(() => textoDesdeEmergencia(estadoEmergencia));
   const [imagenArchivo, setImagenArchivo] = useState(null);
   const [imagenPreview, setImagenPreview] = useState(null);
   const [cargando, setCargando] = useState(false);
-  const [contextoVehiculo, setContextoVehiculo] = useState('Motocicleta general');
+  const [contextoVehiculo, setContextoVehiculo] = useState(() => contextoDesdeEmergencia(estadoEmergencia));
   const [errorChat, setErrorChat] = useState('');
-  const [modoEmergencia, setModoEmergencia] = useState(false);
+  const [modoEmergencia, setModoEmergencia] = useState(Boolean(estadoEmergencia?.sintoma));
 
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -99,7 +115,7 @@ export default function ChatBot({ usuario }) {
 
   useEffect(() => {
     async function cargarVehiculo() {
-      if (!usuario) return;
+      if (!usuario || estadoEmergencia?.moto) return;
       const { data, error } = await supabase
         .from('motos')
         .select('*')
@@ -119,7 +135,7 @@ export default function ChatBot({ usuario }) {
       }
     }
     cargarVehiculo();
-  }, [usuario]);
+  }, [usuario, estadoEmergencia]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
